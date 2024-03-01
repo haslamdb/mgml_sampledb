@@ -16,7 +16,14 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from django.urls import path
+from sampletracking import views
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-]
+    path('create_crude_sample/', views.create_crude_sample, name='create_crude_sample'),
+    path('sampletracking/templates/create_aliquot/', views.create_aliquot, name='create_aliquot'),
+    path('sampletracking/templates/create_extract/', views.create_extract, name='create_extract'),
+    path('sampletracking/templates/create_sequence_library/', views.create_sequence_library, name='create_sequence_library')
+    ]

@@ -1,17 +1,43 @@
 from django.shortcuts import render, redirect
+from .forms import SampleForm, CrudeSampleForm, AliquotForm, ExtractForm, SequenceLibraryForm
+from .models import Sample, CrudeSample, Aliquot, Extract, SequenceLibrary
 
-def sample_entry(request):
+def create_crude_sample(request):
     if request.method == 'POST':
-        base_form = SampleBaseForm(request.POST)
-        crude_form = CrudeSampleForm(request.POST)
-        if base_form.is_valid() and crude_form.is_valid():
-            base_instance = base_form.save()
-            crude_instance = crude_form.save(commit=False)
-            crude_instance.base_sample = base_instance
-            crude_instance.save()
-            return redirect('success_url')  # Redirect to a new URL
+        form = CrudeSampleForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('home')
     else:
-        base_form = SampleBaseForm()
-        crude_form = CrudeSampleForm()
-    return render(request, 'sample_entry.html', {'base_form': base_form, 'crude_form': crude_form})
+        form = CrudeSampleForm()
+    return render(request, 'create.html', {'form': form})
 
+def create_aliquot(request):
+    if request.method == 'POST':
+        form = AliquotForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('home')
+    else:
+        form = AliquotForm()
+    return render(request, 'create.html', {'form': form})
+
+def create_extract(request):
+    if request.method == 'POST':
+        form = ExtractForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('home')
+    else:
+        form = ExtractForm()
+    return render(request, 'create.html', {'form': form})
+
+def create_sequence_library(request):
+    if request.method == 'POST':
+        form = SequenceLibraryForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('home')
+    else:
+        form = SequenceLibraryForm()
+    return render(request, 'create.html', {'form': form})
