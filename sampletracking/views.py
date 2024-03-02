@@ -7,7 +7,7 @@ def create_crude_sample(request):
     if request.method == 'POST':
         form = CrudeSampleForm(request.POST)
         if form.is_valid():
-            sample = form.save(commit=False)
+            form.save()
 
             return redirect('sample_submitted')
     else:
