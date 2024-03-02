@@ -5,13 +5,6 @@ from django.db.models import Max
 
 class Sample(models.Model):
     barcode = models.CharField(max_length=255, unique=True)
-    sample_type = models.CharField(max_length=10, choices=[
-        ('CRUDE', 'Crude Sample'),
-        ('ALIQUOT', 'Crude Aliquot'),
-        ('DNA', 'DNA Extract'),
-        ('RNA', 'RNA Extract'),
-        ('SEQ', 'Sequence Library'),
-    ])
     date_created = models.DateField()
     freezer_ID = models.CharField(max_length=100)
     shelf_ID = models.CharField(max_length=100)
@@ -34,36 +27,17 @@ class CrudeSample(Sample):
     collection_date = models.DateField() 
     sample_source = models.CharField(max_length=100, choices=SAMPLE_SOURCE_CHOICES, default='')
 
-    def save(self, *args, **kwargs):
-        if not self.sample_id:  
-            self.sample_id = self.generate_sample_id()  
-        super(Sample, self).save(*args, **kwargs) 
-
-    @staticmethod
-    def generate_sample_id():
-        last_sample = Sample.objects.order_by('-sample_id').first()
-        if last_sample:
-            last_id = last_sample.sample_id
-            try:
-                prefix, num = last_id.split('_')
-                num = int(num) + 1
-                new_id = f'{prefix}_{num:05}'
-            except (ValueError, IndexError):
-                # Handle the case where the ID format is unexpected
-                new_id = 'MGML_00001'
-        else:
-            new_id = 'MGML_00001'
-        return new_id
     pass
 
 
+
 class Aliquot(Sample):
-    parent = models.ForeignKey('CrudeSample', on_delete=models.SET_NULL, null=True, blank=True, related_name='children')
+    parent_barcode = models.ForeignKey(CrudeSample, on_delete=models.CASCADE, to_field='barcode', related_name='aliquots', null=True, blank=True)  
     pass
 
 
 class Extract(Sample):
-    parent = models.ForeignKey('Aliquot', on_delete=models.SET_NULL, null=True, blank=True, related_name='children')
+    parent = models.ForeignKey(Aliquot, on_delete=models.CASCADE, to_field='barcode', related_name='extracts', null=True, blank=True)
     
     EXTRACT_CHOICES = [
         ('DNA', 'DNA'),  
@@ -76,7 +50,7 @@ class Extract(Sample):
 
 
 class SequenceLibrary(Sample):
-    parent = models.ForeignKey('Extract', on_delete=models.SET_NULL, null=True, blank=True, related_name='children')
+    parent = models.ForeignKey('Extract', on_delete=models.PROTECT, related_name='children', null=True, blank=True)
     LIBRARY_CHOICES = [
         ('Nextera', 'Nextera'),  
         ('SMARTer', 'SMARTer'),
@@ -130,10 +104,10 @@ class SequenceLibrary(Sample):
         ("S513", "S513")
     ]
     sindex = models.CharField(max_length=100, choices=SINDEX_CHOICES, default='')
-    qubit_conc = models.FloatField()
-    diluted_qubit_conc = models.FloatField()
-    clean_library_conc = models.FloatField()
-    date_sequenced = models.DateField()
+    qubit_conc = models.FloatField(null=True, blank=True)
+    diluted_qubit_conc = models.FloatField(null=True, blank=True)
+    clean_library_conc = models.FloatField(null=True, blank=True)
+    date_sequenced = models.DateField(null=True, blank=True)
 
     pass
 

@@ -1,0 +1,12 @@
+
+
+{% block content %}
+  <h2>Welcome to the Sample Submission Site</h2>
+  <p>Select the type of sample you're submitting:</p>
+  <ul>
+    <li><a href="{% url 'create_crude_sample' %}">Crude Sample</a></li>
+    <li><a href="{% url 'create_aliquot' %}">Aliquot</a></li>
+    <li><a href="{% url 'create_extract' %}">Extract</a></li>
+    <li><a href="{% url 'create_sequence_library' %}">Sequence Library</a></li>
+  </ul>
+{% endblock %}

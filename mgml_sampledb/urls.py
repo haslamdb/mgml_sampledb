@@ -22,8 +22,11 @@ from sampletracking import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('', views.home, name='home'),
+    path('sample_submitted/', views.home, name='home'),
     path('create_crude_sample/', views.create_crude_sample, name='create_crude_sample'),
-    path('sampletracking/templates/create_aliquot/', views.create_aliquot, name='create_aliquot'),
-    path('sampletracking/templates/create_extract/', views.create_extract, name='create_extract'),
-    path('sampletracking/templates/create_sequence_library/', views.create_sequence_library, name='create_sequence_library')
+    path('create_aliquot/', views.create_aliquot, name='create_aliquot'),
+    path('create_extract/', views.create_extract, name='create_extract'),
+    path('create_sequence_library/', views.create_sequence_library, name='create_sequence_library'),
+    path('sample_submitted/', views.sample_submitted, name='sample_submitted'),
     ]

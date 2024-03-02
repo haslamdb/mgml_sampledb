@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Submission Success</title>
+</head>
+<body>
+    <h1>Sample Submitted Successfully</h1>
+    <p>Your sample has been successfully submitted. Thank you for your contribution.</p>
+
+{% block content %}
+  <h2>Sample Submitted Successfully</h2>
+  <p>Your sample has been submitted. Thank you!</p>
+
+  <!-- Add this button -->
+  <a href="{% url 'home' %}">
+    <button type="button">Submit another sample</button>
+  </a>
+{% endblock %}
+
+</body>
+</html>
+
+
