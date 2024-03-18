@@ -78,7 +78,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'mgml_sampledb',
-        'USER': 'haslamdb',
+        'USER': 'david',
         'PASSWORD': 'Mattom0!',
         'HOST': 'localhost',  # 
         'PORT': '3306',
