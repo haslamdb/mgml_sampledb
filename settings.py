@@ -85,9 +85,8 @@ DATABASES = {
     }
 }
 
-# but seems i need to use a different password for mysql
-# username = haslamdb
-# password = Mattom0!
+# but note that on surface laptop and maybe some other machines, the mysql superuser is haslamdb
+# and the password is the same as the one for the user david
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
