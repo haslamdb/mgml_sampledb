@@ -85,6 +85,8 @@ DATABASES = {
     }
 }
 
+# but note that on surface laptop and maybe some other machines, the mysql superuser is haslamdb
+# and the password is the same as the one for the user david
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
