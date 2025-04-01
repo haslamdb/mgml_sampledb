@@ -1,23 +1,18 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Submission Success</title>
-</head>
-<body>
-    <h1>Sample Submitted Successfully</h1>
-    <p>Your sample has been successfully submitted. Thank you for your contribution.</p>
+{% extends 'base_generic.html' %}
 
 {% block content %}
-  <h2>Sample Submitted Successfully</h2>
-  <p>Your sample has been submitted. Thank you!</p>
-
-  <!-- Add this button -->
-  <a href="{% url 'home' %}">
-    <button type="button">Submit another sample</button>
-  </a>
+<div class="container text-center">
+    <div class="alert alert-success mt-5">
+        <h2>Success!</h2>
+        <p class="lead">Your sample has been successfully submitted.</p>
+        <hr>
+        <div class="mt-4">
+            <a href="{% url 'home' %}" class="btn btn-primary me-3">Return to Home</a>
+            {% if user.is_authenticated %}
+                <a href="{% url 'search' %}" class="btn btn-secondary">Search Samples</a>
+            {% endif %}
+        </div>
+    </div>
+</div>
 {% endblock %}
-
-</body>
-</html>
-
 

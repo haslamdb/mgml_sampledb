@@ -1,0 +1,46 @@
+{% extends 'base_generic.html' %}
+
+{% block content %}
+<div class="container mt-3">
+    <div class="card shadow">
+        <div class="card-header bg-warning text-dark py-2">
+            <h4 class="mb-0">Submit an Extract</h4>
+        </div>
+        <div class="card-body py-2">
+            <p class="lead text-muted mb-2">Create an extract from an aliquot (DNA, RNA, cfDNA, etc.).</p>
+            
+            <form method="post" class="mt-2">
+                {% csrf_token %}
+                <div class="row">
+                    {% for field in form %}
+                        <div class="col-md-4 mb-2">
+                            <div class="form-group">
+                                <label for="{{ field.id_for_label }}" class="font-weight-bold">{{ field.label }}</label>
+                                {{ field }}
+                                {% if field.help_text %}
+                                    <small class="form-text text-muted">{{ field.help_text }}</small>
+                                {% endif %}
+                                {% if field.errors %}
+                                    <div class="text-danger small">
+                                        {{ field.errors }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+                
+                <div class="mt-3 text-center">
+                    <a href="{% url 'home' %}" class="btn btn-sm btn-secondary mr-2">Cancel</a>
+                    <button type="submit" class="btn btn-sm btn-warning">
+                        <i class="fas fa-save"></i> Submit Extract
+                    </button>
+                </div>
+            </form>
+        </div>
+        <div class="card-footer text-muted py-1">
+            <small>All fields marked with an asterisk (*) are required.</small>
+        </div>
+    </div>
+</div>
+{% endblock %}

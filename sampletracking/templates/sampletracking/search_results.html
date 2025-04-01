@@ -4,9 +4,9 @@
 <div class="container mt-4">
     <h1>Search Results</h1>
     
-    <form method="GET" action="{% url 'sample_search' %}" class="mb-4">
+    <form method="GET" action="{% url 'search' %}" class="mb-4">
         <div class="input-group">
-            <input type="text" name="q" class="form-control" placeholder="Search samples..." value="{{ query }}">
+            <input type="text" name="q" class="form-control" placeholder="Search by barcode, ID, or sample type..." value="{{ query }}">
             <div class="input-group-append">
                 <button class="btn btn-primary" type="submit">Search</button>
             </div>
@@ -85,7 +85,7 @@
     {% endif %}
     
     <div class="mt-4">
-        <a href="{% url 'dashboard' %}" class="btn btn-secondary">Back to Dashboard</a>
+        <a href="{% url 'home' %}" class="btn btn-secondary">Back to Home</a>
     </div>
 </div>
 {% endblock %}

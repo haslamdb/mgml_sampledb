@@ -1,11 +1,101 @@
-{% extends "base_generic.html" %}
+{% extends 'base_generic.html' %}
 
 {% block content %}
-  <p>Select the type of sample you're submitting:</p>
-  <ul>
-    <li><a href="{% url 'create_crude_sample' %}">Crude Sample</a></li>
-    <li><a href="{% url 'create_aliquot' %}">Aliquot</a></li>
-    <li><a href="{% url 'create_extract' %}">Extract</a></li>
-    <li><a href="{% url 'create_sequence_library' %}">Sequence Library</a></li>
-  </ul>
+<div class="container mt-4">
+    <div class="jumbotron">
+        <h1 class="display-4">MGML Sample Database</h1>
+        <p class="lead">Manage and track your laboratory samples through their entire lifecycle.</p>
+        <hr class="my-4">
+        <p>Choose a submission form below to get started or search for existing samples.</p>
+    </div>
+
+    <div class="row mt-5">
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0">Crude Sample</h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">Submit a new crude sample from a patient or source.</p>
+                    <a href="{% url 'create_crude_sample' %}" class="btn btn-primary">Create</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5 class="card-title mb-0">Aliquot</h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">Create a new aliquot from an existing crude sample.</p>
+                    <a href="{% url 'create_aliquot' %}" class="btn btn-success">Create</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="card-title mb-0">Extract</h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">Submit a new extract from an existing aliquot.</p>
+                    <a href="{% url 'create_extract' %}" class="btn btn-warning">Create</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="card-title mb-0">Sequence Library</h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">Create a new sequencing library from an extract.</p>
+                    <a href="{% url 'create_sequence_library' %}" class="btn btn-info">Create</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-5">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="card-title mb-0">Sample Search</h5>
+                </div>
+                <div class="card-body">
+                    <form method="GET" action="{% url 'search' %}">
+                        <div class="input-group">
+                            <input type="text" name="q" class="form-control" placeholder="Search by barcode, ID, or sample type...">
+                            <div class="input-group-append">
+                                <button class="btn btn-primary" type="submit">Search</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="card-title mb-0">Admin Actions</h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">Administrative actions for privileged users.</p>
+                    {% if user.is_authenticated %}
+                        {% if user.is_staff %}
+                            <a href="{% url 'admin:index' %}" class="btn btn-dark">Admin Panel</a>
+                        {% endif %}
+                        <a href="{% url 'logout' %}" class="btn btn-outline-secondary">Logout</a>
+                    {% else %}
+                        <a href="{% url 'login' %}" class="btn btn-outline-primary">Login</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
