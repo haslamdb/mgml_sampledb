@@ -96,7 +96,7 @@ A Django-based application for tracking samples in the MGML laboratory as they m
 
 ## Contributors
 
-- Your Name - Initial work
+- David Haslam (dbhaslam@gmail.com)
 
 ## License
 
