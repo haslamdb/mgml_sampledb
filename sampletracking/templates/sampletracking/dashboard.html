@@ -1,0 +1,201 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">MGML Laboratory Dashboard</h1>
+    
+    <!-- Sample Count Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-white bg-primary">
+                <div class="card-body">
+                    <h5 class="card-title">Crude Samples</h5>
+                    <h2 class="card-text">{{ crude_count }}</h2>
+                    <p class="card-text"><small>{{ recent_crude }} in the last week</small></p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-success">
+                <div class="card-body">
+                    <h5 class="card-title">Aliquots</h5>
+                    <h2 class="card-text">{{ aliquot_count }}</h2>
+                    <p class="card-text"><small>{{ recent_aliquot }} in the last week</small></p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-info">
+                <div class="card-body">
+                    <h5 class="card-title">Extracts</h5>
+                    <h2 class="card-text">{{ extract_count }}</h2>
+                    <p class="card-text"><small>{{ recent_extract }} in the last week</small></p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-warning">
+                <div class="card-body">
+                    <h5 class="card-title">Sequence Libraries</h5>
+                    <h2 class="card-text">{{ library_count }}</h2>
+                    <p class="card-text"><small>{{ recent_library }} in the last week</small></p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mb-4">
+        <!-- Sample Source Distribution -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    Sample Source Distribution
+                </div>
+                <div class="card-body">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Source Type</th>
+                                <th>Count</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for source in source_distribution %}
+                            <tr>
+                                <td>{{ source.sample_source }}</td>
+                                <td>{{ source.count }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="2">No samples recorded</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Extract Types -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    Extract Types
+                </div>
+                <div class="card-body">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Extract Type</th>
+                                <th>Count</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for type in extract_types %}
+                            <tr>
+                                <td>{{ type.extract_type }}</td>
+                                <td>{{ type.count }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="2">No extracts recorded</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mb-4">
+        <!-- Library Types -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    Library Types
+                </div>
+                <div class="card-body">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Library Type</th>
+                                <th>Count</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for type in library_types %}
+                            <tr>
+                                <td>{{ type.library_type }}</td>
+                                <td>{{ type.count }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="2">No libraries recorded</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Awaiting Sequencing -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    Status
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning">
+                        <h4 class="alert-heading">Awaiting Sequencing</h4>
+                        <p>There are currently <strong>{{ awaiting_sequencing }}</strong> libraries waiting to be sequenced</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Recent Samples -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    Recently Added Samples
+                </div>
+                <div class="card-body">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Barcode</th>
+                                <th>Source</th>
+                                <th>Date Created</th>
+                                <th>Collection Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for sample in recent_samples %}
+                            <tr>
+                                <td>{{ sample.barcode }}</td>
+                                <td>{{ sample.sample_source }}</td>
+                                <td>{{ sample.date_created }}</td>
+                                <td>{{ sample.collection_date }}</td>
+                                <td>
+                                    <a href="#" class="btn btn-sm btn-primary">View</a>
+                                    <a href="#" class="btn btn-sm btn-info">Aliquot</a>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5">No samples recorded</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

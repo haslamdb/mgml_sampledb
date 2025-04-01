@@ -1,32 +1,66 @@
 """
 URL configuration for mgml_sampledb project.
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/5.0/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
-from django.urls import path
-from sampletracking import views
+from django.urls import path, include
+from django.contrib.auth import views as auth_views
 
+from sampletracking import views
+from sampletracking.views import (
+    HomeView,
+    CrudeSampleListView,
+    CrudeSampleCreateView,
+    CrudeSampleDetailView,
+    CrudeSampleUpdateView,
+    AliquotListView,
+    AliquotCreateView,
+    AliquotDetailView,
+    ExtractListView,
+    ExtractCreateView,
+    ExtractDetailView,
+    SequenceLibraryListView,
+    SequenceLibraryCreateView,
+    SequenceLibraryDetailView,
+    SampleSearchView,
+)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', views.home, name='home'),
-    path('sample_submitted/', views.home, name='home'),
-    path('create_crude_sample/', views.create_crude_sample, name='create_crude_sample'),
-    path('create_aliquot/', views.create_aliquot, name='create_aliquot'),
-    path('create_extract/', views.create_extract, name='create_extract'),
-    path('create_sequence_library/', views.create_sequence_library, name='create_sequence_library'),
+    
+    # Authentication URLs
+    path('accounts/login/', auth_views.LoginView.as_view(template_name='registration/login.html'), name='login'),
+    path('accounts/logout/', auth_views.LogoutView.as_view(), name='logout'),
+    path('accounts/password_change/', auth_views.PasswordChangeView.as_view(), name='password_change'),
+    path('accounts/password_change/done/', auth_views.PasswordChangeDoneView.as_view(), name='password_change_done'),
+    
+    # Dashboard
+    path('', HomeView.as_view(), name='home'),
+    path('dashboard/', views.dashboard, name='dashboard'),
+    
+    # Sample submission completion
     path('sample_submitted/', views.sample_submitted, name='sample_submitted'),
-    ]
+    
+    # Crude Sample URLs
+    path('crude_samples/', CrudeSampleListView.as_view(), name='crude_sample_list'),
+    path('crude_samples/new/', CrudeSampleCreateView.as_view(), name='create_crude_sample'),
+    path('crude_samples/<int:pk>/', CrudeSampleDetailView.as_view(), name='crude_sample_detail'),
+    path('crude_samples/<int:pk>/edit/', CrudeSampleUpdateView.as_view(), name='crude_sample_edit'),
+    
+    # Aliquot URLs
+    path('aliquots/', AliquotListView.as_view(), name='aliquot_list'),
+    path('aliquots/new/', AliquotCreateView.as_view(), name='create_aliquot'),
+    path('aliquots/<int:pk>/', AliquotDetailView.as_view(), name='aliquot_detail'),
+    
+    # Extract URLs
+    path('extracts/', ExtractListView.as_view(), name='extract_list'),
+    path('extracts/new/', ExtractCreateView.as_view(), name='create_extract'),
+    path('extracts/<int:pk>/', ExtractDetailView.as_view(), name='extract_detail'),
+    
+    # Sequence Library URLs
+    path('libraries/', SequenceLibraryListView.as_view(), name='library_list'),
+    path('libraries/new/', SequenceLibraryCreateView.as_view(), name='create_sequence_library'),
+    path('libraries/<int:pk>/', SequenceLibraryDetailView.as_view(), name='library_detail'),
+    
+    # Search
+    path('search/', SampleSearchView.as_view(), name='sample_search'),
+]
