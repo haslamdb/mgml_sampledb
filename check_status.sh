@@ -33,7 +33,7 @@ echo "4. Checking if the database is accessible..."
 # This requires Python to run a small script that checks database connectivity
 echo "from sampletracking.models import CrudeSample; print('Database connection successful. Found %s crude samples.' % CrudeSample.objects.count())" > /tmp/check_db.py
 cd /var/www/mgml_sampledb
-export DJANGO_SETTINGS_MODULE=mgml_sampledb.mgml_sampledb.settings
+export DJANGO_SETTINGS_MODULE=mgml_sampledb.settings
 if python -c "import django; django.setup(); exec(open('/tmp/check_db.py').read())"; then
     echo "✅ Database is accessible"
 else
@@ -66,7 +66,7 @@ echo ""
 echo "===== Status Check Complete ====="
 echo ""
 echo "To access the application:"
-echo "- Website: http://interface-labs.com or https://mgml-sampledb.interface-labs.com"
+echo "- Website: https://mgml-sampledb.com or https://www.mgml-sampledb.com"
 echo ""
 echo "If there are issues:"
 echo "1. Run the fix_gunicorn.sh script to update the Gunicorn service configuration"

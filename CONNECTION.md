@@ -6,8 +6,8 @@ The MGML Sample Database is now accessible online. This document provides inform
 
 The database can be accessed through the following URLs:
 
-- **Main site**: [https://mgml-sampledb.interface-labs.com](https://mgml-sampledb.interface-labs.com)
-- **Alternative**: [http://interface-labs.com](http://interface-labs.com)
+- **Main site**: [https://mgml-sampledb.com](https://mgml-sampledb.com)
+- **Alternative**: [https://www.mgml-sampledb.com](https://www.mgml-sampledb.com)
 
 ## Logging In
 

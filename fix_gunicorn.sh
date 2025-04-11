@@ -39,4 +39,4 @@ sudo systemctl status mgml_sampledb.service
 echo "Restarting Nginx..."
 sudo systemctl restart nginx
 
-echo "Done. The application should now be accessible at mgml-sampledb.com and interface-labs.com"
+echo "Done. The application should now be accessible at mgml-sampledb.com"

@@ -1,6 +1,6 @@
 server {
     listen 80;
-    server_name interface-labs.com www.interface-labs.com;
+    server_name mgml-sampledb.com www.mgml-sampledb.com;
 
     location = /favicon.ico { access_log off; log_not_found off; }
     
