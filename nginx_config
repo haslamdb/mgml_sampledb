@@ -1,0 +1,15 @@
+server {
+    listen 80;
+    server_name interface-labs.com www.interface-labs.com;
+
+    location = /favicon.ico { access_log off; log_not_found off; }
+    
+    location /static/ {
+        root /var/www/mgml_sampledb;
+    }
+
+    location / {
+        include proxy_params;
+        proxy_pass http://unix:/var/www/mgml_sampledb/mgml_sampledb.sock;
+    }
+}
