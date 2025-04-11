@@ -38,6 +38,7 @@ A Django-based application for tracking samples in the MGML laboratory as they m
 
 2. Create a virtual environment and activate it:
    ```
+   sudo apt-get install python3-dev default-libmysqlclient-dev build-essential pkg-config
    python -m venv venv
    source venv/bin/activate  # On Windows, use venv\Scripts\activate
    ```
