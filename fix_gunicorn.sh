@@ -17,8 +17,8 @@ After=network.target
 User=david
 Group=david
 WorkingDirectory=/var/www/mgml_sampledb
-Environment="DJANGO_SETTINGS_MODULE=mgml_sampledb.mgml_sampledb.settings"
-ExecStart=/home/david/miniconda3/envs/biobakery3/bin/gunicorn --access-logfile /var/www/mgml_sampledb/logs/gunicorn_access.log --error-logfile /var/www/mgml_sampledb/logs/gunicorn_error.log --workers 3 --bind unix:/var/www/mgml_sampledb/mgml_sampledb.sock mgml_sampledb.mgml_sampledb.wsgi:application
+Environment="DJANGO_SETTINGS_MODULE=mgml_sampledb.settings"
+ExecStart=/home/david/miniconda3/envs/biobakery3/bin/gunicorn --access-logfile /var/www/mgml_sampledb/logs/gunicorn_access.log --error-logfile /var/www/mgml_sampledb/logs/gunicorn_error.log --workers 3 --bind unix:/var/www/mgml_sampledb/mgml_sampledb.sock mgml_sampledb.wsgi:application
 
 [Install]
 WantedBy=multi-user.target
@@ -39,4 +39,4 @@ sudo systemctl status mgml_sampledb.service
 echo "Restarting Nginx..."
 sudo systemctl restart nginx
 
-echo "Done. The application should now be accessible at interface-labs.com"
+echo "Done. The application should now be accessible at mgml-sampledb.com and interface-labs.com"
