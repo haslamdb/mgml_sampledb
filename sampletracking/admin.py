@@ -59,9 +59,9 @@ class CrudeSampleAdmin(SampleAdmin):
     """
     Admin configuration for crude samples
     """
-    list_display = SampleAdmin.list_display + ('your_id', 'sample_source', 'collection_date', 'aliquot_count')
-    list_filter = SampleAdmin.list_filter + ('sample_source',)
-    search_fields = SampleAdmin.search_fields + ('your_id', 'source_details')
+    list_display = SampleAdmin.list_display + ('subject_id', 'sample_source', 'collection_date', 'aliquot_count', 'override_indicator')
+    list_filter = SampleAdmin.list_filter + ('sample_source', 'barcode_override_used')
+    search_fields = SampleAdmin.search_fields + ('subject_id', 'source_details')
     
     def get_queryset(self, request):
         queryset = super().get_queryset(request)
@@ -75,9 +75,20 @@ class CrudeSampleAdmin(SampleAdmin):
     aliquot_count.short_description = 'Aliquots'
     aliquot_count.admin_order_field = '_aliquot_count'
     
+    def override_indicator(self, obj):
+        """Show if barcode override was used"""
+        if obj.barcode_override_used:
+            return format_html(
+                '<span style="color: #17a2b8;" title="Barcode validation was overridden">'
+                '<i class="fas fa-exclamation-triangle"></i> Override</span>'
+            )
+        return ""
+    override_indicator.short_description = 'Override'
+    override_indicator.admin_order_field = 'barcode_override_used'
+    
     fieldsets = (
         ('Basic Information', {
-            'fields': ('barcode', 'your_id', 'date_created', 'collection_date', 'status')
+            'fields': ('barcode', 'subject_id', 'date_created', 'collection_date', 'status')
         }),
         ('Source Information', {
             'fields': ('sample_source', 'source_details')
@@ -89,7 +100,7 @@ class CrudeSampleAdmin(SampleAdmin):
             'fields': ('notes',)
         }),
         ('Metadata', {
-            'fields': ('created_at', 'updated_at', 'created_by', 'updated_by'),
+            'fields': ('created_at', 'updated_at', 'created_by', 'updated_by', 'barcode_override_used'),
             'classes': ('collapse',)
         }),
     )

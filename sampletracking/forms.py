@@ -50,11 +50,18 @@ class AccessioningForm(forms.ModelForm):
     """
     A simplified form for nurses or collection staff to register a new sample.
     """
+    override_barcode_check = forms.BooleanField(
+        required=False,
+        label="Override barcode validation",
+        help_text="Check this if using generic pre-printed barcodes not specific to this subject",
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'})
+    )
+    
     class Meta:
         model = CrudeSample
-        fields = ['your_id', 'barcode', 'collection_date', 'sample_source', 'source_details']
+        fields = ['subject_id', 'barcode', 'collection_date', 'sample_source', 'source_details']
         widgets = {
-            'your_id': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter Subject ID'}),
+            'subject_id': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter Subject ID'}),
             'barcode': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Scan Sample Barcode'}),
             'collection_date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
             'sample_source': forms.Select(attrs={'class': 'form-select'}),
@@ -70,6 +77,25 @@ class AccessioningForm(forms.ModelForm):
         if collection_date and collection_date > timezone.now().date():
             raise forms.ValidationError("Collection date cannot be in the future.")
         return collection_date
+    
+    def clean(self):
+        """
+        Cross-field validation to check if barcode contains subject ID
+        """
+        cleaned_data = super().clean()
+        barcode = cleaned_data.get('barcode', '')
+        subject_id = cleaned_data.get('subject_id', '')
+        override = cleaned_data.get('override_barcode_check', False)
+        
+        # Only validate if override is not checked
+        if barcode and subject_id and not override:
+            # Check if the barcode starts with the subject ID
+            if not barcode.upper().startswith(subject_id.upper()):
+                error_msg = "Entered Subject ID does not match the barcode Subject ID. Please check that the sample collection barcode is for the correct Subject"
+                self.add_error('barcode', error_msg)
+                self.add_error('subject_id', error_msg)
+        
+        return cleaned_data
 
 
 class CrudeSampleForm(SampleForm):
@@ -78,7 +104,7 @@ class CrudeSampleForm(SampleForm):
     """
     class Meta(SampleForm.Meta):
         model = CrudeSample
-        fields = SampleForm.Meta.fields + ['sample_source', 'collection_date', 'your_id', 'source_details']
+        fields = SampleForm.Meta.fields + ['sample_source', 'collection_date', 'subject_id', 'source_details']
         widgets = {
             **SampleForm.Meta.widgets,
             'date_created': DateInput(attrs={'type': 'date', 'class': 'form-control'}),

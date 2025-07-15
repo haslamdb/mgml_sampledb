@@ -69,16 +69,16 @@
                             <!-- Subject ID -->
                             <div class="col-md-6 mb-2 mobile-friendly">
                                 <div class="form-group">
-                                    <label for="{{ form.your_id.id_for_label }}" class="font-weight-bold">
-                                        {{ form.your_id.label }}
+                                    <label for="{{ form.subject_id.id_for_label }}" class="font-weight-bold">
+                                        {{ form.subject_id.label }}
                                     </label>
-                                    {{ form.your_id }}
-                                    {% if form.your_id.help_text %}
-                                        <small class="form-text text-muted">{{ form.your_id.help_text }}</small>
+                                    {{ form.subject_id }}
+                                    {% if form.subject_id.help_text %}
+                                        <small class="form-text text-muted">{{ form.subject_id.help_text }}</small>
                                     {% endif %}
-                                    {% if form.your_id.errors %}
+                                    {% if form.subject_id.errors %}
                                         <div class="text-danger small">
-                                            {{ form.your_id.errors }}
+                                            {{ form.subject_id.errors }}
                                         </div>
                                     {% endif %}
                                 </div>
@@ -155,6 +155,21 @@
                                     {% endif %}
                                 </div>
                             </div>
+                            
+                            <!-- Override Checkbox -->
+                            <div class="col-12 mb-2">
+                                <div class="form-group">
+                                    <div class="form-check">
+                                        {{ form.override_barcode_check }}
+                                        <label class="form-check-label" for="{{ form.override_barcode_check.id_for_label }}">
+                                            {{ form.override_barcode_check.label }}
+                                        </label>
+                                        {% if form.override_barcode_check.help_text %}
+                                            <small class="form-text text-muted d-block">{{ form.override_barcode_check.help_text }}</small>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                         
                         <!-- Non-field errors -->
@@ -203,6 +218,90 @@ document.addEventListener('DOMContentLoaded', function() {
             element.classList.add('form-control');
         }
     });
+    
+    // Real-time barcode validation
+    const barcodeInput = document.getElementById('id_barcode');
+    const subjectIdInput = document.getElementById('id_subject_id');
+    const overrideCheckbox = document.getElementById('id_override_barcode_check');
+    
+    function validateBarcode() {
+        // Skip validation if override is checked
+        if (overrideCheckbox && overrideCheckbox.checked) {
+            barcodeInput.classList.remove('is-valid', 'is-invalid');
+            const existingFeedback = barcodeInput.parentElement.querySelector('.barcode-feedback');
+            if (existingFeedback) {
+                existingFeedback.remove();
+            }
+            
+            // Add override indicator
+            const overrideDiv = document.createElement('div');
+            overrideDiv.className = 'text-info small barcode-feedback mt-1';
+            overrideDiv.innerHTML = '<i class="fas fa-info-circle"></i> Barcode validation overridden';
+            barcodeInput.parentElement.appendChild(overrideDiv);
+            return;
+        }
+        
+        const barcode = barcodeInput.value.toUpperCase();
+        const subjectId = subjectIdInput.value.toUpperCase();
+        
+        if (barcode && subjectId) {
+            if (barcode.startsWith(subjectId)) {
+                // Valid match
+                barcodeInput.classList.remove('is-invalid');
+                barcodeInput.classList.add('is-valid');
+                
+                // Remove any existing feedback
+                const existingFeedback = barcodeInput.parentElement.querySelector('.barcode-feedback');
+                if (existingFeedback) {
+                    existingFeedback.remove();
+                }
+                
+                // Add success feedback
+                const successDiv = document.createElement('div');
+                successDiv.className = 'valid-feedback barcode-feedback';
+                successDiv.innerHTML = '<i class="fas fa-check-circle"></i> Barcode matches Subject ID';
+                barcodeInput.parentElement.appendChild(successDiv);
+            } else {
+                // Invalid match
+                barcodeInput.classList.remove('is-valid');
+                barcodeInput.classList.add('is-invalid');
+                
+                // Remove any existing feedback
+                const existingFeedback = barcodeInput.parentElement.querySelector('.barcode-feedback');
+                if (existingFeedback) {
+                    existingFeedback.remove();
+                }
+                
+                // Add error feedback
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'invalid-feedback barcode-feedback';
+                errorDiv.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Entered Subject ID does not match the barcode Subject ID';
+                barcodeInput.parentElement.appendChild(errorDiv);
+            }
+        } else {
+            // Remove validation classes if either field is empty
+            barcodeInput.classList.remove('is-valid', 'is-invalid');
+            const existingFeedback = barcodeInput.parentElement.querySelector('.barcode-feedback');
+            if (existingFeedback) {
+                existingFeedback.remove();
+            }
+        }
+    }
+    
+    // Add event listeners
+    if (barcodeInput && subjectIdInput) {
+        barcodeInput.addEventListener('input', validateBarcode);
+        subjectIdInput.addEventListener('input', validateBarcode);
+        
+        // Also validate on blur
+        barcodeInput.addEventListener('blur', validateBarcode);
+        subjectIdInput.addEventListener('blur', validateBarcode);
+    }
+    
+    // Add listener for override checkbox
+    if (overrideCheckbox) {
+        overrideCheckbox.addEventListener('change', validateBarcode);
+    }
 });
 </script>
 {% endblock %}

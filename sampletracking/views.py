@@ -119,6 +119,14 @@ class AccessioningCreateView(LoginRequiredMixin, PermissionRequiredMixin, Create
         form.instance.updated_by = self.request.user
         form.instance.date_created = timezone.now().date()
         form.instance.status = 'AWAITING_RECEIPT'
+        
+        # Track if barcode validation was overridden
+        if form.cleaned_data.get('override_barcode_check'):
+            form.instance.barcode_override_used = True
+            existing_notes = form.instance.notes or ''
+            override_note = "[BARCODE OVERRIDE] Generic barcode used - Subject ID validation was overridden during registration."
+            form.instance.notes = f"{override_note}\n{existing_notes}".strip()
+        
         messages.success(self.request, f"Sample {form.instance.barcode} registered and is awaiting receipt.")
         return super().form_valid(form)
 

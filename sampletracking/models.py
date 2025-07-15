@@ -98,8 +98,9 @@ class CrudeSample(Sample):
         ('Other', 'Other')
     ]
     
-    your_id = models.CharField(
+    subject_id = models.CharField(
         max_length=50,
+        verbose_name="Subject ID",
         help_text="Identifier provided by the submitter"
     )
     collection_date = models.DateField(
@@ -116,6 +117,10 @@ class CrudeSample(Sample):
         null=True,
         help_text="Additional details about the sample source"
     )
+    barcode_override_used = models.BooleanField(
+        default=False,
+        help_text="Indicates if barcode validation was overridden during registration"
+    )
     
     history = HistoricalRecords()
     
@@ -124,7 +129,7 @@ class CrudeSample(Sample):
         verbose_name_plural = "Crude Samples"
         indexes = [
             models.Index(fields=['barcode']),
-            models.Index(fields=['your_id']),
+            models.Index(fields=['subject_id']),
             models.Index(fields=['collection_date']),
         ]
 

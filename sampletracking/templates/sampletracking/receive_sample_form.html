@@ -31,7 +31,7 @@
                     <div class="card bg-light">
                         <div class="card-body py-2">
                             <h6 class="card-title mb-1">Sample Information</h6>
-                            <p class="mb-1"><strong>Subject ID:</strong> {{ object.your_id }}</p>
+                            <p class="mb-1"><strong>Subject ID:</strong> {{ object.subject_id }}</p>
                             <p class="mb-1"><strong>Collection Date:</strong> {{ object.collection_date|date:"M d, Y" }}</p>
                             <p class="mb-1"><strong>Sample Source:</strong> {{ object.get_sample_source_display }}</p>
                             {% if object.source_details %}
@@ -129,7 +129,7 @@
                 <!-- Hidden fields that shouldn't be edited during receiving -->
                 <div style="display: none;">
                     {{ form.barcode }}
-                    {{ form.your_id }}
+                    {{ form.subject_id }}
                     {{ form.date_created }}
                     {{ form.collection_date }}
                     {{ form.sample_source }}
