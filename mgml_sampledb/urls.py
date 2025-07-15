@@ -19,6 +19,7 @@ from django.urls import path, include
 from django.views.generic import TemplateView
 from django.contrib.auth import views as auth_views
 from sampletracking import views
+from sampletracking import sample_dashboard
 
 
 urlpatterns = [
@@ -31,7 +32,13 @@ urlpatterns = [
     
     # Main app URLs
     path('', views.HomeView.as_view(), name='home'),
+    path('dashboard/', sample_dashboard.dashboard, name='dashboard'),
     path('search/', views.SampleSearchView.as_view(), name='search'),
+    
+    # New workflow URLs for accessioning and receiving
+    path('register/', views.AccessioningCreateView.as_view(), name='accessioning_create'),
+    path('receive/', views.find_sample_to_receive, name='find_sample_to_receive'),
+    path('receive/<str:barcode>/', views.ReceiveSampleView.as_view(), name='receive_sample'),
     
     # Crude Sample URLs
     path('crude-samples/', views.CrudeSampleListView.as_view(), name='crude_sample_list'),

@@ -25,6 +25,7 @@ class Sample(TimeStampedModel):
     """
     # Define status choices
     STATUS_CHOICES = [
+        ('AWAITING_RECEIPT', 'Awaiting Receipt'),
         ('AVAILABLE', 'Available'),
         ('IN_PROCESS', 'In Process'),
         ('EXHAUSTED', 'Exhausted'),
@@ -57,21 +58,21 @@ class Sample(TimeStampedModel):
     status = models.CharField(
         max_length=20, 
         choices=STATUS_CHOICES, 
-        default='AVAILABLE',
-        help_text="Current status of the sample"
+        default='AWAITING_RECEIPT',
+        help_text="The current status of the sample"
     )
     
     # Storage information
     freezer_ID = models.CharField(
-        max_length=100,
+        max_length=100, blank=True, null=True,  # Allow blank for initial registration
         help_text="Identifier for the freezer where this sample is stored"
     )
     shelf_ID = models.CharField(
-        max_length=100,
+        max_length=100, blank=True, null=True,  # Allow blank for initial registration
         help_text="Identifier for the shelf where this sample is stored"
     )
     box_ID = models.CharField(
-        max_length=100,
+        max_length=100, blank=True, null=True,  # Allow blank for initial registration
         help_text="Identifier for the box where this sample is stored"
     )
     

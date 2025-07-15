@@ -46,6 +46,32 @@ class SampleForm(forms.ModelForm):
         return date_created
 
 
+class AccessioningForm(forms.ModelForm):
+    """
+    A simplified form for nurses or collection staff to register a new sample.
+    """
+    class Meta:
+        model = CrudeSample
+        fields = ['your_id', 'barcode', 'collection_date', 'sample_source', 'source_details']
+        widgets = {
+            'your_id': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter Subject ID'}),
+            'barcode': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Scan Sample Barcode'}),
+            'collection_date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'sample_source': forms.Select(attrs={'class': 'form-select'}),
+            'source_details': forms.Textarea(attrs={'rows': 2, 'class': 'form-control'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['collection_date'].initial = timezone.now().date()
+
+    def clean_collection_date(self):
+        collection_date = self.cleaned_data.get('collection_date')
+        if collection_date and collection_date > timezone.now().date():
+            raise forms.ValidationError("Collection date cannot be in the future.")
+        return collection_date
+
+
 class CrudeSampleForm(SampleForm):
     """
     Form for creating and updating crude samples

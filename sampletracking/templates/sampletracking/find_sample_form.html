@@ -1,0 +1,95 @@
+{% extends 'base_generic.html' %}
+
+{% block title %}Find Sample to Receive - MGML Laboratory{% endblock %}
+
+{% block content %}
+<div class="container mt-3">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white py-2">
+                    <h4 class="mb-0">
+                        <i class="fas fa-barcode"></i> Find Sample to Receive
+                    </h4>
+                </div>
+                <div class="card-body py-3">
+                    <p class="lead text-muted mb-3">
+                        <i class="fas fa-info-circle"></i> Enter or scan the barcode of the sample you want to receive into the lab.
+                    </p>
+                    
+                    <!-- Display any messages -->
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                    
+                    <form method="post" class="mt-3">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label for="barcode" class="font-weight-bold">Sample Barcode</label>
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-barcode"></i>
+                                    </span>
+                                </div>
+                                <input type="text" 
+                                       class="form-control form-control-lg" 
+                                       id="barcode" 
+                                       name="barcode" 
+                                       placeholder="Scan or enter barcode..." 
+                                       required 
+                                       autofocus>
+                            </div>
+                            <small class="form-text text-muted">
+                                The sample must be registered before it can be received.
+                            </small>
+                        </div>
+                        
+                        <div class="mt-4 text-center">
+                            <a href="{% url 'home' %}" class="btn btn-secondary mr-2">
+                                <i class="fas fa-arrow-left"></i> Back
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-search"></i> Find Sample
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                <div class="card-footer bg-light py-2">
+                    <div class="text-center">
+                        <small class="text-muted">
+                            <i class="fas fa-lightbulb"></i> Tip: You can use a barcode scanner for faster entry
+                        </small>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Quick Actions -->
+            <div class="mt-3 text-center">
+                <p class="text-muted">Need to register a new sample first?</p>
+                <a href="{% url 'accessioning_create' %}" class="btn btn-sm btn-outline-primary">
+                    <i class="fas fa-plus-circle"></i> Register New Sample
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Focus on the barcode input field
+    const barcodeInput = document.getElementById('barcode');
+    if (barcodeInput) {
+        barcodeInput.focus();
+        barcodeInput.select();
+    }
+});
+</script>
+{% endblock %}

@@ -29,6 +29,7 @@ class SampleAdmin(admin.ModelAdmin):
     def colored_status(self, obj):
         """Display status with color coding."""
         colors = {
+            'AWAITING_RECEIPT': '#17a2b8',
             'AVAILABLE': '#28a745',
             'IN_PROCESS': '#ffc107',
             'EXHAUSTED': '#6c757d',

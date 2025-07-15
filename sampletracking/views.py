@@ -1,7 +1,10 @@
-from django.views.generic import ListView, CreateView, UpdateView, DetailView, TemplateView
+from django.views.generic import ListView, CreateView, UpdateView, DetailView, TemplateView, FormView
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
+from django.contrib.auth.decorators import login_required
 from django.urls import reverse_lazy
 from django.contrib import messages
+from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
 from django.db.models import Q
 
 from .models import CrudeSample, Aliquot, Extract, SequenceLibrary
@@ -9,7 +12,8 @@ from .forms import (
     CrudeSampleForm, 
     AliquotForm, 
     ExtractForm, 
-    SequenceLibraryForm
+    SequenceLibraryForm,
+    AccessioningForm
 )
 
 
@@ -84,6 +88,75 @@ class CrudeSampleUpdateView(PermissionRequiredMixin, UpdateView):
         form.instance.updated_by = self.request.user
         messages.success(self.request, "Crude sample updated successfully.")
         return super().form_valid(form)
+
+
+class AccessioningCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
+    """
+    View for collection staff to register a new sample into the system.
+    """
+    model = CrudeSample
+    form_class = AccessioningForm
+    template_name = 'sampletracking/accessioning_form.html'
+    success_url = reverse_lazy('sample_submitted')
+    permission_required = 'sampletracking.add_crudesample'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = "Register New Sample"
+        return context
+
+    def form_valid(self, form):
+        form.instance.created_by = self.request.user
+        form.instance.updated_by = self.request.user
+        form.instance.date_created = timezone.now().date()
+        form.instance.status = 'AWAITING_RECEIPT'
+        messages.success(self.request, f"Sample {form.instance.barcode} registered and is awaiting receipt.")
+        return super().form_valid(form)
+
+
+class ReceiveSampleView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
+    """
+    View for lab staff to receive a sample that has been registered.
+    This view finds the sample by barcode and allows staff to update its
+    status and storage location.
+    """
+    model = CrudeSample
+    form_class = CrudeSampleForm
+    template_name = 'sampletracking/receive_sample_form.html'
+    permission_required = 'sampletracking.change_crudesample'
+
+    def get_object(self, queryset=None):
+        barcode = self.kwargs.get('barcode')
+        sample = get_object_or_404(CrudeSample, barcode=barcode)
+        return sample
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = f"Receive Sample: {self.object.barcode}"
+        return context
+
+    def form_valid(self, form):
+        form.instance.updated_by = self.request.user
+        form.instance.status = 'AVAILABLE'
+        messages.success(self.request, f"Sample {form.instance.barcode} has been received and stored.")
+        return super().form_valid(form)
+        
+    def get_success_url(self):
+        return reverse_lazy('crude_sample_detail', kwargs={'pk': self.object.pk})
+
+
+@login_required
+def find_sample_to_receive(request):
+    """
+    A simple view to handle the barcode scan/search before the update
+    """
+    if request.method == 'POST':
+        barcode = request.POST.get('barcode')
+        if CrudeSample.objects.filter(barcode=barcode).exists():
+            return redirect('receive_sample', barcode=barcode)
+        else:
+            messages.error(request, f"No sample found with barcode '{barcode}'. Please register it first.")
+    return render(request, 'sampletracking/find_sample_form.html')
 
 
 class AliquotListView(PermissionRequiredMixin, ListView):
