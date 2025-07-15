@@ -2,6 +2,7 @@ from django.db import models
 from django.utils import timezone
 from django.core.validators import RegexValidator
 from django.contrib.auth.models import User
+from simple_history.models import HistoricalRecords
 
 class TimeStampedModel(models.Model):
     """
@@ -22,6 +23,15 @@ class Sample(TimeStampedModel):
     Abstract base class for all sample types.
     Contains common fields for all sample types.
     """
+    # Define status choices
+    STATUS_CHOICES = [
+        ('AVAILABLE', 'Available'),
+        ('IN_PROCESS', 'In Process'),
+        ('EXHAUSTED', 'Exhausted'),
+        ('CONTAMINATED', 'Contaminated'),
+        ('ARCHIVED', 'Archived'),
+    ]
+    
     # Define a validator for barcodes
     barcode_validator = RegexValidator(
         r'^[A-Za-z0-9_-]+$',
@@ -41,6 +51,14 @@ class Sample(TimeStampedModel):
         blank=True, 
         null=True,
         help_text="Additional notes about this sample"
+    )
+    
+    # Sample status
+    status = models.CharField(
+        max_length=20, 
+        choices=STATUS_CHOICES, 
+        default='AVAILABLE',
+        help_text="Current status of the sample"
     )
     
     # Storage information
@@ -98,6 +116,8 @@ class CrudeSample(Sample):
         help_text="Additional details about the sample source"
     )
     
+    history = HistoricalRecords()
+    
     class Meta:
         verbose_name = "Crude Sample"
         verbose_name_plural = "Crude Samples"
@@ -114,11 +134,9 @@ class Aliquot(Sample):
     """
     parent_barcode = models.ForeignKey(
         CrudeSample, 
-        on_delete=models.CASCADE, 
+        on_delete=models.PROTECT, 
         to_field='barcode', 
         related_name='aliquots', 
-        null=True, 
-        blank=True,
         help_text="The crude sample this aliquot was derived from"
     )
     volume = models.FloatField(
@@ -131,6 +149,8 @@ class Aliquot(Sample):
         blank=True,
         help_text="Concentration of the aliquot"
     )
+    
+    history = HistoricalRecords()
     
     class Meta:
         verbose_name = "Aliquot"
@@ -154,11 +174,9 @@ class Extract(Sample):
     
     parent = models.ForeignKey(
         Aliquot, 
-        on_delete=models.CASCADE, 
+        on_delete=models.PROTECT, 
         to_field='barcode', 
         related_name='extracts', 
-        null=True, 
-        blank=True,
         help_text="The aliquot this extract was derived from"
     )
     extract_type = models.CharField(
@@ -179,6 +197,8 @@ class Extract(Sample):
         help_text="Quality score for this extract (e.g., A260/A280)"
     )
     
+    history = HistoricalRecords()
+    
     class Meta:
         verbose_name = "Extract"
         verbose_name_plural = "Extracts"
@@ -186,6 +206,71 @@ class Extract(Sample):
             models.Index(fields=['barcode']),
             models.Index(fields=['extract_type']),
         ]
+
+
+class Plate(TimeStampedModel):
+    """
+    Represents a physical plate (96-well or 384-well) used for sequencing.
+    """
+    PLATE_TYPE_CHOICES = [
+        ('96', '96-Well'),
+        ('384', '384-Well')
+    ]
+    
+    # Define a validator for barcodes
+    barcode_validator = RegexValidator(
+        r'^[A-Za-z0-9_-]+$',
+        'Barcode can only contain alphanumeric characters, underscores, and hyphens.'
+    )
+    
+    barcode = models.CharField(
+        max_length=255, 
+        unique=True,
+        validators=[barcode_validator],
+        help_text="Unique identifier for this plate"
+    )
+    plate_type = models.CharField(
+        max_length=3, 
+        choices=PLATE_TYPE_CHOICES, 
+        default='96',
+        help_text="Type of plate (96-well or 384-well)"
+    )
+    
+    # Storage information
+    freezer_ID = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        help_text="Identifier for the freezer where this plate is stored"
+    )
+    shelf_ID = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        help_text="Identifier for the shelf where this plate is stored"
+    )
+    box_ID = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        help_text="Identifier for the box where this plate is stored"
+    )
+    
+    notes = models.TextField(
+        blank=True, 
+        null=True,
+        help_text="Additional notes about this plate"
+    )
+
+    def __str__(self):
+        return f"{self.barcode} ({self.plate_type})"
+    
+    history = HistoricalRecords()
+    
+    class Meta:
+        verbose_name = "Plate"
+        verbose_name_plural = "Plates"
+        ordering = ['-created_at']
 
 
 class SequenceLibrary(Sample):
@@ -249,8 +334,6 @@ class SequenceLibrary(Sample):
         'Extract', 
         on_delete=models.PROTECT,  # Use PROTECT to prevent deletion of libraries
         related_name='libraries', 
-        null=True, 
-        blank=True,
         help_text="The extract this library was derived from"
     )
     library_type = models.CharField(
@@ -304,9 +387,28 @@ class SequenceLibrary(Sample):
         help_text="Identifier for the sequencing run"
     )
     
+    # Plate and well information
+    plate = models.ForeignKey(
+        Plate, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True, 
+        related_name='libraries',
+        help_text="The plate this library is in"
+    )
+    well = models.CharField(
+        max_length=4, 
+        blank=True, 
+        null=True, 
+        help_text="Well position, e.g., A1, H12"
+    )
+    
+    history = HistoricalRecords()
+    
     class Meta:
         verbose_name = "Sequence Library"
         verbose_name_plural = "Sequence Libraries"
+        unique_together = [['plate', 'well']]
         indexes = [
             models.Index(fields=['barcode']),
             models.Index(fields=['library_type']),

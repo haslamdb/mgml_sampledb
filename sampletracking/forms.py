@@ -2,7 +2,7 @@ from django import forms
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 
-from .models import Sample, CrudeSample, Aliquot, Extract, SequenceLibrary
+from .models import Sample, CrudeSample, Aliquot, Extract, SequenceLibrary, Plate
 
 
 class DateInput(forms.DateInput):
@@ -18,9 +18,10 @@ class SampleForm(forms.ModelForm):
     """
     class Meta:
         model = Sample
-        fields = ['barcode', 'date_created', 'freezer_ID', 'shelf_ID', 'box_ID', 'notes']
+        fields = ['barcode', 'date_created', 'status', 'freezer_ID', 'shelf_ID', 'box_ID', 'notes']
         widgets = {
             'date_created': DateInput(attrs={'class': 'form-control'}),
+            'status': forms.Select(attrs={'class': 'form-control'}),
             'notes': forms.Textarea(attrs={'rows': 3, 'class': 'form-control'}),
         }
     
@@ -160,7 +161,8 @@ class SequenceLibraryForm(SampleForm):
         fields = SampleForm.Meta.fields + [
             'parent', 'library_type', 'nindex', 'sindex', 
             'qubit_conc', 'diluted_qubit_conc', 'clean_library_conc', 
-            'date_sequenced', 'sequencing_platform', 'sequencing_run_id'
+            'date_sequenced', 'sequencing_platform', 'sequencing_run_id',
+            'plate', 'well'
         ]
         widgets = {
             **SampleForm.Meta.widgets,
@@ -171,6 +173,7 @@ class SequenceLibraryForm(SampleForm):
             'clean_library_conc': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
             'sequencing_platform': forms.TextInput(attrs={'class': 'form-control'}),
             'sequencing_run_id': forms.TextInput(attrs={'class': 'form-control'}),
+            'well': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g., A1, H12'}),
         }
         
     def __init__(self, *args, **kwargs):
@@ -178,6 +181,17 @@ class SequenceLibraryForm(SampleForm):
         self.fields['parent'].empty_label = "Select an extract barcode"
         self.fields['parent'].widget.attrs.update({'class': 'form-select'})
         self.fields['parent'].label_from_instance = lambda obj: f"{obj.barcode} ({obj.extract_type})"
+        
+        # Configure plate field
+        self.fields['plate'] = forms.ModelChoiceField(
+            queryset=Plate.objects.all(),
+            required=False,
+            widget=forms.Select(attrs={'class': 'form-select'}),
+            empty_label="Select a plate (optional)",
+            label="Plate",
+            help_text="Select the plate this library is in"
+        )
+        self.fields['plate'].label_from_instance = lambda obj: f"{obj.barcode} ({obj.plate_type})"
     
     def clean_date_sequenced(self):
         """
@@ -187,3 +201,30 @@ class SequenceLibraryForm(SampleForm):
         if date_sequenced and date_sequenced > timezone.now().date():
             raise ValidationError("Sequencing date cannot be in the future.")
         return date_sequenced
+    
+    def clean_well(self):
+        """
+        Validate well format (e.g., A1, H12)
+        """
+        well = self.cleaned_data.get('well')
+        if well:
+            well = well.upper().strip()
+            # Validate well format: letter(s) followed by number(s)
+            import re
+            if not re.match(r'^[A-Z]{1,2}[0-9]{1,3}$', well):
+                raise ValidationError("Well must be in format like A1, H12, AA1, etc.")
+        return well
+    
+    def clean(self):
+        """
+        Cross field validation for plate and well
+        """
+        cleaned_data = super().clean()
+        plate = cleaned_data.get('plate')
+        well = cleaned_data.get('well')
+        
+        # If one is specified, both should be specified
+        if (plate and not well) or (well and not plate):
+            raise ValidationError("Both plate and well must be specified together.")
+        
+        return cleaned_data

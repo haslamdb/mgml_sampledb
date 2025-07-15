@@ -1,20 +1,20 @@
 from django.contrib import admin
 from django.utils.html import format_html
 from django.db.models import Count
-from .models import CrudeSample, Aliquot, Extract, SequenceLibrary
+from .models import CrudeSample, Aliquot, Extract, SequenceLibrary, Plate
 
 
 @admin.action(description="Mark selected samples as archived")
 def mark_archived(modeladmin, request, queryset):
-    queryset.update(notes=f"ARCHIVED: {queryset.first().notes}" if queryset.first().notes else "ARCHIVED")
+    queryset.update(status='ARCHIVED')
 
 
 class SampleAdmin(admin.ModelAdmin):
     """
     Base admin configuration for all sample types
     """
-    list_display = ('barcode', 'date_created', 'created_by', 'updated_at')
-    list_filter = ('date_created', 'created_by')
+    list_display = ('barcode', 'status', 'date_created', 'created_by', 'updated_at')
+    list_filter = ('status', 'date_created', 'created_by')
     search_fields = ('barcode', 'notes')
     readonly_fields = ('created_at', 'updated_at', 'created_by', 'updated_by')
     date_hierarchy = 'date_created'
@@ -53,7 +53,7 @@ class CrudeSampleAdmin(SampleAdmin):
     
     fieldsets = (
         ('Basic Information', {
-            'fields': ('barcode', 'your_id', 'date_created', 'collection_date')
+            'fields': ('barcode', 'your_id', 'date_created', 'collection_date', 'status')
         }),
         ('Source Information', {
             'fields': ('sample_source', 'source_details')
@@ -102,7 +102,7 @@ class AliquotAdmin(SampleAdmin):
     
     fieldsets = (
         ('Basic Information', {
-            'fields': ('barcode', 'date_created', 'parent_barcode')
+            'fields': ('barcode', 'date_created', 'parent_barcode', 'status')
         }),
         ('Properties', {
             'fields': ('volume', 'concentration')
@@ -151,7 +151,7 @@ class ExtractAdmin(SampleAdmin):
     
     fieldsets = (
         ('Basic Information', {
-            'fields': ('barcode', 'date_created', 'parent', 'extract_type')
+            'fields': ('barcode', 'date_created', 'parent', 'extract_type', 'status')
         }),
         ('Properties', {
             'fields': ('protocol_used', 'quality_score')
@@ -174,10 +174,10 @@ class SequenceLibraryAdmin(SampleAdmin):
     """
     Admin configuration for sequence libraries
     """
-    list_display = SampleAdmin.list_display + ('parent_link', 'library_type', 'sequencing_status')
+    list_display = SampleAdmin.list_display + ('parent_link', 'library_type', 'plate_well', 'sequencing_status')
     list_filter = SampleAdmin.list_filter + ('library_type', 'date_sequenced')
-    search_fields = SampleAdmin.search_fields + ('sequencing_run_id', 'sequencing_platform')
-    autocomplete_fields = ('parent',)
+    search_fields = SampleAdmin.search_fields + ('sequencing_run_id', 'sequencing_platform', 'well')
+    autocomplete_fields = ('parent', 'plate')
     
     def sequencing_status(self, obj):
         if obj.date_sequenced:
@@ -192,9 +192,15 @@ class SequenceLibraryAdmin(SampleAdmin):
         return "-"
     parent_link.short_description = 'Parent Extract'
     
+    def plate_well(self, obj):
+        if obj.plate and obj.well:
+            return f"{obj.plate.barcode}: {obj.well}"
+        return "-"
+    plate_well.short_description = 'Plate:Well'
+    
     fieldsets = (
         ('Basic Information', {
-            'fields': ('barcode', 'date_created', 'parent', 'library_type')
+            'fields': ('barcode', 'date_created', 'parent', 'library_type', 'status')
         }),
         ('Indexing', {
             'fields': ('nindex', 'sindex')
@@ -204,6 +210,58 @@ class SequenceLibraryAdmin(SampleAdmin):
         }),
         ('Sequencing', {
             'fields': ('date_sequenced', 'sequencing_platform', 'sequencing_run_id')
+        }),
+        ('Plate Information', {
+            'fields': ('plate', 'well')
+        }),
+        ('Storage Location', {
+            'fields': ('freezer_ID', 'shelf_ID', 'box_ID')
+        }),
+        ('Notes', {
+            'fields': ('notes',)
+        }),
+        ('Metadata', {
+            'fields': ('created_at', 'updated_at', 'created_by', 'updated_by'),
+            'classes': ('collapse',)
+        }),
+    )
+
+
+@admin.register(Plate)
+class PlateAdmin(admin.ModelAdmin):
+    """
+    Admin configuration for plates
+    """
+    list_display = ('barcode', 'plate_type', 'library_count', 'created_at', 'created_by')
+    list_filter = ('plate_type', 'created_at', 'created_by')
+    search_fields = ('barcode', 'notes')
+    readonly_fields = ('created_at', 'updated_at', 'created_by', 'updated_by')
+    date_hierarchy = 'created_at'
+    
+    def get_queryset(self, request):
+        queryset = super().get_queryset(request)
+        queryset = queryset.annotate(
+            _library_count=Count('libraries', distinct=True),
+        )
+        return queryset
+    
+    def library_count(self, obj):
+        return obj._library_count
+    library_count.short_description = 'Libraries'
+    library_count.admin_order_field = '_library_count'
+    
+    def save_model(self, request, obj, form, change):
+        """
+        Track the user who creates or updates a plate
+        """
+        if not change:
+            obj.created_by = request.user
+        obj.updated_by = request.user
+        super().save_model(request, obj, form, change)
+    
+    fieldsets = (
+        ('Basic Information', {
+            'fields': ('barcode', 'plate_type')
         }),
         ('Storage Location', {
             'fields': ('freezer_ID', 'shelf_ID', 'box_ID')

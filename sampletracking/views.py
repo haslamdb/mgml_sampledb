@@ -1,5 +1,5 @@
 from django.views.generic import ListView, CreateView, UpdateView, DetailView, TemplateView
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.urls import reverse_lazy
 from django.contrib import messages
 from django.db.models import Q
@@ -20,10 +20,11 @@ class HomeView(TemplateView):
     template_name = 'sampletracking/home.html'
 
 
-class CrudeSampleListView(LoginRequiredMixin, ListView):
+class CrudeSampleListView(PermissionRequiredMixin, ListView):
     """
     Display a list of all crude samples
     """
+    permission_required = 'sampletracking.view_crudesample'
     model = CrudeSample
     template_name = 'sampletracking/crude_sample_list.html'
     context_object_name = 'samples'
@@ -33,10 +34,11 @@ class CrudeSampleListView(LoginRequiredMixin, ListView):
         return CrudeSample.objects.all().order_by('-date_created')
 
 
-class CrudeSampleCreateView(LoginRequiredMixin, CreateView):
+class CrudeSampleCreateView(PermissionRequiredMixin, CreateView):
     """
     Create a new crude sample
     """
+    permission_required = 'sampletracking.add_crudesample'
     model = CrudeSample
     form_class = CrudeSampleForm
     template_name = 'sampletracking/crude_sample_form.html'
@@ -50,10 +52,11 @@ class CrudeSampleCreateView(LoginRequiredMixin, CreateView):
         return super().form_valid(form)
 
 
-class CrudeSampleDetailView(LoginRequiredMixin, DetailView):
+class CrudeSampleDetailView(PermissionRequiredMixin, DetailView):
     """
     Display details of a crude sample
     """
+    permission_required = 'sampletracking.view_crudesample'
     model = CrudeSample
     template_name = 'sampletracking/crude_sample_detail.html'
     context_object_name = 'sample'
@@ -65,10 +68,11 @@ class CrudeSampleDetailView(LoginRequiredMixin, DetailView):
         return context
 
 
-class CrudeSampleUpdateView(LoginRequiredMixin, UpdateView):
+class CrudeSampleUpdateView(PermissionRequiredMixin, UpdateView):
     """
     Update an existing crude sample
     """
+    permission_required = 'sampletracking.change_crudesample'
     model = CrudeSample
     form_class = CrudeSampleForm
     template_name = 'sampletracking/crude_sample_form.html'
@@ -82,10 +86,11 @@ class CrudeSampleUpdateView(LoginRequiredMixin, UpdateView):
         return super().form_valid(form)
 
 
-class AliquotListView(LoginRequiredMixin, ListView):
+class AliquotListView(PermissionRequiredMixin, ListView):
     """
     Display a list of all aliquots
     """
+    permission_required = 'sampletracking.view_aliquot'
     model = Aliquot
     template_name = 'sampletracking/aliquot_list.html'
     context_object_name = 'aliquots'
@@ -95,10 +100,11 @@ class AliquotListView(LoginRequiredMixin, ListView):
         return Aliquot.objects.all().order_by('-date_created')
 
 
-class AliquotCreateView(LoginRequiredMixin, CreateView):
+class AliquotCreateView(PermissionRequiredMixin, CreateView):
     """
     Create a new aliquot
     """
+    permission_required = 'sampletracking.add_aliquot'
     model = Aliquot
     form_class = AliquotForm
     template_name = 'sampletracking/aliquot_form.html'
@@ -111,10 +117,11 @@ class AliquotCreateView(LoginRequiredMixin, CreateView):
         return super().form_valid(form)
 
 
-class AliquotDetailView(LoginRequiredMixin, DetailView):
+class AliquotDetailView(PermissionRequiredMixin, DetailView):
     """
     Display details of an aliquot
     """
+    permission_required = 'sampletracking.view_aliquot'
     model = Aliquot
     template_name = 'sampletracking/aliquot_detail.html'
     context_object_name = 'aliquot'
@@ -126,10 +133,11 @@ class AliquotDetailView(LoginRequiredMixin, DetailView):
         return context
 
 
-class ExtractListView(LoginRequiredMixin, ListView):
+class ExtractListView(PermissionRequiredMixin, ListView):
     """
     Display a list of all extracts
     """
+    permission_required = 'sampletracking.view_extract'
     model = Extract
     template_name = 'sampletracking/extract_list.html'
     context_object_name = 'extracts'
@@ -139,10 +147,11 @@ class ExtractListView(LoginRequiredMixin, ListView):
         return Extract.objects.all().order_by('-date_created')
 
 
-class ExtractCreateView(LoginRequiredMixin, CreateView):
+class ExtractCreateView(PermissionRequiredMixin, CreateView):
     """
     Create a new extract
     """
+    permission_required = 'sampletracking.add_extract'
     model = Extract
     form_class = ExtractForm
     template_name = 'sampletracking/extract_form.html'
@@ -155,10 +164,11 @@ class ExtractCreateView(LoginRequiredMixin, CreateView):
         return super().form_valid(form)
 
 
-class ExtractDetailView(LoginRequiredMixin, DetailView):
+class ExtractDetailView(PermissionRequiredMixin, DetailView):
     """
     Display details of an extract
     """
+    permission_required = 'sampletracking.view_extract'
     model = Extract
     template_name = 'sampletracking/extract_detail.html'
     context_object_name = 'extract'
@@ -170,10 +180,11 @@ class ExtractDetailView(LoginRequiredMixin, DetailView):
         return context
 
 
-class SequenceLibraryListView(LoginRequiredMixin, ListView):
+class SequenceLibraryListView(PermissionRequiredMixin, ListView):
     """
     Display a list of all sequence libraries
     """
+    permission_required = 'sampletracking.view_sequencelibrary'
     model = SequenceLibrary
     template_name = 'sampletracking/sequence_library_list.html'
     context_object_name = 'libraries'
@@ -183,10 +194,11 @@ class SequenceLibraryListView(LoginRequiredMixin, ListView):
         return SequenceLibrary.objects.all().order_by('-date_created')
 
 
-class SequenceLibraryCreateView(LoginRequiredMixin, CreateView):
+class SequenceLibraryCreateView(PermissionRequiredMixin, CreateView):
     """
     Create a new sequence library
     """
+    permission_required = 'sampletracking.add_sequencelibrary'
     model = SequenceLibrary
     form_class = SequenceLibraryForm
     template_name = 'sampletracking/sequence_library_form.html'
@@ -199,19 +211,21 @@ class SequenceLibraryCreateView(LoginRequiredMixin, CreateView):
         return super().form_valid(form)
 
 
-class SequenceLibraryDetailView(LoginRequiredMixin, DetailView):
+class SequenceLibraryDetailView(PermissionRequiredMixin, DetailView):
     """
     Display details of a sequence library
     """
+    permission_required = 'sampletracking.view_sequencelibrary'
     model = SequenceLibrary
     template_name = 'sampletracking/sequence_library_detail.html'
     context_object_name = 'library'
 
 
-class SampleSearchView(LoginRequiredMixin, ListView):
+class SampleSearchView(PermissionRequiredMixin, ListView):
     """
     Search for samples across all types
     """
+    permission_required = ['sampletracking.view_crudesample', 'sampletracking.view_aliquot', 'sampletracking.view_extract', 'sampletracking.view_sequencelibrary']
     template_name = 'sampletracking/search_results.html'
     context_object_name = 'results'
     paginate_by = 20
