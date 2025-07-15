@@ -11,6 +11,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <!-- Bootstrap Select CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.1/css/bootstrap-select.min.css">
+    <!-- Load static files -->
+    {% load static %}
     
     <style>
       body {
@@ -21,11 +23,19 @@
       
       .navbar {
           box-shadow: 0 2px 4px rgba(0,0,0,.1);
+          background: linear-gradient(135deg, #2c5f7c 0%, #1a3a52 100%) !important;
       }
       
       .navbar-brand {
           font-weight: 700;
           font-size: 1.5rem;
+          display: flex;
+          align-items: center;
+      }
+      
+      .navbar-logo {
+          height: 40px;
+          margin-right: 10px;
       }
       
       .nav-link {
@@ -36,11 +46,11 @@
           box-shadow: 0 4px 6px rgba(0,0,0,.05);
           border-radius: 8px;
           border: none;
-          transition: transform 0.3s ease;
+          transition: box-shadow 0.3s ease;
       }
       
       .card:hover {
-          transform: translateY(-5px);
+          box-shadow: 0 8px 12px rgba(0,0,0,.1);
       }
       
       .card-header {
@@ -54,6 +64,31 @@
           padding: 0.5rem 1rem;
       }
       
+      .btn-primary {
+          background-color: #2c5f7c;
+          border-color: #2c5f7c;
+      }
+      
+      .btn-primary:hover {
+          background-color: #1a3a52;
+          border-color: #1a3a52;
+      }
+      
+      .btn-success {
+          background-color: #218838;
+          border-color: #218838;
+      }
+      
+      .btn-danger {
+          background-color: #c82333;
+          border-color: #c82333;
+      }
+      
+      .btn-warning {
+          background-color: #e0a800;
+          border-color: #e0a800;
+      }
+      
       .form-control {
           border-radius: 5px;
           border: 1px solid #ced4da;
@@ -64,10 +99,35 @@
       }
       
       .footer {
-          background-color: #343a40;
+          background: linear-gradient(135deg, #2c5f7c 0%, #1a3a52 100%);
           color: white;
           padding: 15px 0;
           margin-top: 2rem;
+      }
+      
+      .text-primary {
+          color: #2c5f7c !important;
+      }
+      
+      .bg-primary {
+          background-color: #2c5f7c !important;
+      }
+      
+      .card-header.bg-primary {
+          background: linear-gradient(135deg, #7b68a6 0%, #5a4d82 100%) !important;
+      }
+      
+      .dropdown-item:hover {
+          background-color: #7b68a6;
+          color: white;
+      }
+      
+      a {
+          color: #2c5f7c;
+      }
+      
+      a:hover {
+          color: #1a3a52;
       }
       
       /* Custom class for form fields */
@@ -125,7 +185,7 @@
   <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <div class="container">
       <a class="navbar-brand" href="{% url 'home' %}">
-        <i class="fas fa-vial"></i> MGML Sample DB
+        MGML Sample DB
       </a>
       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
@@ -195,7 +255,7 @@
   <!-- Footer -->
   <footer class="footer text-center">
     <div class="container">
-      <p class="mb-0">© 2024 MGML Laboratory | Microbial Genomics & Metagenomics Laboratory</p>
+      <p class="mb-0">© 2024-2025 MGML Laboratory | Microbial Genomics & Metagenomics Laboratory</p>
     </div>
   </footer>
 

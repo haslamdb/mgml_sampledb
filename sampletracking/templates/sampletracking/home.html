@@ -1,12 +1,20 @@
 {% extends 'base_generic.html' %}
+{% load static %}
 
 {% block content %}
 <div class="container mt-4">
     <div class="jumbotron">
-        <h1 class="display-4">MGML Sample Database</h1>
-        <p class="lead">Manage and track your laboratory samples through their entire lifecycle.</p>
-        <hr class="my-4">
-        <p>Choose a submission form below to get started or search for existing samples.</p>
+        <div class="row align-items-center">
+            <div class="col-md-3 text-center">
+                <img src="{% static 'images/Picture1.png' %}" alt="MGML Logo" style="height: 120px;">
+            </div>
+            <div class="col-md-9">
+                <h1 class="display-4">MGML Sample Database</h1>
+                <p class="lead">Manage and track your laboratory samples through their entire lifecycle.</p>
+                <hr class="my-4">
+                <p>Choose a submission form below to get started or search for existing samples.</p>
+            </div>
+        </div>
     </div>
 
     <div class="row mt-5">
@@ -17,7 +25,7 @@
                 </div>
                 <div class="card-body">
                     <p class="card-text">Submit a new crude sample from a patient or source.</p>
-                    <a href="{% url 'create_crude_sample' %}" class="btn btn-primary">Create</a>
+                    <a href="{% url 'create_crude_sample' %}" class="btn text-white" style="background-color: #7b68a6; border-color: #7b68a6;">Create</a>
                 </div>
             </div>
         </div>
@@ -48,12 +56,12 @@
         
         <div class="col-md-3">
             <div class="card">
-                <div class="card-header bg-info text-white">
+                <div class="card-header text-white" style="background-color: #2c5f7c;">
                     <h5 class="card-title mb-0">Sequence Library</h5>
                 </div>
                 <div class="card-body">
                     <p class="card-text">Create a new sequencing library from an extract.</p>
-                    <a href="{% url 'create_sequence_library' %}" class="btn btn-info">Create</a>
+                    <a href="{% url 'create_sequence_library' %}" class="btn text-white" style="background-color: #2c5f7c; border-color: #2c5f7c;">Create</a>
                 </div>
             </div>
         </div>
