@@ -17,6 +17,58 @@
         </div>
     </div>
 
+    <!-- Sample Collection & Receiving Section -->
+    <div class="row mt-5 mb-4">
+        <div class="col-12">
+            <h3 class="text-center mb-4" style="color: #2c5f7c;">
+                <i class="fas fa-exchange-alt"></i> Sample Collection & Receiving
+            </h3>
+        </div>
+        <div class="col-md-6">
+            <div class="card border-info">
+                <div class="card-header text-white" style="background-color: #17a2b8;">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-user-nurse"></i> Register New Sample
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">
+                        <strong>For Collection Staff:</strong> Register a new sample at the point of collection. 
+                        This simplified form is designed for nurses and collection personnel.
+                    </p>
+                    <a href="{% url 'accessioning_create' %}" class="btn btn-info">
+                        <i class="fas fa-clipboard-check"></i> Go to Registration Form
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card border-success">
+                <div class="card-header bg-success text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-inbox"></i> Receive Sample
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">
+                        <strong>For Lab Staff:</strong> Receive samples that have been registered by collection staff. 
+                        Update storage location and confirm receipt.
+                    </p>
+                    <a href="{% url 'find_sample_to_receive' %}" class="btn btn-success">
+                        <i class="fas fa-barcode"></i> Scan & Receive Sample
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <hr class="my-4">
+    
+    <h3 class="text-center mb-4" style="color: #2c5f7c;">
+        <i class="fas fa-flask"></i> Laboratory Sample Processing
+    </h3>
+
     <div class="row mt-5">
         <div class="col-md-3">
             <div class="card">

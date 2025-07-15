@@ -6,6 +6,7 @@ from django.contrib import messages
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.db.models import Q
+from datetime import datetime, time
 
 from .models import CrudeSample, Aliquot, Extract, SequenceLibrary
 from .forms import (
@@ -19,9 +20,17 @@ from .forms import (
 
 class HomeView(TemplateView):
     """
-    Home page view
+    Home page view with role-based redirects
     """
     template_name = 'sampletracking/home.html'
+    
+    def get(self, request, *args, **kwargs):
+        # Check if user is authenticated and belongs to Sample Collectors group
+        if request.user.is_authenticated:
+            if request.user.groups.filter(name='Sample Collectors').exists():
+                # Redirect sample collectors to their dedicated portal
+                return redirect('collection_landing')
+        return super().get(request, *args, **kwargs)
 
 
 class CrudeSampleListView(PermissionRequiredMixin, ListView):
@@ -157,6 +166,33 @@ def find_sample_to_receive(request):
         else:
             messages.error(request, f"No sample found with barcode '{barcode}'. Please register it first.")
     return render(request, 'sampletracking/find_sample_form.html')
+
+
+@login_required
+def collection_landing(request):
+    """
+    Simplified landing page for sample collectors
+    """
+    # Check if user belongs to appropriate group
+    if not (request.user.groups.filter(name='Sample Collectors').exists() or 
+            request.user.is_staff):
+        messages.error(request, "You don't have permission to access this page.")
+        return redirect('home')
+    
+    # Get samples registered by this user today
+    today_start = datetime.combine(timezone.now().date(), time.min)
+    today_end = datetime.combine(timezone.now().date(), time.max)
+    
+    recent_samples = CrudeSample.objects.filter(
+        created_by=request.user,
+        created_at__range=(today_start, today_end)
+    ).order_by('-created_at')[:10]
+    
+    context = {
+        'recent_samples': recent_samples,
+    }
+    
+    return render(request, 'sampletracking/collection_landing.html', context)
 
 
 class AliquotListView(PermissionRequiredMixin, ListView):

@@ -12,6 +12,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         # Create groups
+        sample_collector_group, _ = Group.objects.get_or_create(name='Sample Collectors')
         technician_group, _ = Group.objects.get_or_create(name='Technicians')
         lab_manager_group, _ = Group.objects.get_or_create(name='Lab Managers')
         viewer_group, _ = Group.objects.get_or_create(name='Viewers')
@@ -22,6 +23,14 @@ class Command(BaseCommand):
         models = [CrudeSample, Aliquot, Extract, SequenceLibrary, Plate]
         
         # Define permissions for each group
+        # Sample Collectors can only add and view CrudeSamples
+        sample_collector_permissions = []
+        ct = ContentType.objects.get_for_model(CrudeSample)
+        sample_collector_permissions.extend([
+            Permission.objects.get(codename='add_crudesample', content_type=ct),
+            Permission.objects.get(codename='view_crudesample', content_type=ct)
+        ])
+        
         # Viewers can only view samples
         viewer_permissions = []
         for model in models:
@@ -57,6 +66,10 @@ class Command(BaseCommand):
             lab_manager_permissions.append(delete_perm)
         
         # Clear existing permissions and assign new ones
+        sample_collector_group.permissions.clear()
+        sample_collector_group.permissions.set(sample_collector_permissions)
+        self.stdout.write(self.style.SUCCESS(f'Assigned {len(sample_collector_permissions)} permissions to Sample Collectors group'))
+        
         viewer_group.permissions.clear()
         viewer_group.permissions.set(viewer_permissions)
         self.stdout.write(self.style.SUCCESS(f'Assigned {len(viewer_permissions)} permissions to Viewers group'))
@@ -77,6 +90,7 @@ class Command(BaseCommand):
         lab_manager_group.permissions.add(*admin_permissions)
         
         self.stdout.write(self.style.SUCCESS('\nPermission Summary:'))
+        self.stdout.write(self.style.SUCCESS('- Sample Collectors: Can only register new crude samples'))
         self.stdout.write(self.style.SUCCESS('- Viewers: Can only view samples'))
         self.stdout.write(self.style.SUCCESS('- Technicians: Can view, add, and modify samples'))
         self.stdout.write(self.style.SUCCESS('- Lab Managers: Full access including delete and history'))

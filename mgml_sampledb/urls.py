@@ -35,6 +35,9 @@ urlpatterns = [
     path('dashboard/', sample_dashboard.dashboard, name='dashboard'),
     path('search/', views.SampleSearchView.as_view(), name='search'),
     
+    # Collection staff portal
+    path('collection/', views.collection_landing, name='collection_landing'),
+    
     # New workflow URLs for accessioning and receiving
     path('register/', views.AccessioningCreateView.as_view(), name='accessioning_create'),
     path('receive/', views.find_sample_to_receive, name='find_sample_to_receive'),

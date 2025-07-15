@@ -1,0 +1,183 @@
+{% extends 'base_generic.html' %}
+
+{% block title %}Sample Collection Portal - MGML Laboratory{% endblock %}
+
+{% block content %}
+<style>
+    /* Mobile-optimized styles */
+    @media (max-width: 768px) {
+        .mobile-card {
+            margin-bottom: 1rem !important;
+        }
+        .mobile-btn {
+            font-size: 1.1rem !important;
+            padding: 0.75rem 1.5rem !important;
+        }
+        h2 {
+            font-size: 1.5rem !important;
+        }
+        .lead {
+            font-size: 1rem !important;
+        }
+    }
+    
+    /* Simplified interface with larger touch targets */
+    .collection-btn {
+        min-height: 60px;
+        font-size: 1.1rem;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .collection-card {
+        transition: transform 0.2s;
+        cursor: pointer;
+    }
+    
+    .collection-card:hover {
+        transform: translateY(-2px);
+    }
+    
+    /* Clean, minimal design */
+    body {
+        background-color: #f8f9fa;
+    }
+</style>
+
+<div class="container mt-3">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10">
+            <!-- Welcome Header -->
+            <div class="text-center mb-4">
+                <h2 class="text-primary">
+                    <i class="fas fa-vial"></i> Sample Collection Portal
+                </h2>
+                <p class="lead text-muted">
+                    Welcome, {{ user.get_full_name|default:user.username }}
+                </p>
+            </div>
+            
+            <!-- Main Actions -->
+            <div class="row">
+                <!-- Register New Sample -->
+                <div class="col-md-6 mb-3 mobile-card">
+                    <div class="card collection-card h-100 shadow-sm" onclick="window.location.href='{% url 'accessioning_create' %}'">
+                        <div class="card-body text-center p-4">
+                            <div class="mb-3">
+                                <i class="fas fa-plus-circle fa-3x text-info"></i>
+                            </div>
+                            <h4 class="card-title">Register New Sample</h4>
+                            <p class="card-text text-muted">
+                                Register a new sample at the point of collection
+                            </p>
+                            <a href="{% url 'accessioning_create' %}" class="btn btn-info collection-btn mobile-btn">
+                                <i class="fas fa-clipboard-check mr-2"></i> Start Registration
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- View Recent Samples -->
+                <div class="col-md-6 mb-3 mobile-card">
+                    <div class="card collection-card h-100 shadow-sm">
+                        <div class="card-body text-center p-4">
+                            <div class="mb-3">
+                                <i class="fas fa-history fa-3x text-secondary"></i>
+                            </div>
+                            <h4 class="card-title">Recent Registrations</h4>
+                            <p class="card-text text-muted">
+                                View samples you've registered today
+                            </p>
+                            <button class="btn btn-secondary collection-btn mobile-btn" data-toggle="collapse" data-target="#recentSamples">
+                                <i class="fas fa-list mr-2"></i> View Recent
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Recent Samples Collapse -->
+            <div class="collapse mt-3" id="recentSamples">
+                <div class="card">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">Today's Registrations</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if recent_samples %}
+                            <div class="table-responsive">
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Time</th>
+                                            <th>Barcode</th>
+                                            <th>Subject ID</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for sample in recent_samples %}
+                                        <tr>
+                                            <td>{{ sample.created_at|time:"g:i A" }}</td>
+                                            <td><code>{{ sample.barcode }}</code></td>
+                                            <td>{{ sample.your_id }}</td>
+                                            <td>
+                                                <span class="badge badge-info">{{ sample.get_status_display }}</span>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <p class="text-muted text-center mb-0">
+                                <i class="fas fa-info-circle"></i> No samples registered today
+                            </p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Quick Instructions -->
+            <div class="card mt-4 border-warning">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-info-circle text-warning"></i> Quick Instructions
+                    </h5>
+                    <ol class="mb-0">
+                        <li>Click "Register New Sample" to begin</li>
+                        <li>Enter the subject ID and scan the barcode</li>
+                        <li>Select the sample type and collection date</li>
+                        <li>Submit the form to register the sample</li>
+                        <li>The sample will be marked as "Awaiting Receipt" until processed by lab staff</li>
+                    </ol>
+                </div>
+            </div>
+            
+            <!-- Help Section -->
+            <div class="text-center mt-4 mb-3">
+                <p class="text-muted">
+                    Need help? Contact the lab at 
+                    <a href="tel:+1234567890"><i class="fas fa-phone"></i> (123) 456-7890</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Add touch-friendly interactions
+    const cards = document.querySelectorAll('.collection-card');
+    cards.forEach(card => {
+        card.addEventListener('touchstart', function() {
+            this.style.transform = 'scale(0.98)';
+        });
+        card.addEventListener('touchend', function() {
+            this.style.transform = 'translateY(-2px)';
+        });
+    });
+});
+</script>
+{% endblock %}
