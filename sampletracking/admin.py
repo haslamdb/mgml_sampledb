@@ -1,7 +1,13 @@
 from django.contrib import admin
 from django.utils.html import format_html
 from django.db.models import Count
+from django.utils.safestring import mark_safe
 from .models import CrudeSample, Aliquot, Extract, SequenceLibrary, Plate
+
+# Customize admin site header and title
+admin.site.site_header = "MGML Sample Database Administration"
+admin.site.site_title = "MGML Admin"
+admin.site.index_title = "Sample Management Dashboard"
 
 
 @admin.action(description="Mark selected samples as archived")
@@ -13,12 +19,29 @@ class SampleAdmin(admin.ModelAdmin):
     """
     Base admin configuration for all sample types
     """
-    list_display = ('barcode', 'status', 'date_created', 'created_by', 'updated_at')
+    list_display = ('barcode', 'colored_status', 'date_created', 'created_by', 'updated_at')
     list_filter = ('status', 'date_created', 'created_by')
     search_fields = ('barcode', 'notes')
     readonly_fields = ('created_at', 'updated_at', 'created_by', 'updated_by')
     date_hierarchy = 'date_created'
     actions = [mark_archived]
+    
+    def colored_status(self, obj):
+        """Display status with color coding."""
+        colors = {
+            'AVAILABLE': '#28a745',
+            'IN_PROCESS': '#ffc107',
+            'EXHAUSTED': '#6c757d',
+            'CONTAMINATED': '#dc3545',
+            'ARCHIVED': '#495057'
+        }
+        return format_html(
+            '<span style="color: {}; font-weight: 500;">{}</span>',
+            colors.get(obj.status, '#000'),
+            obj.get_status_display()
+        )
+    colored_status.short_description = 'Status'
+    colored_status.admin_order_field = 'status'
     
     def save_model(self, request, obj, form, change):
         """

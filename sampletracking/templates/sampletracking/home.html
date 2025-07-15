@@ -97,7 +97,10 @@
                         {% if user.is_staff %}
                             <a href="{% url 'admin:index' %}" class="btn btn-dark">Admin Panel</a>
                         {% endif %}
-                        <a href="{% url 'logout' %}" class="btn btn-outline-secondary">Logout</a>
+                        <form method="post" action="{% url 'logout' %}" style="display: inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-outline-secondary">Logout</button>
+                        </form>
                     {% else %}
                         <a href="{% url 'login' %}" class="btn btn-outline-primary">Login</a>
                     {% endif %}

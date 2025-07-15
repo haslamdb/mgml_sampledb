@@ -1,0 +1,336 @@
+{% extends "admin/base.html" %}
+{% load static %}
+
+{% block title %}{% if subtitle %}{{ subtitle }} | {% endif %}{{ title }} | MGML Sample Database Admin{% endblock %}
+
+{% block branding %}
+<div id="branding">
+    <h1 id="site-name">
+        <a href="{% url 'admin:index' %}">
+            <span class="brand-icon">🧬</span> MGML Sample Database Administration
+        </a>
+    </h1>
+</div>
+{% endblock %}
+
+{% block extrastyle %}
+{{ block.super }}
+<style>
+    /* MGML Color Scheme */
+    :root {
+        --primary-color: #2c5f7c;
+        --primary-dark: #1a3a52;
+        --secondary-color: #7b68a6;
+        --secondary-dark: #5a4d82;
+        --accent-color: #a8d0e6;
+        --success-color: #218838;
+        --danger-color: #c82333;
+        --warning-color: #e0a800;
+    }
+
+    /* Header Styling */
+    #header {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+        color: white;
+        height: auto;
+        padding: 0;
+    }
+
+    #branding {
+        float: left;
+        padding: 16px 20px;
+    }
+
+    #branding h1 {
+        margin: 0;
+        font-size: 20px;
+        font-weight: 400;
+        color: white;
+    }
+
+    #branding h1 a:link, #branding h1 a:visited {
+        color: white;
+        text-decoration: none;
+    }
+
+    #branding h1 a:hover {
+        color: var(--accent-color);
+    }
+
+    .brand-icon {
+        font-size: 24px;
+        vertical-align: middle;
+        margin-right: 8px;
+    }
+
+    /* User Tools */
+    #user-tools {
+        padding: 16px 20px;
+        text-align: right;
+        color: var(--accent-color);
+    }
+
+    #user-tools a {
+        color: var(--accent-color);
+        border-bottom: 1px solid transparent;
+        font-weight: 400;
+        padding: 4px 8px;
+    }
+
+    #user-tools a:hover, #user-tools a:focus {
+        color: white;
+        border-bottom-color: white;
+        text-decoration: none;
+    }
+
+    /* Navigation */
+    div.breadcrumbs {
+        background: var(--secondary-color);
+        color: white;
+        padding: 10px 20px;
+        font-size: 13px;
+    }
+
+    div.breadcrumbs a {
+        color: var(--accent-color);
+    }
+
+    div.breadcrumbs a:hover {
+        color: white;
+    }
+
+    /* Sidebar */
+    #nav-sidebar {
+        background: #f5f5f5;
+        border-right: 1px solid #ddd;
+    }
+
+    .module caption {
+        background: var(--secondary-color);
+        color: white;
+        padding: 10px 15px;
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    /* Buttons */
+    .button, input[type=submit], input[type=button], .submit-row input, a.button {
+        background: var(--primary-color);
+        color: white;
+        border: none;
+        padding: 10px 15px;
+        border-radius: 4px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+
+    .button:hover, input[type=submit]:hover, input[type=button]:hover, 
+    .submit-row input:hover, a.button:hover {
+        background: var(--primary-dark);
+        color: white;
+    }
+
+    .button.default, input[type=submit].default, .submit-row input.default {
+        background: var(--success-color);
+    }
+
+    .button.default:hover, input[type=submit].default:hover, 
+    .submit-row input.default:hover {
+        background: #1e7e34;
+    }
+
+    .deletelink {
+        background: var(--danger-color) !important;
+    }
+
+    .deletelink:hover {
+        background: #bd2130 !important;
+    }
+
+    /* Links */
+    a:link, a:visited {
+        color: var(--primary-color);
+    }
+
+    a:hover, a:focus {
+        color: var(--primary-dark);
+    }
+
+    /* Tables */
+    #changelist table thead th {
+        background: var(--secondary-color);
+        color: white;
+        padding: 10px;
+        font-weight: 500;
+        white-space: nowrap;
+    }
+
+    #changelist table thead th a:link, 
+    #changelist table thead th a:visited {
+        color: white;
+    }
+
+    #changelist table tbody tr:hover {
+        background-color: #f0f7ff;
+    }
+
+    .row1 {
+        background: white;
+    }
+
+    .row2 {
+        background: #f9f9f9;
+    }
+
+    /* Success/Error Messages */
+    .success {
+        background: var(--success-color);
+        color: white;
+        padding: 10px 15px;
+        border-radius: 4px;
+    }
+
+    .errornote {
+        background: var(--danger-color);
+        color: white;
+        padding: 10px 15px;
+        border-radius: 4px;
+        border: none;
+    }
+
+    ul.errorlist {
+        color: var(--danger-color);
+        background: #fee;
+        padding: 10px;
+        border-radius: 4px;
+        border: 1px solid #fcc;
+    }
+
+    /* Form Styling */
+    .form-row {
+        padding: 15px 10px;
+        border-bottom: 1px solid #eee;
+    }
+
+    .form-row:last-child {
+        border-bottom: none;
+    }
+
+    fieldset {
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        margin-bottom: 20px;
+    }
+
+    fieldset h2 {
+        background: var(--secondary-color);
+        color: white;
+        padding: 10px 15px;
+        margin: -1px -1px 0 -1px;
+        border-radius: 4px 4px 0 0;
+        font-size: 14px;
+        font-weight: 500;
+    }
+
+    /* Module Index (Dashboard) */
+    #content-main .module table {
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+    #content-main .module table caption {
+        background: linear-gradient(135deg, var(--secondary-color) 0%, var(--secondary-dark) 100%);
+        color: white;
+        padding: 12px 15px;
+        text-align: left;
+        font-weight: 500;
+        font-size: 14px;
+    }
+
+    /* Action Buttons */
+    .object-tools {
+        margin-top: 0;
+        margin-bottom: 20px;
+    }
+
+    .object-tools a {
+        background: var(--primary-color);
+        color: white;
+        padding: 10px 15px;
+        border-radius: 4px;
+        font-weight: 500;
+        text-decoration: none;
+        display: inline-block;
+        margin-left: 10px;
+    }
+
+    .object-tools a:hover {
+        background: var(--primary-dark);
+    }
+
+    .object-tools a.addlink {
+        background: var(--success-color);
+    }
+
+    .object-tools a.addlink:hover {
+        background: #1e7e34;
+    }
+
+    /* Sample Status Colors */
+    .field-status {
+        font-weight: 500;
+    }
+
+    .status-available { color: var(--success-color); }
+    .status-in_process { color: var(--warning-color); }
+    .status-exhausted { color: #6c757d; }
+    .status-contaminated { color: var(--danger-color); }
+    .status-archived { color: #495057; }
+
+    /* History Table */
+    table#change-history {
+        width: 100%;
+    }
+
+    table#change-history tbody tr {
+        background: white;
+        border-bottom: 1px solid #eee;
+    }
+
+    table#change-history tbody tr:hover {
+        background: #f0f7ff;
+    }
+
+    /* Footer */
+    #footer {
+        padding: 20px;
+        text-align: center;
+        color: #666;
+        border-top: 1px solid #ddd;
+        margin-top: 50px;
+        background: #f8f9fa;
+    }
+
+    /* Responsive */
+    @media (max-width: 767px) {
+        #branding h1 {
+            font-size: 16px;
+        }
+        
+        .brand-icon {
+            display: none;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block footer %}
+<div id="footer">
+    <p>
+        <strong>MGML Sample Database</strong> | 
+        GLP & CLIA Compliant | 
+        Webmaster: <a href="mailto:dbhaslam@interface-labs.com">dbhaslam@interface-labs.com</a>
+    </p>
+</div>
+{% endblock %}
