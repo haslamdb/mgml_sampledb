@@ -1,10 +1,10 @@
-Django==5.0.2
+Django==5.0.14
 mysqlclient==2.2.1
 python-decouple==3.8
-gunicorn==21.2.0
+gunicorn==23.0.0
 django-cors-headers==4.3.1
 django-filter==23.5
 django-crispy-forms==2.1
 crispy-bootstrap4==2023.1
-Pillow==10.1.0
+Pillow==10.4.0
 django-simple-history==3.10.1
