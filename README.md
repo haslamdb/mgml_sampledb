@@ -1,18 +1,38 @@
 # MGML Sample Database
 
-A Django-based application for tracking samples in the MGML laboratory as they move through different processing stages.
+A GLP & CLIA compliant Django-based application for tracking samples in the MGML (Microbial Genomics & Metagenomics Laboratory) as they move through different processing stages.
 
-## Features
+## Compliance & Features
 
-- Track samples through their entire lifecycle:
-  - Crude Samples
+### Regulatory Compliance
+- **GLP (Good Laboratory Practice) Compliant**: Full audit trail with user tracking and timestamps
+- **CLIA (Clinical Laboratory Improvement Amendments) Compliant**: Proper sample tracking and chain of custody
+- **21 CFR Part 11 Ready**: Electronic signatures and audit trails via Django Simple History
+
+### Core Features
+- **Two-Step Sample Registration Workflow**:
+  - Step 1: Collection staff register samples (status: "Awaiting Receipt")
+  - Step 2: Lab staff receive and store samples (status: "Available")
+- **Sample Lifecycle Tracking**:
+  - Crude Samples (with Subject ID validation)
   - Aliquots
   - Extracts
   - Sequence Libraries
-- Dashboard with visualizations and statistics
-- Search capabilities across all sample types
-- User authentication and sample ownership tracking
-- Detailed sample history and audit trail
+  - Plates (96-well format)
+- **Barcode Validation System**:
+  - Automatic validation that barcode starts with Subject ID
+  - Override option for generic pre-printed barcodes
+  - Full audit trail of validation overrides
+- **Role-Based Access Control**:
+  - Sample Collectors: Can only register new samples
+  - Viewers: Read-only access
+  - Technicians: Can add and modify samples
+  - Lab Managers: Full access including delete permissions
+- **Mobile-Optimized Collection Portal** at `/collection/`
+- **Dashboard** with visualizations and statistics
+- **Advanced Search** capabilities across all sample types
+- **Complete Audit Trail** tracking who did what and when
+- **Storage Location Tracking** (Freezer/Shelf/Box)
 
 ## Project Structure
 
@@ -72,28 +92,68 @@ A Django-based application for tracking samples in the MGML laboratory as they m
    python manage.py createsuperuser
    ```
 
-7. Run the development server:
+7. Set up user groups and permissions:
+   ```
+   python manage.py setup_groups
+   ```
+   This creates the following groups:
+   - **Sample Collectors**: For nurses/collection staff
+   - **Viewers**: Read-only access
+   - **Technicians**: Standard lab users
+   - **Lab Managers**: Full administrative access
+
+8. Run the development server:
    ```
    python manage.py runserver
    ```
 
-8. Access the application at http://localhost:8000
+9. Access the application at http://localhost:8000
 
 ## Usage
 
-1. Log in using your credentials
-2. Navigate to the dashboard to see an overview of samples
-3. Add new samples using the appropriate forms
-4. Search for samples using the search bar
-5. View, edit, and process samples through their lifecycle
+### For Sample Collection Staff
+1. Access the collection portal at `/collection/` or via the home page
+2. Click "Register New Sample"
+3. Enter the Subject ID and scan the barcode
+   - The system validates that the barcode starts with the Subject ID
+   - Use the override checkbox for generic pre-printed barcodes
+4. Fill in collection details and submit
+5. Sample is marked as "Awaiting Receipt"
+
+### For Lab Staff
+1. Access the main portal and click "Receive Sample"
+2. Scan or enter the barcode of the incoming sample
+3. Verify sample information
+4. Enter storage location (Freezer/Shelf/Box)
+5. Confirm receipt - sample status changes to "Available"
+
+### General Usage
+1. Use the dashboard to view sample statistics and recent activity
+2. Search for samples using the search bar
+3. Create aliquots, extracts, and sequence libraries from existing samples
+4. Track samples through their entire lifecycle
+5. View complete audit history for any sample
+
+### Admin Interface
+- Access at `/admin/` with staff credentials
+- Custom admin interface with MGML branding
+- Features:
+  - Bulk actions for sample management
+  - Advanced filtering and search
+  - Export capabilities
+  - Historical data viewing
+  - User and group management
+  - Override indicators for barcode validation
 
 ## Technology Stack
 
-- Django 5.0
-- MySQL
-- Bootstrap 4
-- jQuery
-- Chart.js (for dashboard visualizations)
+- **Backend**: Django 5.0 with Django Simple History for audit trails
+- **Database**: MySQL with full transaction support
+- **Frontend**: Bootstrap 4 (mobile-responsive)
+- **JavaScript**: jQuery with real-time form validation
+- **Visualizations**: Chart.js for dashboard analytics
+- **Security**: Role-based permissions, CSRF protection, secure session management
+- **Compliance**: Audit logging, user tracking, data integrity controls
 
 ## Contributors
 
