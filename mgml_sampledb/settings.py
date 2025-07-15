@@ -32,6 +32,7 @@ ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'mgml-sampledb.com', 'www.mgml-sample
 # Application definition
 
 INSTALLED_APPS = [
+    'sampletracking',  # Must be before admin to override templates
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -39,7 +40,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'simple_history',
-    'sampletracking',
 ]
 
 MIDDLEWARE = [
