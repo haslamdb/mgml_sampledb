@@ -1,7 +1,7 @@
 from django.views.generic import ListView, CreateView, UpdateView, DetailView, TemplateView, FormView
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.contrib.auth.decorators import login_required
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from django.contrib import messages
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
@@ -354,7 +354,7 @@ class SampleSearchView(PermissionRequiredMixin, ListView):
             # Search across all sample types
             crude_samples = CrudeSample.objects.filter(
                 Q(barcode__icontains=query) | 
-                Q(your_id__icontains=query) |
+                Q(subject_id__icontains=query) |
                 Q(notes__icontains=query)
             )
             aliquots = Aliquot.objects.filter(
@@ -380,7 +380,7 @@ class SampleSearchView(PermissionRequiredMixin, ListView):
                     'object': sample,
                     'barcode': sample.barcode,
                     'date': sample.date_created,
-                    'url': reverse_lazy('crude_sample_detail', kwargs={'pk': sample.pk})
+                    'url': reverse('crude_sample_detail', kwargs={'pk': sample.pk})
                 })
             for sample in aliquots:
                 results.append({
@@ -388,7 +388,7 @@ class SampleSearchView(PermissionRequiredMixin, ListView):
                     'object': sample,
                     'barcode': sample.barcode,
                     'date': sample.date_created,
-                    'url': reverse_lazy('aliquot_detail', kwargs={'pk': sample.pk})
+                    'url': reverse('aliquot_detail', kwargs={'pk': sample.pk})
                 })
             for sample in extracts:
                 results.append({
@@ -396,7 +396,7 @@ class SampleSearchView(PermissionRequiredMixin, ListView):
                     'object': sample,
                     'barcode': sample.barcode,
                     'date': sample.date_created,
-                    'url': reverse_lazy('extract_detail', kwargs={'pk': sample.pk})
+                    'url': reverse('extract_detail', kwargs={'pk': sample.pk})
                 })
             for sample in libraries:
                 results.append({
@@ -404,7 +404,7 @@ class SampleSearchView(PermissionRequiredMixin, ListView):
                     'object': sample,
                     'barcode': sample.barcode,
                     'date': sample.date_created,
-                    'url': reverse_lazy('library_detail', kwargs={'pk': sample.pk})
+                    'url': reverse('library_detail', kwargs={'pk': sample.pk})
                 })
             
             return sorted(results, key=lambda x: x['date'], reverse=True)

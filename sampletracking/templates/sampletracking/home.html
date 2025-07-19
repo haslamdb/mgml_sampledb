@@ -34,7 +34,7 @@
                 <div class="card-body">
                     <p class="card-text">
                         <strong>For Collection Staff:</strong> Register a new sample at the point of collection. 
-                        Scan sample barcode and verify subject ID, sample type, and collection date.
+                        Scan sample barcode and verify sample type and collection date.
                     </p>
                     <a href="{% url 'accessioning_create' %}" class="btn btn-info">
                         <i class="fas fa-clipboard-check"></i> Go to Registration Form
@@ -144,7 +144,6 @@
                     <h5 class="card-title mb-0">Admin Actions</h5>
                 </div>
                 <div class="card-body">
-                    <p class="card-text">Administrative actions for privileged users.</p>
                     {% if user.is_authenticated %}
                         {% if user.is_staff %}
                             <a href="{% url 'admin:index' %}" class="btn btn-dark">Admin Panel</a>
