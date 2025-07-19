@@ -162,7 +162,7 @@ class ExtractAdmin(SampleAdmin):
     """
     list_display = SampleAdmin.list_display + ('parent_link', 'extract_type', 'quality_score', 'library_count')
     list_filter = SampleAdmin.list_filter + ('extract_type',)
-    search_fields = SampleAdmin.search_fields + ('protocol_used',)
+    search_fields = SampleAdmin.search_fields + ('protocol_used', 'extraction_method', 'extraction_solvent')
     autocomplete_fields = ('parent',)
     
     def get_queryset(self, request):
@@ -188,11 +188,19 @@ class ExtractAdmin(SampleAdmin):
         ('Basic Information', {
             'fields': ('barcode', 'date_created', 'parent', 'extract_type', 'status')
         }),
-        ('Properties', {
-            'fields': ('protocol_used', 'quality_score')
+        ('DNA/RNA Extract Details', {
+            'fields': ('extraction_method', 'protocol_used', 'quality_score'),
+            'classes': ('collapse',),
+            'description': 'Fields specific to DNA, RNA, and cfDNA extracts'
+        }),
+        ('Metabolomics/Antimicrobials Extract Details', {
+            'fields': ('sample_weight', 'extraction_solvent', 'solvent_volume', 'extract_volume'),
+            'classes': ('collapse',),
+            'description': 'Fields specific to Metabolomics and Antimicrobials extracts'
         }),
         ('Storage Location', {
-            'fields': ('freezer_ID', 'shelf_ID', 'box_ID')
+            'fields': ('freezer_ID', 'shelf_ID', 'box_ID'),
+            'classes': ('collapse',)
         }),
         ('Notes', {
             'fields': ('notes',)

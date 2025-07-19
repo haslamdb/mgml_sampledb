@@ -4,20 +4,28 @@
 {% block extrastyle %}
 {{ block.super }}
 <style>
-    /* Enhanced form styling */
+    /* Match main site form styling */
+    .module {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0,0,0,.05);
+        margin-bottom: 1.5rem;
+        overflow: hidden;
+    }
+    
     .module h2 {
         background: linear-gradient(135deg, #7b68a6 0%, #5a4d82 100%);
         color: white;
-        padding: 12px 15px;
-        margin: -10px -10px 15px -10px;
-        font-size: 14px;
-        font-weight: 500;
+        padding: 1rem 1.25rem;
+        margin: 0;
+        font-size: 1.1rem;
+        font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 0.5px;
     }
     
     .form-row {
-        padding: 12px 10px;
+        padding: 1rem 1.25rem;
         margin-bottom: 0;
         border-bottom: 1px solid #f0f0f0;
         transition: background-color 0.2s ease;
@@ -33,18 +41,20 @@
     
     .form-row label {
         font-weight: 500;
-        color: #2c5f7c;
+        color: #5b9aa9;
+        font-size: 0.9rem;
+        margin-bottom: 0.25rem;
     }
     
     .help {
-        font-size: 12px;
-        color: #666;
-        font-style: italic;
-        margin-top: 4px;
+        font-size: 0.75rem;
+        color: #6c757d;
+        margin-top: 0.1rem;
         display: block;
+        line-height: 1.4;
     }
     
-    /* Highlight required fields */
+    /* Consistent with main site required fields */
     .required label:after {
         content: " *";
         color: #dc3545;
@@ -54,24 +64,29 @@
     /* Storage location section */
     fieldset.storage-location {
         background: #f8f9fa;
-        border: 1px solid #dee2e6;
-        border-radius: 4px;
-        padding: 10px;
-        margin: 15px 0;
+        border: none;
+        border-radius: 8px;
+        padding: 1rem;
+        margin: 1rem 0;
+        box-shadow: 0 2px 4px rgba(0,0,0,.05);
     }
     
-    /* Submit row styling */
+    /* Submit row styling - match main site buttons */
     .submit-row {
         background: #f8f9fa;
-        border: 1px solid #dee2e6;
-        border-radius: 4px;
-        padding: 15px;
-        margin: 20px 0;
+        border: none;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin: 2rem 0;
         text-align: right;
+        box-shadow: 0 2px 4px rgba(0,0,0,.05);
     }
     
     .submit-row input {
-        margin-left: 8px;
+        margin-left: 0.5rem;
+        padding: 0.5rem 1rem;
+        border-radius: 5px;
+        font-weight: 500;
     }
     
     /* Status field highlighting */
@@ -86,17 +101,21 @@
     #id_status option[value="CONTAMINATED"] { color: #dc3545; }
     #id_status option[value="ARCHIVED"] { color: #495057; }
     
-    /* Metadata section */
+    /* Metadata section - match main site cards */
     .metadata-info {
-        background: #e9ecef;
+        background: white;
         border-left: 4px solid #7b68a6;
-        padding: 10px 15px;
-        margin: 15px 0;
-        font-size: 13px;
+        padding: 1rem 1.25rem;
+        margin: 1.5rem 0;
+        font-size: 0.9rem;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0,0,0,.05);
+        line-height: 1.6;
     }
     
     .metadata-info strong {
-        color: #2c5f7c;
+        color: #5b9aa9;
+        font-weight: 600;
     }
 </style>
 {% endblock %}

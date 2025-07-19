@@ -11,7 +11,7 @@ export DJANGO_SETTINGS_MODULE=mgml_sampledb.settings
 cd /var/www/mgml_sampledb
 
 # Start Gunicorn
-/home/david/miniconda3/envs/biobakery3/bin/gunicorn \
+/var/www/mgml_sampledb/venv/bin/gunicorn \
     --access-logfile /var/www/mgml_sampledb/logs/gunicorn_access.log \
     --error-logfile /var/www/mgml_sampledb/logs/gunicorn_error.log \
     --workers 3 \

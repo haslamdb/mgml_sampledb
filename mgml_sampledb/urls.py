@@ -66,4 +66,7 @@ urlpatterns = [
     
     # Submission confirmation
     path('sample-submitted/', TemplateView.as_view(template_name='sampletracking/sample_submitted.html'), name='sample_submitted'),
+    
+    # Reporting URLs
+    path('reports/daily_status/', views.ReportView.as_view(), name='daily_status_report'),
 ]

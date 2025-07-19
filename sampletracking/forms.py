@@ -71,6 +71,18 @@ class AccessioningForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['collection_date'].initial = timezone.now().date()
+        
+        # Explicitly mark required fields
+        self.fields['subject_id'].required = True
+        self.fields['barcode'].required = True
+        self.fields['collection_date'].required = True
+        self.fields['sample_source'].required = True
+        
+        # Update labels to show they are required
+        self.fields['subject_id'].label = "Subject ID *"
+        self.fields['barcode'].label = "Barcode *"
+        self.fields['collection_date'].label = "Collection Date *"
+        self.fields['sample_source'].label = "Sample Source *"
 
     def clean_collection_date(self):
         collection_date = self.cleaned_data.get('collection_date')
@@ -162,7 +174,7 @@ class AliquotForm(SampleForm):
         super(AliquotForm, self).__init__(*args, **kwargs)
         self.fields['parent_barcode'].empty_label = "Select a crude sample barcode"
         self.fields['parent_barcode'].widget.attrs.update({'class': 'form-select'})
-        self.fields['parent_barcode'].label_from_instance = lambda obj: f"{obj.barcode} ({obj.your_id})"
+        self.fields['parent_barcode'].label_from_instance = lambda obj: f"{obj.barcode} ({obj.subject_id})"
 
 
 class ExtractForm(SampleForm):
@@ -180,12 +192,21 @@ class ExtractForm(SampleForm):
 
     class Meta(SampleForm.Meta):
         model = Extract
-        fields = SampleForm.Meta.fields + ['parent', 'extract_type', 'protocol_used', 'quality_score']
+        fields = SampleForm.Meta.fields + [
+            'parent', 'extract_type', 'protocol_used', 'quality_score',
+            'extraction_method', 'sample_weight', 'extraction_solvent', 
+            'solvent_volume', 'extract_volume'
+        ]
         widgets = {
             **SampleForm.Meta.widgets,
             'date_created': DateInput(attrs={'type': 'date', 'class': 'form-control'}),
             'protocol_used': forms.TextInput(attrs={'class': 'form-control'}),
             'quality_score': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+            'extraction_method': forms.TextInput(attrs={'class': 'form-control'}),
+            'sample_weight': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.001'}),
+            'extraction_solvent': forms.TextInput(attrs={'class': 'form-control'}),
+            'solvent_volume': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+            'extract_volume': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
         }
         
     def __init__(self, *args, **kwargs):
@@ -280,3 +301,14 @@ class SequenceLibraryForm(SampleForm):
             raise ValidationError("Both plate and well must be specified together.")
         
         return cleaned_data
+
+
+class ReportForm(forms.Form):
+    """
+    A simple form to select a date for generating a report.
+    """
+    report_date = forms.DateField(
+        widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+        initial=timezone.now().date(),
+        label="Select Report Date"
+    )

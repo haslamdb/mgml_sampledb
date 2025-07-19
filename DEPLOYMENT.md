@@ -64,6 +64,10 @@ python -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
 
+# Note: In this deployment, the virtual environment is at /var/www/mgml_sampledb/venv/
+# Use the Python binary directly: /var/www/mgml_sampledb/venv/bin/python
+# Example: /var/www/mgml_sampledb/venv/bin/python manage.py makemigrations
+
 # 3. Set up production settings
 # Create production .env file with DEBUG=False
 
@@ -112,7 +116,7 @@ sudo apt-get install certbot python3-certbot-nginx
 sudo certbot --nginx -d your_domain.com -d www.your_domain.com
 
 # 7. Collect static files
-python manage.py collectstatic
+/var/www/mgml_sampledb/venv/bin/python manage.py collectstatic
 
 # 8. Start services
 sudo systemctl start mgml_sampledb

@@ -1,0 +1,150 @@
+{% extends "base_generic.html" %}
+{% load static %}
+
+{% block title %}Daily Status Report{% endblock %}
+
+{% block content %}
+<style>
+    /* Styles for the screen */
+    .report-container {
+        font-family: Arial, sans-serif;
+    }
+    .report-header {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    .logo-container {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    .logo-container img {
+        max-height: 100px;
+        width: auto;
+    }
+    .report-title {
+        font-size: 28px;
+        font-weight: bold;
+        color: #333;
+        margin: 10px 0;
+    }
+    .report-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+    .report-table th, .report-table td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+    }
+    .report-table th {
+        background-color: #f2f2f2;
+    }
+    .check { color: green; font-weight: bold; }
+    .cross { color: red; font-weight: bold; }
+
+    /* Styles for printing */
+    @media print {
+        body * {
+            visibility: hidden;
+        }
+        .printable-area, .printable-area * {
+            visibility: visible;
+        }
+        .printable-area {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+        }
+        .no-print {
+            display: none;
+        }
+        .report-table th, .report-table td {
+            font-size: 10pt;
+        }
+    }
+</style>
+
+<div class="container mt-4 report-container">
+    <div class="card">
+        <div class="card-header no-print">
+            <h3>Daily Sample Status Report</h3>
+        </div>
+        <div class="card-body">
+            <form method="post" class="row g-3 align-items-end no-print">
+                {% csrf_token %}
+                <div class="col-auto">
+                    {{ form.report_date.label_tag }}
+                    {{ form.report_date }}
+                </div>
+                <div class="col-auto">
+                    <button type="submit" class="btn btn-primary">Generate Report</button>
+                </div>
+            </form>
+
+            {% if report_data %}
+            <hr class="no-print">
+            <div class="printable-area">
+                <div class="logo-container">
+                    <img src="{% static 'images/Logo6.png' %}" alt="MGML Logo">
+                    <h1 class="report-title">MGML Sample Report Form</h1>
+                </div>
+                <div class="report-header">
+                    <h2>Daily Sample Status Report</h2>
+                    <p><strong>Date:</strong> {{ report_date|date:"F d, Y" }}</p>
+                </div>
+                <table class="report-table">
+                    <thead>
+                        <tr>
+                            <th>Patient ID</th>
+                            <th>Sample Type</th>
+                            <th>Collection Date</th>
+                            <th>Aliquoted</th>
+                            <th>Extracted</th>
+                            <th>Library Made</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in report_data %}
+                        <tr>
+                            <td>{{ item.patient_id }}</td>
+                            <td>{{ item.sample_type }}</td>
+                            <td>{{ item.collection_date|date:"Y-m-d" }}</td>
+                            <td class="text-center">
+                                {% if item.aliquot_date %}
+                                    {{ item.aliquot_date|date:"Y-m-d" }}
+                                {% else %}
+                                    <span class="cross">&#10007;</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-center">
+                                {% if item.extract_date %}
+                                    {{ item.extract_date|date:"Y-m-d" }}
+                                {% else %}
+                                    <span class="cross">&#10007;</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-center">
+                                {% if item.library_date %}
+                                    {{ item.library_date|date:"Y-m-d" }}
+                                {% else %}
+                                    <span class="cross">&#10007;</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="text-center mt-4 no-print">
+                <button onclick="window.print()" class="btn btn-secondary">Print Report</button>
+            </div>
+            {% elif request.method == 'POST' %}
+            <hr>
+            <p class="text-center text-muted">No samples were collected on the selected date.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

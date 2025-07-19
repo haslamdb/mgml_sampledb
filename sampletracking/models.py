@@ -175,6 +175,8 @@ class Extract(Sample):
         ('RNA', 'RNA'),
         ('cfDNA', 'cfDNA'),
         ('Protein', 'Protein'),
+        ('Metabolomics', 'Metabolomics'),
+        ('Antimicrobials', 'Antimicrobials'),
         ('Other', 'Other')
     ]
     
@@ -201,6 +203,43 @@ class Extract(Sample):
         null=True, 
         blank=True,
         help_text="Quality score for this extract (e.g., A260/A280)"
+    )
+    
+    # New fields for Metabolomics and Antimicrobials
+    sample_weight = models.DecimalField(
+        max_digits=10,
+        decimal_places=3,
+        null=True,
+        blank=True,
+        help_text="Sample weight in grams (for Metabolomics/Antimicrobials)"
+    )
+    extraction_solvent = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        help_text="Solvent used for extraction (for Metabolomics/Antimicrobials)"
+    )
+    solvent_volume = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        help_text="Volume of solvent used in mL (for Metabolomics/Antimicrobials)"
+    )
+    extract_volume = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        help_text="Final extract volume in mL (for Metabolomics/Antimicrobials)"
+    )
+    
+    # New field for DNA/RNA extracts
+    extraction_method = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        help_text="Extraction method used (for DNA/RNA extracts)"
     )
     
     history = HistoricalRecords()

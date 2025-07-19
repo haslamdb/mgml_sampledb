@@ -14,7 +14,8 @@ from .forms import (
     AliquotForm, 
     ExtractForm, 
     SequenceLibraryForm,
-    AccessioningForm
+    AccessioningForm,
+    ReportForm
 )
 
 
@@ -413,3 +414,72 @@ class SampleSearchView(PermissionRequiredMixin, ListView):
         context = super().get_context_data(**kwargs)
         context['query'] = self.request.GET.get('q', '')
         return context
+
+
+class ReportView(LoginRequiredMixin, FormView):
+    """
+    View for generating and displaying a daily sample status report.
+    """
+    template_name = 'sampletracking/report_form.html'
+    form_class = ReportForm
+
+    def form_valid(self, form):
+        report_date = form.cleaned_data['report_date']
+        
+        # 1. Get all crude samples for the selected day.
+        crude_samples = list(CrudeSample.objects.filter(collection_date=report_date).order_by('subject_id'))
+        
+        # Get all barcodes from these crude samples to use in subsequent queries.
+        crude_barcodes = [cs.barcode for cs in crude_samples]
+
+        # 2. Get all aliquots that are children of these crude samples.
+        aliquots = Aliquot.objects.filter(parent_barcode__barcode__in=crude_barcodes).select_related('parent_barcode')
+        aliquot_barcodes = [a.barcode for a in aliquots]
+
+        # 3. Get all extracts that are children of these aliquots.
+        extracts = Extract.objects.filter(parent__barcode__in=aliquot_barcodes).select_related('parent')
+        extract_pks = [e.pk for e in extracts]
+
+        # 4. Get all libraries that are children of these extracts.
+        libraries = SequenceLibrary.objects.filter(parent_id__in=extract_pks).select_related('parent')
+
+        # Create sets for quick lookups
+        aliquot_parent_barcodes = {a.parent_barcode.barcode for a in aliquots}
+        extract_parent_barcodes = {e.parent.barcode for e in extracts}
+        library_parent_pks = {l.parent.pk for l in libraries}
+
+        # Build the final report data structure
+        report_data = []
+        for cs in crude_samples:
+            # Get the earliest aliquot date for this crude sample
+            aliquot_date = None
+            child_aliquots = [a for a in aliquots if a.parent_barcode.barcode == cs.barcode]
+            if child_aliquots:
+                aliquot_date = min(a.date_created for a in child_aliquots)
+            
+            # Get the earliest extract date for the children of this crude sample
+            extract_date = None
+            child_aliquot_barcodes = {a.barcode for a in child_aliquots}
+            child_extracts = [e for e in extracts if e.parent.barcode in child_aliquot_barcodes]
+            if child_extracts:
+                extract_date = min(e.date_created for e in child_extracts)
+
+            # Get the earliest library date for the grandchildren of this crude sample
+            library_date = None
+            child_extract_pks = {e.pk for e in child_extracts}
+            child_libraries = [l for l in libraries if l.parent.pk in child_extract_pks]
+            if child_libraries:
+                library_date = min(l.date_created for l in child_libraries)
+
+            report_data.append({
+                'patient_id': cs.subject_id,
+                'sample_type': cs.get_sample_source_display(),
+                'collection_date': cs.collection_date,
+                'aliquot_date': aliquot_date,
+                'extract_date': extract_date,
+                'library_date': library_date,
+            })
+
+        # Pass the processed data and the date back to the template context
+        context = self.get_context_data(form=form, report_data=report_data, report_date=report_date)
+        return self.render_to_response(context)

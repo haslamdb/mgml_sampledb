@@ -47,12 +47,65 @@
     .mobile-friendly {
         margin-bottom: 1rem;
     }
+    
+    /* Override checkbox box styling */
+    .override-box {
+        border: 1px solid #dee2e6;
+        border-radius: 5px;
+        padding: 1rem;
+        background-color: #f8f9fa;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    
+    .override-text-container {
+        flex: 1;
+        padding-right: 1rem;
+    }
+    
+    .override-title {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 0.25rem;
+    }
+    
+    .override-help {
+        font-size: 0.875rem;
+        color: #6c757d;
+        line-height: 1.4;
+    }
+    
+    .override-checkbox-container {
+        flex: 0 0 auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding-left: 1rem;
+    }
+    
+    .override-checkbox-container input[type="checkbox"] {
+        width: 24px;
+        height: 24px;
+        cursor: pointer;
+        margin: 0;
+    }
+    
+    /* Style for required field asterisks */
+    .font-weight-bold {
+        color: #333;
+    }
+    
+    label .text-danger {
+        color: #dc3545;
+        font-weight: bold;
+    }
 </style>
 <div class="container mt-3">
     <div class="row justify-content-center">
         <div class="col-md-8">
             <div class="card shadow">
-                <div class="card-header bg-primary text-white py-2">
+                <div class="card-header text-white py-2" style="background-color: #5b9aa9;">
                     <h4 class="mb-0">
                         <i class="fas fa-vial"></i> {{ title }}
                     </h4>
@@ -159,14 +212,14 @@
                             <!-- Override Checkbox -->
                             <div class="col-12 mb-2">
                                 <div class="form-group">
-                                    <div class="form-check">
-                                        {{ form.override_barcode_check }}
-                                        <label class="form-check-label" for="{{ form.override_barcode_check.id_for_label }}">
-                                            {{ form.override_barcode_check.label }}
-                                        </label>
-                                        {% if form.override_barcode_check.help_text %}
-                                            <small class="form-text text-muted d-block">{{ form.override_barcode_check.help_text }}</small>
-                                        {% endif %}
+                                    <div class="override-box d-flex align-items-start">
+                                        <div class="override-text-container">
+                                            <div class="override-title">Override barcode validation</div>
+                                            <div class="override-help">Check this if using generic pre-printed barcodes not specific to this subject</div>
+                                        </div>
+                                        <div class="override-checkbox-container">
+                                            {{ form.override_barcode_check }}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
