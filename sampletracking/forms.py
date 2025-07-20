@@ -162,12 +162,11 @@ class AliquotForm(SampleForm):
     
     class Meta(SampleForm.Meta):
         model = Aliquot
-        fields = SampleForm.Meta.fields + ['parent_barcode', 'volume', 'concentration']
+        fields = SampleForm.Meta.fields + ['parent_barcode', 'volume']
         widgets = {
             **SampleForm.Meta.widgets,
             'date_created': DateInput(attrs={'type': 'date', 'class': 'form-control'}),
             'volume': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
-            'concentration': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
         }
 
     def __init__(self, *args, **kwargs):
@@ -200,6 +199,7 @@ class ExtractForm(SampleForm):
         widgets = {
             **SampleForm.Meta.widgets,
             'date_created': DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'extract_type': forms.Select(attrs={'class': 'form-select'}),
             'protocol_used': forms.TextInput(attrs={'class': 'form-control'}),
             'quality_score': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
             'extraction_method': forms.TextInput(attrs={'class': 'form-control'}),
@@ -207,6 +207,11 @@ class ExtractForm(SampleForm):
             'extraction_solvent': forms.TextInput(attrs={'class': 'form-control'}),
             'solvent_volume': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
             'extract_volume': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+            'freezer_ID': forms.TextInput(attrs={'class': 'form-control'}),
+            'rack_ID': forms.TextInput(attrs={'class': 'form-control'}),
+            'container_type': forms.Select(attrs={'class': 'form-select'}),
+            'box_ID': forms.TextInput(attrs={'class': 'form-control'}),
+            'well_ID': forms.TextInput(attrs={'class': 'form-control'}),
         }
         
     def __init__(self, *args, **kwargs):
@@ -234,19 +239,25 @@ class SequenceLibraryForm(SampleForm):
         fields = SampleForm.Meta.fields + [
             'parent', 'library_type', 'nindex', 'sindex', 
             'qubit_conc', 'diluted_qubit_conc', 'clean_library_conc', 
-            'date_sequenced', 'sequencing_platform', 'sequencing_run_id',
-            'plate', 'well'
+            'date_sequenced', 'sequencing_platform', 'sequencing_run_id'
         ]
         widgets = {
             **SampleForm.Meta.widgets,
             'date_created': DateInput(attrs={'type': 'date', 'class': 'form-control'}),
             'date_sequenced': DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'library_type': forms.Select(attrs={'class': 'form-select'}),
+            'nindex': forms.TextInput(attrs={'class': 'form-control'}),
+            'sindex': forms.TextInput(attrs={'class': 'form-control'}),
             'qubit_conc': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
             'diluted_qubit_conc': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
             'clean_library_conc': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
             'sequencing_platform': forms.TextInput(attrs={'class': 'form-control'}),
             'sequencing_run_id': forms.TextInput(attrs={'class': 'form-control'}),
-            'well': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g., A1, H12'}),
+            'freezer_ID': forms.TextInput(attrs={'class': 'form-control'}),
+            'rack_ID': forms.TextInput(attrs={'class': 'form-control'}),
+            'container_type': forms.Select(attrs={'class': 'form-select'}),
+            'box_ID': forms.TextInput(attrs={'class': 'form-control'}),
+            'well_ID': forms.TextInput(attrs={'class': 'form-control'}),
         }
         
     def __init__(self, *args, **kwargs):
@@ -255,16 +266,11 @@ class SequenceLibraryForm(SampleForm):
         self.fields['parent'].widget.attrs.update({'class': 'form-select'})
         self.fields['parent'].label_from_instance = lambda obj: f"{obj.barcode} ({obj.extract_type})"
         
-        # Configure plate field
-        self.fields['plate'] = forms.ModelChoiceField(
-            queryset=Plate.objects.all(),
-            required=False,
-            widget=forms.Select(attrs={'class': 'form-select'}),
-            empty_label="Select a plate (optional)",
-            label="Plate",
-            help_text="Select the plate this library is in"
-        )
-        self.fields['plate'].label_from_instance = lambda obj: f"{obj.barcode} ({obj.plate_type})"
+        # Update field labels
+        self.fields['nindex'].label = "N-index"
+        self.fields['sindex'].label = "S-index"
+        self.fields['qubit_conc'].label = "Input DNA conc"
+        self.fields['diluted_qubit_conc'].label = "Diluted input conc"
     
     def clean_date_sequenced(self):
         """
@@ -275,32 +281,6 @@ class SequenceLibraryForm(SampleForm):
             raise ValidationError("Sequencing date cannot be in the future.")
         return date_sequenced
     
-    def clean_well(self):
-        """
-        Validate well format (e.g., A1, H12)
-        """
-        well = self.cleaned_data.get('well')
-        if well:
-            well = well.upper().strip()
-            # Validate well format: letter(s) followed by number(s)
-            import re
-            if not re.match(r'^[A-Z]{1,2}[0-9]{1,3}$', well):
-                raise ValidationError("Well must be in format like A1, H12, AA1, etc.")
-        return well
-    
-    def clean(self):
-        """
-        Cross field validation for plate and well
-        """
-        cleaned_data = super().clean()
-        plate = cleaned_data.get('plate')
-        well = cleaned_data.get('well')
-        
-        # If one is specified, both should be specified
-        if (plate and not well) or (well and not plate):
-            raise ValidationError("Both plate and well must be specified together.")
-        
-        return cleaned_data
 
 
 class ReportForm(forms.Form):

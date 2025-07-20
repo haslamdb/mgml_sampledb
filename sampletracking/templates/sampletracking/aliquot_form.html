@@ -7,29 +7,13 @@
             <h4 class="mb-0">Submit an Aliquot</h4>
         </div>
         <div class="card-body py-2">
-            <p class="lead text-muted mb-2">Create an aliquot derived from a crude sample.</p>
-            
             <form method="post" class="mt-2">
                 {% csrf_token %}
                 
                 <div class="row">
-                    <!-- Basic Information Column -->
+                    <!-- Sample Information Column -->
                     <div class="col-md-6">
-                        <h5 class="mb-3">Basic Information</h5>
-                        
-                        <div class="form-group mb-3" id="barcode-group">
-                            <label for="{{ form.barcode.id_for_label }}" class="font-weight-bold">
-                                <span id="barcode-label">{{ form.barcode.label }}</span>
-                            </label>
-                            {{ form.barcode }}
-                            <small class="form-text text-muted" id="barcode-help">
-                                <span class="box-storage-help">Scan the tube barcode</span>
-                                <span class="plate-storage-help" style="display:none;">Will be auto-generated from plate and well</span>
-                            </small>
-                            {% if form.barcode.errors %}
-                                <div class="text-danger small">{{ form.barcode.errors }}</div>
-                            {% endif %}
-                        </div>
+                        <h5 class="mb-3">Sample Information</h5>
                         
                         <div class="form-group mb-3">
                             <label for="{{ form.parent_barcode.id_for_label }}" class="font-weight-bold">{{ form.parent_barcode.label }}</label>
@@ -149,6 +133,20 @@
                                 <div class="text-danger small">{{ form.well_ID.errors }}</div>
                             {% endif %}
                         </div>
+                        
+                        <div class="form-group mb-3" id="barcode-group">
+                            <label for="{{ form.barcode.id_for_label }}" class="font-weight-bold">
+                                <span id="barcode-label">New Sample Barcode</span>
+                            </label>
+                            {{ form.barcode }}
+                            <small class="form-text text-muted" id="barcode-help">
+                                <span class="box-storage-help">Scan the tube barcode</span>
+                                <span class="plate-storage-help" style="display:none;">Will be auto-generated from plate and well</span>
+                            </small>
+                            {% if form.barcode.errors %}
+                                <div class="text-danger small">{{ form.barcode.errors }}</div>
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
                 
@@ -185,4 +183,55 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const containerTypeField = document.getElementById('id_container_type');
+    const barcodeField = document.getElementById('id_barcode');
+    const barcodeLabel = document.getElementById('barcode-label');
+    const boxHelp = document.querySelector('.box-storage-help');
+    const plateHelp = document.querySelector('.plate-storage-help');
+    const containerIdField = document.getElementById('id_box_ID');
+    const wellField = document.getElementById('id_well_ID');
+    
+    function updateBarcodeField() {
+        if (!containerTypeField || !barcodeField) return;
+        
+        if (containerTypeField.value === 'plate') {
+            // Plate storage - barcode will be auto-generated
+            if (barcodeLabel) barcodeLabel.textContent = 'New Sample Barcode (Auto-generated)';
+            barcodeField.readOnly = true;
+            barcodeField.style.backgroundColor = '#e9ecef';
+            if (boxHelp) boxHelp.style.display = 'none';
+            if (plateHelp) plateHelp.style.display = 'block';
+            
+            // Generate barcode if plate and well are filled
+            generatePlateBarcode();
+        } else {
+            // Box storage - user scans tube barcode
+            if (barcodeLabel) barcodeLabel.textContent = 'New Sample Barcode';
+            barcodeField.readOnly = false;
+            barcodeField.style.backgroundColor = '';
+            if (boxHelp) boxHelp.style.display = 'block';
+            if (plateHelp) plateHelp.style.display = 'none';
+        }
+    }
+    
+    function generatePlateBarcode() {
+        if (containerTypeField && containerIdField && wellField) {
+            if (containerTypeField.value === 'plate' && containerIdField.value && wellField.value) {
+                barcodeField.value = `PLATE:${containerIdField.value}:${wellField.value}`;
+            }
+        }
+    }
+    
+    // Listen for changes
+    if (containerTypeField) containerTypeField.addEventListener('change', updateBarcodeField);
+    if (containerIdField) containerIdField.addEventListener('input', generatePlateBarcode);
+    if (wellField) wellField.addEventListener('input', generatePlateBarcode);
+    
+    // Initialize on page load
+    updateBarcodeField();
+});
+</script>
 {% endblock %}

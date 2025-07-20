@@ -7,29 +7,13 @@
             <h4 class="mb-0">Submit an Extract</h4>
         </div>
         <div class="card-body py-2">
-            <p class="lead text-muted mb-2">Create an extract from an aliquot (DNA, RNA, cfDNA, Metabolomics, Antimicrobials, etc.).</p>
-            
             <form method="post" class="mt-2">
                 {% csrf_token %}
                 
                 <div class="row">
-                    <!-- Basic Information Column -->
+                    <!-- Sample Information Column -->
                     <div class="col-md-6">
-                        <h5 class="mb-3">Basic Information</h5>
-                        
-                        <div class="form-group mb-3" id="barcode-group">
-                            <label for="{{ form.barcode.id_for_label }}" class="font-weight-bold">
-                                <span id="barcode-label">{{ form.barcode.label }}</span>
-                            </label>
-                            {{ form.barcode }}
-                            <small class="form-text text-muted" id="barcode-help">
-                                <span class="box-storage-help">Scan the tube barcode</span>
-                                <span class="plate-storage-help" style="display:none;">Will be auto-generated from plate and well</span>
-                            </small>
-                            {% if form.barcode.errors %}
-                                <div class="text-danger small">{{ form.barcode.errors }}</div>
-                            {% endif %}
-                        </div>
+                        <h5 class="mb-3">Sample Information</h5>
                         
                         <div class="form-group mb-3">
                             <label for="{{ form.parent.id_for_label }}" class="font-weight-bold">{{ form.parent.label }}</label>
@@ -134,6 +118,20 @@
                                 <div class="text-danger small">{{ form.well_ID.errors }}</div>
                             {% endif %}
                         </div>
+                        
+                        <div class="form-group mb-3" id="barcode-group">
+                            <label for="{{ form.barcode.id_for_label }}" class="font-weight-bold">
+                                <span id="barcode-label">New Sample Barcode</span>
+                            </label>
+                            {{ form.barcode }}
+                            <small class="form-text text-muted" id="barcode-help">
+                                <span class="box-storage-help">Scan the tube barcode</span>
+                                <span class="plate-storage-help" style="display:none;">Will be auto-generated from plate and well</span>
+                            </small>
+                            {% if form.barcode.errors %}
+                                <div class="text-danger small">{{ form.barcode.errors }}</div>
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
                 
@@ -236,7 +234,7 @@
                     
                     <!-- Additional fields that might be present -->
                     {% for field in form %}
-                        {% if field.name not in ['barcode', 'parent', 'extract_type', 'date_created', 'status', 'extraction_method', 'protocol_used', 'quality_score', 'sample_weight', 'extraction_solvent', 'solvent_volume', 'extract_volume', 'freezer_ID', 'rack_ID', 'container_type', 'box_ID', 'well_ID', 'notes'] %}
+                        {% if field.name != 'barcode' and field.name != 'parent' and field.name != 'extract_type' and field.name != 'date_created' and field.name != 'status' and field.name != 'extraction_method' and field.name != 'protocol_used' and field.name != 'quality_score' and field.name != 'sample_weight' and field.name != 'extraction_solvent' and field.name != 'solvent_volume' and field.name != 'extract_volume' and field.name != 'freezer_ID' and field.name != 'rack_ID' and field.name != 'container_type' and field.name != 'box_ID' and field.name != 'well_ID' and field.name != 'notes' %}
                             <div class="col-md-4 mb-3">
                                 <div class="form-group">
                                     <label for="{{ field.id_for_label }}" class="font-weight-bold">{{ field.label }}</label>
@@ -296,7 +294,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         if (containerTypeField.value === 'plate') {
             // Plate storage - barcode will be auto-generated
-            if (barcodeLabel) barcodeLabel.textContent = 'Barcode (Auto-generated)';
+            if (barcodeLabel) barcodeLabel.textContent = 'New Sample Barcode (Auto-generated)';
             barcodeField.readOnly = true;
             barcodeField.style.backgroundColor = '#e9ecef';
             if (boxHelp) boxHelp.style.display = 'none';
@@ -306,7 +304,7 @@ document.addEventListener('DOMContentLoaded', function() {
             generatePlateBarcode();
         } else {
             // Box storage - user scans tube barcode
-            if (barcodeLabel) barcodeLabel.textContent = 'Barcode';
+            if (barcodeLabel) barcodeLabel.textContent = 'New Sample Barcode';
             barcodeField.readOnly = false;
             barcodeField.style.backgroundColor = '';
             if (boxHelp) boxHelp.style.display = 'block';
@@ -351,10 +349,12 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Initial toggle on page load
-    toggleFields();
-    
-    // Toggle on change
-    extractTypeField.addEventListener('change', toggleFields);
+    if (extractTypeField) {
+        toggleFields();
+        
+        // Toggle on change
+        extractTypeField.addEventListener('change', toggleFields);
+    }
 });
 </script>
 {% endblock %}
