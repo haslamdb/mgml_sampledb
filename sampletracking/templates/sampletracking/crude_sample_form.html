@@ -12,11 +12,12 @@
             <form method="post" class="mt-2">
                 {% csrf_token %}
                 
-                <!-- Basic Information -->
-                <h5 class="mb-3">Basic Information</h5>
                 <div class="row">
-                    <div class="col-md-4 mb-2">
-                        <div class="form-group" id="barcode-group">
+                    <!-- Basic Information Column -->
+                    <div class="col-md-6">
+                        <h5 class="mb-3">Basic Information</h5>
+                        
+                        <div class="form-group mb-3" id="barcode-group">
                             <label for="{{ form.barcode.id_for_label }}" class="font-weight-bold">
                                 <span id="barcode-label">{{ form.barcode.label }}</span>
                             </label>
@@ -29,9 +30,8 @@
                                 <div class="text-danger small">{{ form.barcode.errors }}</div>
                             {% endif %}
                         </div>
-                    </div>
-                    <div class="col-md-4 mb-2">
-                        <div class="form-group">
+                        
+                        <div class="form-group mb-3">
                             <label for="{{ form.subject_id.id_for_label }}" class="font-weight-bold">{{ form.subject_id.label }}</label>
                             {{ form.subject_id }}
                             {% if form.subject_id.help_text %}
@@ -41,36 +41,8 @@
                                 <div class="text-danger small">{{ form.subject_id.errors }}</div>
                             {% endif %}
                         </div>
-                    </div>
-                    <div class="col-md-4 mb-2">
-                        <div class="form-group">
-                            <label for="{{ form.date_created.id_for_label }}" class="font-weight-bold">{{ form.date_created.label }}</label>
-                            {{ form.date_created }}
-                            {% if form.date_created.help_text %}
-                                <small class="form-text text-muted">{{ form.date_created.help_text }}</small>
-                            {% endif %}
-                            {% if form.date_created.errors %}
-                                <div class="text-danger small">{{ form.date_created.errors }}</div>
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="row">
-                    <div class="col-md-4 mb-2">
-                        <div class="form-group">
-                            <label for="{{ form.collection_date.id_for_label }}" class="font-weight-bold">{{ form.collection_date.label }}</label>
-                            {{ form.collection_date }}
-                            {% if form.collection_date.help_text %}
-                                <small class="form-text text-muted">{{ form.collection_date.help_text }}</small>
-                            {% endif %}
-                            {% if form.collection_date.errors %}
-                                <div class="text-danger small">{{ form.collection_date.errors }}</div>
-                            {% endif %}
-                        </div>
-                    </div>
-                    <div class="col-md-4 mb-2">
-                        <div class="form-group">
+                        
+                        <div class="form-group mb-3">
                             <label for="{{ form.sample_source.id_for_label }}" class="font-weight-bold">{{ form.sample_source.label }}</label>
                             {{ form.sample_source }}
                             {% if form.sample_source.help_text %}
@@ -80,9 +52,30 @@
                                 <div class="text-danger small">{{ form.sample_source.errors }}</div>
                             {% endif %}
                         </div>
-                    </div>
-                    <div class="col-md-4 mb-2">
-                        <div class="form-group">
+                        
+                        <div class="form-group mb-3">
+                            <label for="{{ form.collection_date.id_for_label }}" class="font-weight-bold">{{ form.collection_date.label }}</label>
+                            {{ form.collection_date }}
+                            {% if form.collection_date.help_text %}
+                                <small class="form-text text-muted">{{ form.collection_date.help_text }}</small>
+                            {% endif %}
+                            {% if form.collection_date.errors %}
+                                <div class="text-danger small">{{ form.collection_date.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <label for="{{ form.date_created.id_for_label }}" class="font-weight-bold">{{ form.date_created.label }}</label>
+                            {{ form.date_created }}
+                            {% if form.date_created.help_text %}
+                                <small class="form-text text-muted">{{ form.date_created.help_text }}</small>
+                            {% endif %}
+                            {% if form.date_created.errors %}
+                                <div class="text-danger small">{{ form.date_created.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="form-group mb-3">
                             <label for="{{ form.status.id_for_label }}" class="font-weight-bold">{{ form.status.label }}</label>
                             {{ form.status }}
                             {% if form.status.help_text %}
@@ -93,13 +86,12 @@
                             {% endif %}
                         </div>
                     </div>
-                </div>
-                
-                <!-- Storage Information -->
-                <h5 class="mb-3 mt-4">Storage Information</h5>
-                <div class="row">
-                    <div class="col-md-2 mb-2">
-                        <div class="form-group">
+                    
+                    <!-- Storage Information Column -->
+                    <div class="col-md-6">
+                        <h5 class="mb-3">Storage Information</h5>
+                        
+                        <div class="form-group mb-3">
                             <label for="{{ form.freezer_ID.id_for_label }}" class="font-weight-bold">Freezer</label>
                             {{ form.freezer_ID }}
                             {% if form.freezer_ID.help_text %}
@@ -109,9 +101,8 @@
                                 <div class="text-danger small">{{ form.freezer_ID.errors }}</div>
                             {% endif %}
                         </div>
-                    </div>
-                    <div class="col-md-2 mb-2">
-                        <div class="form-group">
+                        
+                        <div class="form-group mb-3">
                             <label for="{{ form.rack_ID.id_for_label }}" class="font-weight-bold">Rack</label>
                             {{ form.rack_ID }}
                             {% if form.rack_ID.help_text %}
@@ -121,9 +112,8 @@
                                 <div class="text-danger small">{{ form.rack_ID.errors }}</div>
                             {% endif %}
                         </div>
-                    </div>
-                    <div class="col-md-3 mb-2">
-                        <div class="form-group">
+                        
+                        <div class="form-group mb-3">
                             <label for="{{ form.container_type.id_for_label }}" class="font-weight-bold">Container Type</label>
                             {{ form.container_type }}
                             {% if form.container_type.help_text %}
@@ -133,9 +123,8 @@
                                 <div class="text-danger small">{{ form.container_type.errors }}</div>
                             {% endif %}
                         </div>
-                    </div>
-                    <div class="col-md-3 mb-2">
-                        <div class="form-group">
+                        
+                        <div class="form-group mb-3">
                             <label for="{{ form.box_ID.id_for_label }}" class="font-weight-bold">Container ID</label>
                             {{ form.box_ID }}
                             {% if form.box_ID.help_text %}
@@ -145,9 +134,8 @@
                                 <div class="text-danger small">{{ form.box_ID.errors }}</div>
                             {% endif %}
                         </div>
-                    </div>
-                    <div class="col-md-2 mb-2">
-                        <div class="form-group">
+                        
+                        <div class="form-group mb-3">
                             <label for="{{ form.well_ID.id_for_label }}" class="font-weight-bold">Well</label>
                             {{ form.well_ID }}
                             {% if form.well_ID.help_text %}
@@ -161,7 +149,8 @@
                 </div>
                 
                 <!-- Additional Information -->
-                <h5 class="mb-3 mt-4">Additional Information</h5>
+                <hr class="my-4">
+                <h5 class="mb-3">Additional Information</h5>
                 <div class="row">
                     <div class="col-md-6 mb-2">
                         <div class="form-group">

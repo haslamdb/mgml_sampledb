@@ -149,6 +149,21 @@
           font-size: 0.9rem;
       }
       
+      /* Narrow input fields for non-text areas */
+      .form-control:not(textarea) {
+          max-width: 250px;
+      }
+      
+      /* Date inputs slightly wider */
+      input[type="date"].form-control {
+          max-width: 180px;
+      }
+      
+      /* Select dropdowns */
+      select.form-control {
+          max-width: 250px;
+      }
+      
       /* More compact form styling */
       .form-group {
           margin-bottom: 0.75rem;

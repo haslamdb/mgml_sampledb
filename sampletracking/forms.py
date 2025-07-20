@@ -22,7 +22,7 @@ class SampleForm(forms.ModelForm):
         widgets = {
             'date_created': DateInput(attrs={'class': 'form-control'}),
             'status': forms.Select(attrs={'class': 'form-control'}),
-            'notes': forms.Textarea(attrs={'rows': 3, 'class': 'form-control'}),
+            'notes': forms.Textarea(attrs={'rows': 2, 'class': 'form-control'}),
         }
     
     def clean_barcode(self):
@@ -121,7 +121,7 @@ class CrudeSampleForm(SampleForm):
             **SampleForm.Meta.widgets,
             'date_created': DateInput(attrs={'type': 'date', 'class': 'form-control'}),
             'collection_date': DateInput(attrs={'type': 'date', 'class': 'form-control'}),
-            'source_details': forms.Textarea(attrs={'rows': 3, 'class': 'form-control'}),
+            'source_details': forms.Textarea(attrs={'rows': 2, 'class': 'form-control'}),
         }
     
     def clean_collection_date(self):
