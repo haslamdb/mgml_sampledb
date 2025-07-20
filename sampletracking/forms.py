@@ -155,7 +155,7 @@ class AliquotForm(SampleForm):
         queryset=CrudeSample.objects.all(),
         to_field_name="barcode",
         required=True,
-        widget=forms.Select(attrs={'class': 'form-select selectpicker', 'data-live-search': 'true'}),
+        widget=forms.Select(attrs={'class': 'form-control'}),
         label="Parent Barcode",
         help_text="Select the crude sample this aliquot was derived from"
     )
@@ -185,7 +185,7 @@ class ExtractForm(SampleForm):
         queryset=Aliquot.objects.all(),
         to_field_name="barcode",
         required=True,
-        widget=forms.Select(attrs={'class': 'form-select selectpicker', 'data-live-search': 'true'}),
+        widget=forms.Select(attrs={'class': 'form-control'}),
         label="Parent Barcode",
         help_text="Select the aliquot this extract was derived from"
     )
@@ -224,7 +224,7 @@ class SequenceLibraryForm(SampleForm):
         queryset=Extract.objects.all(),
         to_field_name="barcode",
         required=True,
-        widget=forms.Select(attrs={'class': 'form-select selectpicker', 'data-live-search': 'true'}),
+        widget=forms.Select(attrs={'class': 'form-control'}),
         label="Parent Barcode",
         help_text="Select the extract this library was derived from"
     )

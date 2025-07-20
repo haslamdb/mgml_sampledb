@@ -192,36 +192,40 @@ document.addEventListener('DOMContentLoaded', function() {
     const wellField = document.getElementById('id_well_ID');
     
     function updateBarcodeField() {
+        if (!containerTypeField || !barcodeField) return;
+        
         if (containerTypeField.value === 'plate') {
             // Plate storage - barcode will be auto-generated
-            barcodeLabel.textContent = 'Barcode (Auto-generated)';
+            if (barcodeLabel) barcodeLabel.textContent = 'Barcode (Auto-generated)';
             barcodeField.readOnly = true;
             barcodeField.style.backgroundColor = '#e9ecef';
-            boxHelp.style.display = 'none';
-            plateHelp.style.display = 'block';
+            if (boxHelp) boxHelp.style.display = 'none';
+            if (plateHelp) plateHelp.style.display = 'block';
             
             // Generate barcode if plate and well are filled
             generatePlateBarcode();
         } else {
             // Box storage - user scans tube barcode
-            barcodeLabel.textContent = 'Barcode';
+            if (barcodeLabel) barcodeLabel.textContent = 'Barcode';
             barcodeField.readOnly = false;
             barcodeField.style.backgroundColor = '';
-            boxHelp.style.display = 'block';
-            plateHelp.style.display = 'none';
+            if (boxHelp) boxHelp.style.display = 'block';
+            if (plateHelp) plateHelp.style.display = 'none';
         }
     }
     
     function generatePlateBarcode() {
-        if (containerTypeField.value === 'plate' && containerIdField.value && wellField.value) {
-            barcodeField.value = `PLATE:${containerIdField.value}:${wellField.value}`;
+        if (containerTypeField && containerIdField && wellField) {
+            if (containerTypeField.value === 'plate' && containerIdField.value && wellField.value) {
+                barcodeField.value = `PLATE:${containerIdField.value}:${wellField.value}`;
+            }
         }
     }
     
     // Listen for changes
-    containerTypeField.addEventListener('change', updateBarcodeField);
-    containerIdField.addEventListener('input', generatePlateBarcode);
-    wellField.addEventListener('input', generatePlateBarcode);
+    if (containerTypeField) containerTypeField.addEventListener('change', updateBarcodeField);
+    if (containerIdField) containerIdField.addEventListener('input', generatePlateBarcode);
+    if (wellField) wellField.addEventListener('input', generatePlateBarcode);
     
     // Initialize on page load
     updateBarcodeField();

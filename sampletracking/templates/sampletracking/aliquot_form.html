@@ -32,13 +32,13 @@
                         </div>
                         
                         <div class="form-group mb-3">
-                            <label for="{{ form.parent.id_for_label }}" class="font-weight-bold">{{ form.parent.label }}</label>
-                            {{ form.parent }}
-                            {% if form.parent.help_text %}
-                                <small class="form-text text-muted">{{ form.parent.help_text }}</small>
+                            <label for="{{ form.parent_barcode.id_for_label }}" class="font-weight-bold">{{ form.parent_barcode.label }}</label>
+                            {{ form.parent_barcode }}
+                            {% if form.parent_barcode.help_text %}
+                                <small class="form-text text-muted">{{ form.parent_barcode.help_text }}</small>
                             {% endif %}
-                            {% if form.parent.errors %}
-                                <div class="text-danger small">{{ form.parent.errors }}</div>
+                            {% if form.parent_barcode.errors %}
+                                <div class="text-danger small">{{ form.parent_barcode.errors }}</div>
                             {% endif %}
                         </div>
                         
@@ -64,20 +64,31 @@
                             {% endif %}
                         </div>
                         
-                        {% for field in form %}
-                            {% if field.name not in ['barcode', 'parent', 'date_created', 'status', 'freezer_ID', 'rack_ID', 'container_type', 'box_ID', 'well_ID', 'notes'] %}
-                                <div class="form-group mb-3">
-                                    <label for="{{ field.id_for_label }}" class="font-weight-bold">{{ field.label }}</label>
-                                    {{ field }}
-                                    {% if field.help_text %}
-                                        <small class="form-text text-muted">{{ field.help_text }}</small>
-                                    {% endif %}
-                                    {% if field.errors %}
-                                        <div class="text-danger small">{{ field.errors }}</div>
-                                    {% endif %}
-                                </div>
+                        {% if form.volume %}
+                        <div class="form-group mb-3">
+                            <label for="{{ form.volume.id_for_label }}" class="font-weight-bold">{{ form.volume.label }}</label>
+                            {{ form.volume }}
+                            {% if form.volume.help_text %}
+                                <small class="form-text text-muted">{{ form.volume.help_text }}</small>
                             {% endif %}
-                        {% endfor %}
+                            {% if form.volume.errors %}
+                                <div class="text-danger small">{{ form.volume.errors }}</div>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                        
+                        {% if form.concentration %}
+                        <div class="form-group mb-3">
+                            <label for="{{ form.concentration.id_for_label }}" class="font-weight-bold">{{ form.concentration.label }}</label>
+                            {{ form.concentration }}
+                            {% if form.concentration.help_text %}
+                                <small class="form-text text-muted">{{ form.concentration.help_text }}</small>
+                            {% endif %}
+                            {% if form.concentration.errors %}
+                                <div class="text-danger small">{{ form.concentration.errors }}</div>
+                            {% endif %}
+                        </div>
+                        {% endif %}
                     </div>
                     
                     <!-- Storage Information Column -->
@@ -174,51 +185,4 @@
         </div>
     </div>
 </div>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const containerTypeField = document.getElementById('id_container_type');
-    const barcodeField = document.getElementById('id_barcode');
-    const barcodeLabel = document.getElementById('barcode-label');
-    const boxHelp = document.querySelector('.box-storage-help');
-    const plateHelp = document.querySelector('.plate-storage-help');
-    const containerIdField = document.getElementById('id_box_ID');
-    const wellField = document.getElementById('id_well_ID');
-    
-    function updateBarcodeField() {
-        if (containerTypeField.value === 'plate') {
-            // Plate storage - barcode will be auto-generated
-            barcodeLabel.textContent = 'Barcode (Auto-generated)';
-            barcodeField.readOnly = true;
-            barcodeField.style.backgroundColor = '#e9ecef';
-            boxHelp.style.display = 'none';
-            plateHelp.style.display = 'block';
-            
-            // Generate barcode if plate and well are filled
-            generatePlateBarcode();
-        } else {
-            // Box storage - user scans tube barcode
-            barcodeLabel.textContent = 'Barcode';
-            barcodeField.readOnly = false;
-            barcodeField.style.backgroundColor = '';
-            boxHelp.style.display = 'block';
-            plateHelp.style.display = 'none';
-        }
-    }
-    
-    function generatePlateBarcode() {
-        if (containerTypeField.value === 'plate' && containerIdField.value && wellField.value) {
-            barcodeField.value = `PLATE:${containerIdField.value}:${wellField.value}`;
-        }
-    }
-    
-    // Listen for changes
-    containerTypeField.addEventListener('change', updateBarcodeField);
-    containerIdField.addEventListener('input', generatePlateBarcode);
-    wellField.addEventListener('input', generatePlateBarcode);
-    
-    // Initialize on page load
-    updateBarcodeField();
-});
-</script>
 {% endblock %}
