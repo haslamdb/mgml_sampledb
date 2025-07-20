@@ -43,7 +43,14 @@ class Sample(TimeStampedModel):
         max_length=255, 
         unique=True, 
         validators=[barcode_validator],
-        help_text="Unique identifier for this sample"
+        help_text="Unique identifier for this sample (auto-generated for plate storage)"
+    )
+    tube_barcode = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        validators=[barcode_validator],
+        help_text="Physical tube barcode (only for box storage)"
     )
     date_created = models.DateField(
         help_text="Date when the sample was created"
@@ -87,6 +94,18 @@ class Sample(TimeStampedModel):
         max_length=50, blank=True, null=True,  # Allow blank for initial registration
         help_text="Well position in the container (e.g., A1, B2, etc.)"
     )
+    
+    def save(self, *args, **kwargs):
+        # Auto-generate barcode for plate-based storage
+        if self.container_type == 'plate' and self.box_ID and self.well_ID:
+            if not self.barcode or self.barcode.startswith('PLATE:'):
+                self.barcode = f"PLATE:{self.box_ID}:{self.well_ID}"
+        
+        # For box storage, if tube_barcode is provided, use it as the main barcode
+        elif self.container_type == 'box' and self.tube_barcode and not self.barcode:
+            self.barcode = self.tube_barcode
+            
+        super().save(*args, **kwargs)
     
     def __str__(self):
         return f"{self.__class__.__name__}: {self.barcode}"

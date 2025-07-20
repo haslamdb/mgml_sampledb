@@ -16,12 +16,15 @@
                 <h5 class="mb-3">Basic Information</h5>
                 <div class="row">
                     <div class="col-md-4 mb-2">
-                        <div class="form-group">
-                            <label for="{{ form.barcode.id_for_label }}" class="font-weight-bold">{{ form.barcode.label }}</label>
+                        <div class="form-group" id="barcode-group">
+                            <label for="{{ form.barcode.id_for_label }}" class="font-weight-bold">
+                                <span id="barcode-label">{{ form.barcode.label }}</span>
+                            </label>
                             {{ form.barcode }}
-                            {% if form.barcode.help_text %}
-                                <small class="form-text text-muted">{{ form.barcode.help_text }}</small>
-                            {% endif %}
+                            <small class="form-text text-muted" id="barcode-help">
+                                <span class="box-storage-help">Scan the tube barcode</span>
+                                <span class="plate-storage-help" style="display:none;">Will be auto-generated from plate and well</span>
+                            </small>
                             {% if form.barcode.errors %}
                                 <div class="text-danger small">{{ form.barcode.errors }}</div>
                             {% endif %}
@@ -199,4 +202,51 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const containerTypeField = document.getElementById('id_container_type');
+    const barcodeField = document.getElementById('id_barcode');
+    const barcodeLabel = document.getElementById('barcode-label');
+    const boxHelp = document.querySelector('.box-storage-help');
+    const plateHelp = document.querySelector('.plate-storage-help');
+    const containerIdField = document.getElementById('id_box_ID');
+    const wellField = document.getElementById('id_well_ID');
+    
+    function updateBarcodeField() {
+        if (containerTypeField.value === 'plate') {
+            // Plate storage - barcode will be auto-generated
+            barcodeLabel.textContent = 'Barcode (Auto-generated)';
+            barcodeField.readOnly = true;
+            barcodeField.style.backgroundColor = '#e9ecef';
+            boxHelp.style.display = 'none';
+            plateHelp.style.display = 'block';
+            
+            // Generate barcode if plate and well are filled
+            generatePlateBarcode();
+        } else {
+            // Box storage - user scans tube barcode
+            barcodeLabel.textContent = 'Barcode';
+            barcodeField.readOnly = false;
+            barcodeField.style.backgroundColor = '';
+            boxHelp.style.display = 'block';
+            plateHelp.style.display = 'none';
+        }
+    }
+    
+    function generatePlateBarcode() {
+        if (containerTypeField.value === 'plate' && containerIdField.value && wellField.value) {
+            barcodeField.value = `PLATE:${containerIdField.value}:${wellField.value}`;
+        }
+    }
+    
+    // Listen for changes
+    containerTypeField.addEventListener('change', updateBarcodeField);
+    containerIdField.addEventListener('input', generatePlateBarcode);
+    wellField.addEventListener('input', generatePlateBarcode);
+    
+    // Initialize on page load
+    updateBarcodeField();
+});
+</script>
 {% endblock %}

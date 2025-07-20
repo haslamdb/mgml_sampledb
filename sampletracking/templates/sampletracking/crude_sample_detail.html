@@ -15,8 +15,19 @@
                     <table class="table table-bordered">
                         <tr>
                             <th>Barcode:</th>
-                            <td>{{ sample.barcode }}</td>
+                            <td>
+                                {{ sample.barcode }}
+                                {% if sample.barcode|slice:":6" == "PLATE:" %}
+                                    <span class="badge badge-info">Auto-generated</span>
+                                {% endif %}
+                            </td>
                         </tr>
+                        {% if sample.tube_barcode %}
+                        <tr>
+                            <th>Tube Barcode:</th>
+                            <td>{{ sample.tube_barcode }}</td>
+                        </tr>
+                        {% endif %}
                         <tr>
                             <th>Subject ID:</th>
                             <td>{{ sample.subject_id }}</td>

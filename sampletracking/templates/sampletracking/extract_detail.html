@@ -15,8 +15,19 @@
                     <table class="table table-bordered">
                         <tr>
                             <th>Barcode:</th>
-                            <td>{{ extract.barcode }}</td>
+                            <td>
+                                {{ extract.barcode }}
+                                {% if extract.barcode|slice:":6" == "PLATE:" %}
+                                    <span class="badge badge-info">Auto-generated</span>
+                                {% endif %}
+                            </td>
                         </tr>
+                        {% if extract.tube_barcode %}
+                        <tr>
+                            <th>Tube Barcode:</th>
+                            <td>{{ extract.tube_barcode }}</td>
+                        </tr>
+                        {% endif %}
                         <tr>
                             <th>Parent Aliquot:</th>
                             <td>
