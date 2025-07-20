@@ -1,0 +1,112 @@
+{% extends "base_generic.html" %}
+
+{% block title %}Aliquot Details - {{ aliquot.barcode }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header bg-success text-white">
+            <h3>Aliquot Details</h3>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>Basic Information</h5>
+                    <table class="table table-bordered">
+                        <tr>
+                            <th>Barcode:</th>
+                            <td>{{ aliquot.barcode }}</td>
+                        </tr>
+                        <tr>
+                            <th>Parent Sample:</th>
+                            <td>
+                                <a href="{% url 'crude_sample_detail' aliquot.parent_barcode.pk %}">
+                                    {{ aliquot.parent_barcode.barcode }}
+                                </a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Date Created:</th>
+                            <td>{{ aliquot.date_created|date:"m/d/Y" }}</td>
+                        </tr>
+                        <tr>
+                            <th>Status:</th>
+                            <td>{{ aliquot.get_status_display }}</td>
+                        </tr>
+                        <tr>
+                            <th>Volume:</th>
+                            <td>{{ aliquot.volume|default:"Not specified" }} {% if aliquot.volume %}µL{% endif %}</td>
+                        </tr>
+                        <tr>
+                            <th>Concentration:</th>
+                            <td>{{ aliquot.concentration|default:"Not specified" }} {% if aliquot.concentration %}ng/µL{% endif %}</td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="col-md-6">
+                    <h5>Storage Information</h5>
+                    <table class="table table-bordered">
+                        <tr>
+                            <th>Freezer:</th>
+                            <td>{{ aliquot.freezer_ID|default:"Not specified" }}</td>
+                        </tr>
+                        <tr>
+                            <th>Rack:</th>
+                            <td>{{ aliquot.rack_ID|default:"Not specified" }}</td>
+                        </tr>
+                        <tr>
+                            <th>Container:</th>
+                            <td>
+                                {% if aliquot.container_type %}{{ aliquot.get_container_type_display }}{% else %}Box{% endif %}: 
+                                {{ aliquot.box_ID|default:"Not specified" }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Well:</th>
+                            <td>{{ aliquot.well_ID|default:"Not specified" }}</td>
+                        </tr>
+                    </table>
+                    
+                    {% if aliquot.notes %}
+                    <h5>Notes</h5>
+                    <p>{{ aliquot.notes }}</p>
+                    {% endif %}
+                </div>
+            </div>
+            
+            {% if extracts %}
+            <hr>
+            <h5>Derived Extracts</h5>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Barcode</th>
+                        <th>Extract Type</th>
+                        <th>Date Created</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for extract in extracts %}
+                    <tr>
+                        <td>{{ extract.barcode }}</td>
+                        <td>{{ extract.get_extract_type_display }}</td>
+                        <td>{{ extract.date_created|date:"m/d/Y" }}</td>
+                        <td>{{ extract.get_status_display }}</td>
+                        <td>
+                            <a href="{% url 'extract_detail' extract.pk %}" class="btn btn-sm btn-info">View</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% endif %}
+            
+            <div class="mt-4">
+                <a href="{% url 'aliquot_list' %}" class="btn btn-secondary">Back to List</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -110,24 +110,24 @@
                         <tr>
                             <td>{{ item.patient_id }}</td>
                             <td>{{ item.sample_type }}</td>
-                            <td>{{ item.collection_date|date:"Y-m-d" }}</td>
+                            <td>{{ item.collection_date|date:"m/d/Y" }}</td>
                             <td class="text-center">
                                 {% if item.aliquot_date %}
-                                    {{ item.aliquot_date|date:"Y-m-d" }}
+                                    {{ item.aliquot_date|date:"m/d/Y" }}
                                 {% else %}
                                     <span class="cross">&#10007;</span>
                                 {% endif %}
                             </td>
                             <td class="text-center">
                                 {% if item.extract_date %}
-                                    {{ item.extract_date|date:"Y-m-d" }}
+                                    {{ item.extract_date|date:"m/d/Y" }}
                                 {% else %}
                                     <span class="cross">&#10007;</span>
                                 {% endif %}
                             </td>
                             <td class="text-center">
                                 {% if item.library_date %}
-                                    {{ item.library_date|date:"Y-m-d" }}
+                                    {{ item.library_date|date:"m/d/Y" }}
                                 {% else %}
                                     <span class="cross">&#10007;</span>
                                 {% endif %}

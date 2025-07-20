@@ -483,3 +483,66 @@ class ReportView(LoginRequiredMixin, FormView):
         # Pass the processed data and the date back to the template context
         context = self.get_context_data(form=form, report_data=report_data, report_date=report_date)
         return self.render_to_response(context)
+
+
+class ComprehensiveReportView(LoginRequiredMixin, TemplateView):
+    """
+    View for generating comprehensive sample reports with filtering options.
+    """
+    template_name = 'sampletracking/comprehensive_report.html'
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        # Get filter parameters from request
+        date_from = self.request.GET.get('date_from')
+        date_to = self.request.GET.get('date_to')
+        sample_type = self.request.GET.get('sample_type')
+        
+        # Start with all crude samples
+        crude_samples = CrudeSample.objects.all()
+        
+        # Apply date filters
+        if date_from:
+            crude_samples = crude_samples.filter(collection_date__gte=date_from)
+        if date_to:
+            crude_samples = crude_samples.filter(collection_date__lte=date_to)
+        
+        # Apply sample type filter
+        if sample_type and sample_type != 'all':
+            crude_samples = crude_samples.filter(sample_source=sample_type)
+        
+        # Order by collection date
+        crude_samples = crude_samples.order_by('-collection_date', 'subject_id')
+        
+        # Build report data
+        report_data = []
+        for cs in crude_samples:
+            # Get related samples
+            aliquots = Aliquot.objects.filter(parent_barcode=cs)
+            extracts = Extract.objects.filter(parent__parent_barcode=cs)
+            libraries = SequenceLibrary.objects.filter(parent__parent__parent_barcode=cs)
+            
+            report_data.append({
+                'crude_sample': cs,
+                'aliquot_count': aliquots.count(),
+                'extract_count': extracts.count(),
+                'library_count': libraries.count(),
+                'latest_aliquot': aliquots.order_by('-date_created').first() if aliquots.exists() else None,
+                'latest_extract': extracts.order_by('-date_created').first() if extracts.exists() else None,
+                'latest_library': libraries.order_by('-date_created').first() if libraries.exists() else None,
+            })
+        
+        # Get sample type choices for filter dropdown
+        sample_type_choices = CrudeSample.SAMPLE_SOURCE_CHOICES
+        
+        context.update({
+            'report_data': report_data,
+            'sample_type_choices': sample_type_choices,
+            'date_from': date_from,
+            'date_to': date_to,
+            'selected_sample_type': sample_type,
+            'total_samples': len(report_data),
+        })
+        
+        return context

@@ -241,6 +241,15 @@
                   <i class="fas fa-vial"></i> Collection Portal
                 </a>
               </li>
+              <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="reportsDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  <i class="fas fa-chart-bar"></i> Reports
+                </a>
+                <div class="dropdown-menu" aria-labelledby="reportsDropdown">
+                  <a class="dropdown-item" href="{% url 'daily_status_report' %}">Daily Status Report</a>
+                  <a class="dropdown-item" href="{% url 'comprehensive_report' %}">Comprehensive Report</a>
+                </div>
+              </li>
             {% endif %}
           {% endif %}
         </ul>

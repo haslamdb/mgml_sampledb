@@ -119,6 +119,12 @@ USE_I18N = True
 
 USE_TZ = True
 
+# Date formatting
+DATE_FORMAT = 'm/d/Y'
+DATETIME_FORMAT = 'm/d/Y g:i A'
+SHORT_DATE_FORMAT = 'm/d/Y'
+DATE_INPUT_FORMATS = ['%m/%d/%Y', '%Y-%m-%d']
+
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/

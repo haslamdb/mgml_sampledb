@@ -18,7 +18,7 @@ class SampleForm(forms.ModelForm):
     """
     class Meta:
         model = Sample
-        fields = ['barcode', 'date_created', 'status', 'freezer_ID', 'shelf_ID', 'box_ID', 'notes']
+        fields = ['barcode', 'date_created', 'status', 'freezer_ID', 'rack_ID', 'container_type', 'box_ID', 'well_ID', 'notes']
         widgets = {
             'date_created': DateInput(attrs={'class': 'form-control'}),
             'status': forms.Select(attrs={'class': 'form-control'}),

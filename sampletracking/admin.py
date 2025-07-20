@@ -94,7 +94,7 @@ class CrudeSampleAdmin(SampleAdmin):
             'fields': ('sample_source', 'source_details')
         }),
         ('Storage Location', {
-            'fields': ('freezer_ID', 'shelf_ID', 'box_ID')
+            'fields': ('freezer_ID', 'rack_ID', 'container_type', 'box_ID', 'well_ID')
         }),
         ('Notes', {
             'fields': ('notes',)
@@ -143,7 +143,7 @@ class AliquotAdmin(SampleAdmin):
             'fields': ('volume', 'concentration')
         }),
         ('Storage Location', {
-            'fields': ('freezer_ID', 'shelf_ID', 'box_ID')
+            'fields': ('freezer_ID', 'rack_ID', 'container_type', 'box_ID', 'well_ID')
         }),
         ('Notes', {
             'fields': ('notes',)
@@ -199,7 +199,7 @@ class ExtractAdmin(SampleAdmin):
             'description': 'Fields specific to Metabolomics and Antimicrobials extracts'
         }),
         ('Storage Location', {
-            'fields': ('freezer_ID', 'shelf_ID', 'box_ID'),
+            'fields': ('freezer_ID', 'rack_ID', 'container_type', 'box_ID', 'well_ID'),
             'classes': ('collapse',)
         }),
         ('Notes', {
@@ -258,7 +258,7 @@ class SequenceLibraryAdmin(SampleAdmin):
             'fields': ('plate', 'well')
         }),
         ('Storage Location', {
-            'fields': ('freezer_ID', 'shelf_ID', 'box_ID')
+            'fields': ('freezer_ID', 'rack_ID', 'container_type', 'box_ID', 'well_ID')
         }),
         ('Notes', {
             'fields': ('notes',)
@@ -307,7 +307,7 @@ class PlateAdmin(admin.ModelAdmin):
             'fields': ('barcode', 'plate_type')
         }),
         ('Storage Location', {
-            'fields': ('freezer_ID', 'shelf_ID', 'box_ID')
+            'fields': ('freezer_ID', 'rack_ID', 'container_type', 'box_ID', 'well_ID')
         }),
         ('Notes', {
             'fields': ('notes',)

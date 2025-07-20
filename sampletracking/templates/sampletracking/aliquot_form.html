@@ -13,21 +13,98 @@
                 {% csrf_token %}
                 <div class="row">
                     {% for field in form %}
-                        <div class="col-md-4 mb-2">
-                            <div class="form-group">
-                                <label for="{{ field.id_for_label }}" class="font-weight-bold">{{ field.label }}</label>
-                                {{ field }}
-                                {% if field.help_text %}
-                                    <small class="form-text text-muted">{{ field.help_text }}</small>
-                                {% endif %}
-                                {% if field.errors %}
-                                    <div class="text-danger small">
-                                        {{ field.errors }}
-                                    </div>
-                                {% endif %}
+                        {% if field.name not in ['freezer_ID', 'rack_ID', 'container_type', 'box_ID', 'well_ID'] %}
+                            <div class="col-md-4 mb-2">
+                                <div class="form-group">
+                                    <label for="{{ field.id_for_label }}" class="font-weight-bold">{{ field.label }}</label>
+                                    {{ field }}
+                                    {% if field.help_text %}
+                                        <small class="form-text text-muted">{{ field.help_text }}</small>
+                                    {% endif %}
+                                    {% if field.errors %}
+                                        <div class="text-danger small">
+                                            {{ field.errors }}
+                                        </div>
+                                    {% endif %}
+                                </div>
                             </div>
-                        </div>
+                        {% endif %}
                     {% endfor %}
+                </div>
+                
+                <!-- Storage Information -->
+                <h5 class="mb-3 mt-4">Storage Information</h5>
+                <div class="row">
+                    <div class="col-md-2 mb-2">
+                        <div class="form-group">
+                            <label for="{{ form.freezer_ID.id_for_label }}" class="font-weight-bold">Freezer</label>
+                            {{ form.freezer_ID }}
+                            {% if form.freezer_ID.help_text %}
+                                <small class="form-text text-muted">{{ form.freezer_ID.help_text }}</small>
+                            {% endif %}
+                            {% if form.freezer_ID.errors %}
+                                <div class="text-danger small">
+                                    {{ form.freezer_ID.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-2 mb-2">
+                        <div class="form-group">
+                            <label for="{{ form.rack_ID.id_for_label }}" class="font-weight-bold">Rack</label>
+                            {{ form.rack_ID }}
+                            {% if form.rack_ID.help_text %}
+                                <small class="form-text text-muted">{{ form.rack_ID.help_text }}</small>
+                            {% endif %}
+                            {% if form.rack_ID.errors %}
+                                <div class="text-danger small">
+                                    {{ form.rack_ID.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <div class="form-group">
+                            <label for="{{ form.container_type.id_for_label }}" class="font-weight-bold">Container Type</label>
+                            {{ form.container_type }}
+                            {% if form.container_type.help_text %}
+                                <small class="form-text text-muted">{{ form.container_type.help_text }}</small>
+                            {% endif %}
+                            {% if form.container_type.errors %}
+                                <div class="text-danger small">
+                                    {{ form.container_type.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <div class="form-group">
+                            <label for="{{ form.box_ID.id_for_label }}" class="font-weight-bold">Container ID</label>
+                            {{ form.box_ID }}
+                            {% if form.box_ID.help_text %}
+                                <small class="form-text text-muted">{{ form.box_ID.help_text }}</small>
+                            {% endif %}
+                            {% if form.box_ID.errors %}
+                                <div class="text-danger small">
+                                    {{ form.box_ID.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-2 mb-2">
+                        <div class="form-group">
+                            <label for="{{ form.well_ID.id_for_label }}" class="font-weight-bold">Well</label>
+                            {{ form.well_ID }}
+                            {% if form.well_ID.help_text %}
+                                <small class="form-text text-muted">{{ form.well_ID.help_text }}</small>
+                            {% endif %}
+                            {% if form.well_ID.errors %}
+                                <div class="text-danger small">
+                                    {{ form.well_ID.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
                 </div>
                 
                 <div class="mt-3 text-center">

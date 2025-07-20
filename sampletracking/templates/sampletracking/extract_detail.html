@@ -1,0 +1,145 @@
+{% extends "base_generic.html" %}
+
+{% block title %}Extract Details - {{ extract.barcode }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header bg-warning text-dark">
+            <h3>Extract Details</h3>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>Basic Information</h5>
+                    <table class="table table-bordered">
+                        <tr>
+                            <th>Barcode:</th>
+                            <td>{{ extract.barcode }}</td>
+                        </tr>
+                        <tr>
+                            <th>Parent Aliquot:</th>
+                            <td>
+                                <a href="{% url 'aliquot_detail' extract.parent.pk %}">
+                                    {{ extract.parent.barcode }}
+                                </a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Extract Type:</th>
+                            <td>{{ extract.get_extract_type_display }}</td>
+                        </tr>
+                        <tr>
+                            <th>Date Created:</th>
+                            <td>{{ extract.date_created|date:"m/d/Y" }}</td>
+                        </tr>
+                        <tr>
+                            <th>Status:</th>
+                            <td>{{ extract.get_status_display }}</td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="col-md-6">
+                    <h5>Extraction Details</h5>
+                    <table class="table table-bordered">
+                        <tr>
+                            <th>Protocol Used:</th>
+                            <td>{{ extract.protocol_used|default:"Not specified" }}</td>
+                        </tr>
+                        <tr>
+                            <th>Quality Score:</th>
+                            <td>{{ extract.quality_score|default:"Not specified" }}</td>
+                        </tr>
+                        <tr>
+                            <th>Extraction Method:</th>
+                            <td>{{ extract.extraction_method|default:"Not specified" }}</td>
+                        </tr>
+                        <tr>
+                            <th>Sample Weight:</th>
+                            <td>{{ extract.sample_weight|default:"Not specified" }} {% if extract.sample_weight %}mg{% endif %}</td>
+                        </tr>
+                        <tr>
+                            <th>Extraction Solvent:</th>
+                            <td>{{ extract.extraction_solvent|default:"Not specified" }}</td>
+                        </tr>
+                        <tr>
+                            <th>Solvent Volume:</th>
+                            <td>{{ extract.solvent_volume|default:"Not specified" }} {% if extract.solvent_volume %}mL{% endif %}</td>
+                        </tr>
+                        <tr>
+                            <th>Extract Volume:</th>
+                            <td>{{ extract.extract_volume|default:"Not specified" }} {% if extract.extract_volume %}µL{% endif %}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            
+            <div class="row mt-3">
+                <div class="col-md-6">
+                    <h5>Storage Information</h5>
+                    <table class="table table-bordered">
+                        <tr>
+                            <th>Freezer:</th>
+                            <td>{{ extract.freezer_ID|default:"Not specified" }}</td>
+                        </tr>
+                        <tr>
+                            <th>Rack:</th>
+                            <td>{{ extract.rack_ID|default:"Not specified" }}</td>
+                        </tr>
+                        <tr>
+                            <th>Container:</th>
+                            <td>
+                                {% if extract.container_type %}{{ extract.get_container_type_display }}{% else %}Box{% endif %}: 
+                                {{ extract.box_ID|default:"Not specified" }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Well:</th>
+                            <td>{{ extract.well_ID|default:"Not specified" }}</td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="col-md-6">
+                    {% if extract.notes %}
+                    <h5>Notes</h5>
+                    <p>{{ extract.notes }}</p>
+                    {% endif %}
+                </div>
+            </div>
+            
+            {% if libraries %}
+            <hr>
+            <h5>Derived Libraries</h5>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Barcode</th>
+                        <th>Library Type</th>
+                        <th>Date Created</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for library in libraries %}
+                    <tr>
+                        <td>{{ library.barcode }}</td>
+                        <td>{{ library.get_library_type_display }}</td>
+                        <td>{{ library.date_created|date:"m/d/Y" }}</td>
+                        <td>{{ library.get_status_display }}</td>
+                        <td>
+                            <a href="{% url 'library_detail' library.pk %}" class="btn btn-sm btn-info">View</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% endif %}
+            
+            <div class="mt-4">
+                <a href="{% url 'extract_list' %}" class="btn btn-secondary">Back to List</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

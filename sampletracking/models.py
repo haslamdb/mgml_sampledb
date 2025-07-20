@@ -67,13 +67,25 @@ class Sample(TimeStampedModel):
         max_length=100, blank=True, null=True,  # Allow blank for initial registration
         help_text="Identifier for the freezer where this sample is stored"
     )
-    shelf_ID = models.CharField(
+    rack_ID = models.CharField(
         max_length=100, blank=True, null=True,  # Allow blank for initial registration
-        help_text="Identifier for the shelf where this sample is stored"
+        help_text="Identifier for the rack where this sample is stored"
+    )
+    container_type = models.CharField(
+        max_length=10,
+        choices=[('box', 'Box'), ('plate', 'Plate')],
+        default='box',
+        blank=True,
+        null=True,
+        help_text="Type of container (box or plate)"
     )
     box_ID = models.CharField(
         max_length=100, blank=True, null=True,  # Allow blank for initial registration
-        help_text="Identifier for the box where this sample is stored"
+        help_text="Identifier for the container where this sample is stored"
+    )
+    well_ID = models.CharField(
+        max_length=50, blank=True, null=True,  # Allow blank for initial registration
+        help_text="Well position in the container (e.g., A1, B2, etc.)"
     )
     
     def __str__(self):
@@ -288,17 +300,31 @@ class Plate(TimeStampedModel):
         null=True,
         help_text="Identifier for the freezer where this plate is stored"
     )
-    shelf_ID = models.CharField(
+    rack_ID = models.CharField(
         max_length=100,
         blank=True,
         null=True,
-        help_text="Identifier for the shelf where this plate is stored"
+        help_text="Identifier for the rack where this plate is stored"
+    )
+    container_type = models.CharField(
+        max_length=10,
+        choices=[('box', 'Box'), ('plate', 'Plate')],
+        default='box',
+        blank=True,
+        null=True,
+        help_text="Type of container (box or plate)"
     )
     box_ID = models.CharField(
         max_length=100,
         blank=True,
         null=True,
-        help_text="Identifier for the box where this plate is stored"
+        help_text="Identifier for the container where this plate is stored"
+    )
+    well_ID = models.CharField(
+        max_length=50,
+        blank=True,
+        null=True,
+        help_text="Well position in the container (e.g., A1, B2, etc.)"
     )
     
     notes = models.TextField(

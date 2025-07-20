@@ -69,4 +69,5 @@ urlpatterns = [
     
     # Reporting URLs
     path('reports/daily_status/', views.ReportView.as_view(), name='daily_status_report'),
+    path('reports/comprehensive/', views.ComprehensiveReportView.as_view(), name='comprehensive_report'),
 ]

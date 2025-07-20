@@ -1,0 +1,146 @@
+{% extends "base_generic.html" %}
+
+{% block title %}Sequence Library Details - {{ library.barcode }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header text-white" style="background-color: #2c5f7c;">
+            <h3>Sequence Library Details</h3>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>Basic Information</h5>
+                    <table class="table table-bordered">
+                        <tr>
+                            <th>Barcode:</th>
+                            <td>{{ library.barcode }}</td>
+                        </tr>
+                        <tr>
+                            <th>Parent Extract:</th>
+                            <td>
+                                <a href="{% url 'extract_detail' library.parent.pk %}">
+                                    {{ library.parent.barcode }} ({{ library.parent.get_extract_type_display }})
+                                </a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Library Type:</th>
+                            <td>{{ library.get_library_type_display }}</td>
+                        </tr>
+                        <tr>
+                            <th>Date Created:</th>
+                            <td>{{ library.date_created|date:"m/d/Y" }}</td>
+                        </tr>
+                        <tr>
+                            <th>Status:</th>
+                            <td>{{ library.get_status_display }}</td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="col-md-6">
+                    <h5>Library Details</h5>
+                    <table class="table table-bordered">
+                        <tr>
+                            <th>N-Index:</th>
+                            <td>{{ library.nindex|default:"Not specified" }}</td>
+                        </tr>
+                        <tr>
+                            <th>S-Index:</th>
+                            <td>{{ library.sindex|default:"Not specified" }}</td>
+                        </tr>
+                        <tr>
+                            <th>Qubit Concentration:</th>
+                            <td>{{ library.qubit_conc|default:"Not specified" }} {% if library.qubit_conc %}ng/µL{% endif %}</td>
+                        </tr>
+                        <tr>
+                            <th>Diluted Qubit Conc:</th>
+                            <td>{{ library.diluted_qubit_conc|default:"Not specified" }} {% if library.diluted_qubit_conc %}ng/µL{% endif %}</td>
+                        </tr>
+                        <tr>
+                            <th>Clean Library Conc:</th>
+                            <td>{{ library.clean_library_conc|default:"Not specified" }} {% if library.clean_library_conc %}ng/µL{% endif %}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            
+            <div class="row mt-3">
+                <div class="col-md-6">
+                    <h5>Sequencing Information</h5>
+                    <table class="table table-bordered">
+                        <tr>
+                            <th>Date Sequenced:</th>
+                            <td>{{ library.date_sequenced|date:"m/d/Y"|default:"Not yet sequenced" }}</td>
+                        </tr>
+                        <tr>
+                            <th>Sequencing Platform:</th>
+                            <td>{{ library.sequencing_platform|default:"Not specified" }}</td>
+                        </tr>
+                        <tr>
+                            <th>Sequencing Run ID:</th>
+                            <td>{{ library.sequencing_run_id|default:"Not specified" }}</td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="col-md-6">
+                    <h5>Plate Information</h5>
+                    <table class="table table-bordered">
+                        <tr>
+                            <th>Plate:</th>
+                            <td>
+                                {% if library.plate %}
+                                    {{ library.plate.barcode }} ({{ library.plate.plate_type }})
+                                {% else %}
+                                    Not specified
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Well:</th>
+                            <td>{{ library.well|default:"Not specified" }}</td>
+                        </tr>
+                    </table>
+                    
+                    <h5>Storage Information</h5>
+                    <table class="table table-bordered">
+                        <tr>
+                            <th>Freezer:</th>
+                            <td>{{ library.freezer_ID|default:"Not specified" }}</td>
+                        </tr>
+                        <tr>
+                            <th>Rack:</th>
+                            <td>{{ library.rack_ID|default:"Not specified" }}</td>
+                        </tr>
+                        <tr>
+                            <th>Container:</th>
+                            <td>
+                                {% if library.container_type %}{{ library.get_container_type_display }}{% else %}Box{% endif %}: 
+                                {{ library.box_ID|default:"Not specified" }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Well:</th>
+                            <td>{{ library.well_ID|default:"Not specified" }}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            
+            {% if library.notes %}
+            <div class="row mt-3">
+                <div class="col-12">
+                    <h5>Notes</h5>
+                    <p>{{ library.notes }}</p>
+                </div>
+            </div>
+            {% endif %}
+            
+            <div class="mt-4">
+                <a href="{% url 'library_list' %}" class="btn btn-secondary">Back to List</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

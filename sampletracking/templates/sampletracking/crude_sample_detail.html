@@ -1,0 +1,112 @@
+{% extends "base_generic.html" %}
+
+{% block title %}Crude Sample Details - {{ sample.barcode }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h3>Crude Sample Details</h3>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>Basic Information</h5>
+                    <table class="table table-bordered">
+                        <tr>
+                            <th>Barcode:</th>
+                            <td>{{ sample.barcode }}</td>
+                        </tr>
+                        <tr>
+                            <th>Subject ID:</th>
+                            <td>{{ sample.subject_id }}</td>
+                        </tr>
+                        <tr>
+                            <th>Sample Source:</th>
+                            <td>{{ sample.get_sample_source_display }}</td>
+                        </tr>
+                        <tr>
+                            <th>Collection Date:</th>
+                            <td>{{ sample.collection_date|date:"m/d/Y" }}</td>
+                        </tr>
+                        <tr>
+                            <th>Date Created:</th>
+                            <td>{{ sample.date_created|date:"m/d/Y" }}</td>
+                        </tr>
+                        <tr>
+                            <th>Status:</th>
+                            <td>{{ sample.get_status_display }}</td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="col-md-6">
+                    <h5>Storage Information</h5>
+                    <table class="table table-bordered">
+                        <tr>
+                            <th>Freezer:</th>
+                            <td>{{ sample.freezer_ID|default:"Not specified" }}</td>
+                        </tr>
+                        <tr>
+                            <th>Rack:</th>
+                            <td>{{ sample.rack_ID|default:"Not specified" }}</td>
+                        </tr>
+                        <tr>
+                            <th>Container:</th>
+                            <td>
+                                {% if sample.container_type %}{{ sample.get_container_type_display }}{% else %}Box{% endif %}: 
+                                {{ sample.box_ID|default:"Not specified" }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Well:</th>
+                            <td>{{ sample.well_ID|default:"Not specified" }}</td>
+                        </tr>
+                    </table>
+                    
+                    {% if sample.source_details %}
+                    <h5>Source Details</h5>
+                    <p>{{ sample.source_details }}</p>
+                    {% endif %}
+                    
+                    {% if sample.notes %}
+                    <h5>Notes</h5>
+                    <p>{{ sample.notes }}</p>
+                    {% endif %}
+                </div>
+            </div>
+            
+            {% if aliquots %}
+            <hr>
+            <h5>Derived Aliquots</h5>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Barcode</th>
+                        <th>Date Created</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for aliquot in aliquots %}
+                    <tr>
+                        <td>{{ aliquot.barcode }}</td>
+                        <td>{{ aliquot.date_created|date:"m/d/Y" }}</td>
+                        <td>{{ aliquot.get_status_display }}</td>
+                        <td>
+                            <a href="{% url 'aliquot_detail' aliquot.pk %}" class="btn btn-sm btn-info">View</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% endif %}
+            
+            <div class="mt-4">
+                <a href="{% url 'crude_sample_update' sample.pk %}" class="btn btn-warning">Edit</a>
+                <a href="{% url 'crude_sample_list' %}" class="btn btn-secondary">Back to List</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -171,10 +171,32 @@
                         </div>
                     </div>
                     
-                    <!-- Storage fields -->
-                    <div class="col-md-4 mb-2">
+                    <!-- Additional fields that might be present -->
+                    {% for field in form %}
+                        {% if field.name not in ['barcode', 'parent', 'extract_type', 'date_created', 'status', 'extraction_method', 'protocol_used', 'quality_score', 'sample_weight', 'extraction_solvent', 'solvent_volume', 'extract_volume', 'freezer_ID', 'rack_ID', 'container_type', 'box_ID', 'well_ID', 'notes'] %}
+                            <div class="col-md-4 mb-2">
+                                <div class="form-group">
+                                    <label for="{{ field.id_for_label }}" class="font-weight-bold">{{ field.label }}</label>
+                                    {{ field }}
+                                    {% if field.help_text %}
+                                        <small class="form-text text-muted">{{ field.help_text }}</small>
+                                    {% endif %}
+                                    {% if field.errors %}
+                                        <div class="text-danger small">{{ field.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                    
+                </div>
+                
+                <!-- Storage Information -->
+                <h5 class="mb-3 mt-4">Storage Information</h5>
+                <div class="row">
+                    <div class="col-md-2 mb-2">
                         <div class="form-group">
-                            <label for="{{ form.freezer_ID.id_for_label }}" class="font-weight-bold">{{ form.freezer_ID.label }}</label>
+                            <label for="{{ form.freezer_ID.id_for_label }}" class="font-weight-bold">Freezer</label>
                             {{ form.freezer_ID }}
                             {% if form.freezer_ID.help_text %}
                                 <small class="form-text text-muted">{{ form.freezer_ID.help_text }}</small>
@@ -184,23 +206,33 @@
                             {% endif %}
                         </div>
                     </div>
-                    
-                    <div class="col-md-4 mb-2">
+                    <div class="col-md-2 mb-2">
                         <div class="form-group">
-                            <label for="{{ form.shelf_ID.id_for_label }}" class="font-weight-bold">{{ form.shelf_ID.label }}</label>
-                            {{ form.shelf_ID }}
-                            {% if form.shelf_ID.help_text %}
-                                <small class="form-text text-muted">{{ form.shelf_ID.help_text }}</small>
+                            <label for="{{ form.rack_ID.id_for_label }}" class="font-weight-bold">Rack</label>
+                            {{ form.rack_ID }}
+                            {% if form.rack_ID.help_text %}
+                                <small class="form-text text-muted">{{ form.rack_ID.help_text }}</small>
                             {% endif %}
-                            {% if form.shelf_ID.errors %}
-                                <div class="text-danger small">{{ form.shelf_ID.errors }}</div>
+                            {% if form.rack_ID.errors %}
+                                <div class="text-danger small">{{ form.rack_ID.errors }}</div>
                             {% endif %}
                         </div>
                     </div>
-                    
-                    <div class="col-md-4 mb-2">
+                    <div class="col-md-3 mb-2">
                         <div class="form-group">
-                            <label for="{{ form.box_ID.id_for_label }}" class="font-weight-bold">{{ form.box_ID.label }}</label>
+                            <label for="{{ form.container_type.id_for_label }}" class="font-weight-bold">Container Type</label>
+                            {{ form.container_type }}
+                            {% if form.container_type.help_text %}
+                                <small class="form-text text-muted">{{ form.container_type.help_text }}</small>
+                            {% endif %}
+                            {% if form.container_type.errors %}
+                                <div class="text-danger small">{{ form.container_type.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <div class="form-group">
+                            <label for="{{ form.box_ID.id_for_label }}" class="font-weight-bold">Container ID</label>
                             {{ form.box_ID }}
                             {% if form.box_ID.help_text %}
                                 <small class="form-text text-muted">{{ form.box_ID.help_text }}</small>
@@ -210,7 +242,21 @@
                             {% endif %}
                         </div>
                     </div>
-                    
+                    <div class="col-md-2 mb-2">
+                        <div class="form-group">
+                            <label for="{{ form.well_ID.id_for_label }}" class="font-weight-bold">Well</label>
+                            {{ form.well_ID }}
+                            {% if form.well_ID.help_text %}
+                                <small class="form-text text-muted">{{ form.well_ID.help_text }}</small>
+                            {% endif %}
+                            {% if form.well_ID.errors %}
+                                <div class="text-danger small">{{ form.well_ID.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
                     <div class="col-12 mb-2">
                         <div class="form-group">
                             <label for="{{ form.notes.id_for_label }}" class="font-weight-bold">{{ form.notes.label }}</label>
