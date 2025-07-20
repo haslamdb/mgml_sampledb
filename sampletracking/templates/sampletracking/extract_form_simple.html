@@ -1,0 +1,28 @@
+{% extends 'base_generic.html' %}
+
+{% block content %}
+<div class="container mt-3">
+    <div class="card shadow">
+        <div class="card-header bg-warning text-dark py-2">
+            <h4 class="mb-0">Submit an Extract</h4>
+        </div>
+        <div class="card-body py-2">
+            <p class="lead text-muted mb-2">Create a new extract from an existing aliquot.</p>
+            
+            <form method="post" class="mt-2">
+                {% csrf_token %}
+                
+                <!-- Simple form display -->
+                {{ form.as_p }}
+                
+                <div class="mt-3 text-center">
+                    <a href="{% url 'home' %}" class="btn btn-sm btn-secondary mr-2">Cancel</a>
+                    <button type="submit" class="btn btn-sm btn-warning">
+                        <i class="fas fa-save"></i> Submit Extract
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

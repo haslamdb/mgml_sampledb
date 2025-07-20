@@ -55,7 +55,7 @@
                         {% endif %}
                         
                         {% for field in form %}
-                            {% if field.name != 'barcode' and field.name != 'parent' and field.name != 'date_created' and field.name != 'status' and field.name != 'freezer_ID' and field.name != 'rack_ID' and field.name != 'container_type' and field.name != 'box_ID' and field.name != 'well_ID' and field.name != 'notes' %}
+                            {% if field.name != 'barcode' and field.name != 'parent' and field.name != 'date_created' and field.name != 'status' and field.name != 'freezer_ID' and field.name != 'rack_ID' and field.name != 'container_type' and field.name != 'box_ID' and field.name != 'well_ID' and field.name != 'notes' and field.name != 'date_sequenced' and field.name != 'sequencing_platform' and field.name != 'sequencing_run_id' %}
                                 <div class="form-group mb-3">
                                     <label for="{{ field.id_for_label }}" class="font-weight-bold">{{ field.label }}</label>
                                     {{ field }}
@@ -142,6 +142,45 @@
                                 <div class="text-danger small">{{ form.barcode.errors }}</div>
                             {% endif %}
                         </div>
+                        
+                        {% if form.date_sequenced %}
+                        <div class="form-group mb-3">
+                            <label for="{{ form.date_sequenced.id_for_label }}" class="font-weight-bold">{{ form.date_sequenced.label }}</label>
+                            {{ form.date_sequenced }}
+                            {% if form.date_sequenced.help_text %}
+                                <small class="form-text text-muted">{{ form.date_sequenced.help_text }}</small>
+                            {% endif %}
+                            {% if form.date_sequenced.errors %}
+                                <div class="text-danger small">{{ form.date_sequenced.errors }}</div>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                        
+                        {% if form.sequencing_platform %}
+                        <div class="form-group mb-3">
+                            <label for="{{ form.sequencing_platform.id_for_label }}" class="font-weight-bold">{{ form.sequencing_platform.label }}</label>
+                            {{ form.sequencing_platform }}
+                            {% if form.sequencing_platform.help_text %}
+                                <small class="form-text text-muted">{{ form.sequencing_platform.help_text }}</small>
+                            {% endif %}
+                            {% if form.sequencing_platform.errors %}
+                                <div class="text-danger small">{{ form.sequencing_platform.errors }}</div>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                        
+                        {% if form.sequencing_run_id %}
+                        <div class="form-group mb-3">
+                            <label for="{{ form.sequencing_run_id.id_for_label }}" class="font-weight-bold">{{ form.sequencing_run_id.label }}</label>
+                            {{ form.sequencing_run_id }}
+                            {% if form.sequencing_run_id.help_text %}
+                                <small class="form-text text-muted">{{ form.sequencing_run_id.help_text }}</small>
+                            {% endif %}
+                            {% if form.sequencing_run_id.errors %}
+                                <div class="text-danger small">{{ form.sequencing_run_id.errors }}</div>
+                            {% endif %}
+                        </div>
+                        {% endif %}
                     </div>
                 </div>
                 
