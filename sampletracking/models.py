@@ -110,9 +110,9 @@ class CrudeSample(Sample):
     """
     SAMPLE_SOURCE_CHOICES = [
         ('Stool', 'Stool'),  
+        ("Oral", "Oral Swab"),
         ('Nasal', 'Nasal Swab'),
         ('Skin', 'Skin Swab'),
-        ("Oral", "Oral Swab"),
         ('Blood', 'Blood'),
         ('Tissue', 'Tissue'),
         ('Other', 'Other')

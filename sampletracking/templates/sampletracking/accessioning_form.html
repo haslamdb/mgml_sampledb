@@ -137,24 +137,6 @@
                                 </div>
                             </div>
                             
-                            <!-- Barcode -->
-                            <div class="col-md-6 mb-2 mobile-friendly">
-                                <div class="form-group">
-                                    <label for="{{ form.barcode.id_for_label }}" class="font-weight-bold">
-                                        {{ form.barcode.label }}
-                                    </label>
-                                    {{ form.barcode }}
-                                    {% if form.barcode.help_text %}
-                                        <small class="form-text text-muted">{{ form.barcode.help_text }}</small>
-                                    {% endif %}
-                                    {% if form.barcode.errors %}
-                                        <div class="text-danger small">
-                                            {{ form.barcode.errors }}
-                                        </div>
-                                    {% endif %}
-                                </div>
-                            </div>
-                            
                             <!-- Collection Date -->
                             <div class="col-md-6 mb-2 mobile-friendly">
                                 <div class="form-group">
@@ -186,6 +168,24 @@
                                     {% if form.sample_source.errors %}
                                         <div class="text-danger small">
                                             {{ form.sample_source.errors }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <!-- Barcode -->
+                            <div class="col-md-6 mb-2 mobile-friendly">
+                                <div class="form-group">
+                                    <label for="{{ form.barcode.id_for_label }}" class="font-weight-bold">
+                                        {{ form.barcode.label }}
+                                    </label>
+                                    {{ form.barcode }}
+                                    {% if form.barcode.help_text %}
+                                        <small class="form-text text-muted">{{ form.barcode.help_text }}</small>
+                                    {% endif %}
+                                    {% if form.barcode.errors %}
+                                        <div class="text-danger small">
+                                            {{ form.barcode.errors }}
                                         </div>
                                     {% endif %}
                                 </div>
