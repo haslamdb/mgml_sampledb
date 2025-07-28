@@ -75,10 +75,13 @@ class CrudeSampleDetailView(PermissionRequiredMixin, DetailView):
     template_name = 'sampletracking/crude_sample_detail.html'
     context_object_name = 'sample'
     
+    def get_queryset(self):
+        return CrudeSample.objects.prefetch_related('aliquots')
+    
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # Add aliquots derived from this sample
-        context['aliquots'] = Aliquot.objects.filter(parent_barcode=self.object.barcode)
+        # Use prefetched aliquots instead of querying again
+        context['aliquots'] = self.object.aliquots.all()
         return context
 
 
@@ -169,7 +172,23 @@ def find_sample_to_receive(request):
     A simple view to handle the barcode scan/search before the update
     """
     if request.method == 'POST':
-        barcode = request.POST.get('barcode')
+        barcode = request.POST.get('barcode', '').strip()
+        
+        # Input validation for barcode
+        if not barcode:
+            messages.error(request, "Please enter a barcode.")
+            return render(request, 'sampletracking/find_sample_form.html')
+        
+        if len(barcode) > 255:  # Match the model field max_length
+            messages.error(request, "Barcode is too long.")
+            return render(request, 'sampletracking/find_sample_form.html')
+        
+        # Check for valid barcode format (alphanumeric, underscore, hyphen)
+        import re
+        if not re.match(r'^[A-Za-z0-9_-]+$', barcode):
+            messages.error(request, "Barcode contains invalid characters. Only letters, numbers, underscores, and hyphens are allowed.")
+            return render(request, 'sampletracking/find_sample_form.html')
+        
         if CrudeSample.objects.filter(barcode=barcode).exists():
             return redirect('receive_sample', barcode=barcode)
         else:
@@ -215,7 +234,7 @@ class AliquotListView(PermissionRequiredMixin, ListView):
     paginate_by = 10
     
     def get_queryset(self):
-        return Aliquot.objects.all().order_by('-date_created')
+        return Aliquot.objects.select_related('parent_barcode').order_by('-date_created')
 
 
 class AliquotCreateView(PermissionRequiredMixin, CreateView):
@@ -244,10 +263,13 @@ class AliquotDetailView(PermissionRequiredMixin, DetailView):
     template_name = 'sampletracking/aliquot_detail.html'
     context_object_name = 'aliquot'
     
+    def get_queryset(self):
+        return Aliquot.objects.select_related('parent_barcode').prefetch_related('extracts')
+    
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # Add extracts derived from this aliquot
-        context['extracts'] = Extract.objects.filter(parent=self.object.barcode)
+        # Use prefetched extracts instead of querying again
+        context['extracts'] = self.object.extracts.all()
         return context
 
 
@@ -262,7 +284,7 @@ class ExtractListView(PermissionRequiredMixin, ListView):
     paginate_by = 10
     
     def get_queryset(self):
-        return Extract.objects.all().order_by('-date_created')
+        return Extract.objects.select_related('parent').order_by('-date_created')
 
 
 class ExtractCreateView(PermissionRequiredMixin, CreateView):
@@ -291,10 +313,13 @@ class ExtractDetailView(PermissionRequiredMixin, DetailView):
     template_name = 'sampletracking/extract_detail.html'
     context_object_name = 'extract'
     
+    def get_queryset(self):
+        return Extract.objects.select_related('parent').prefetch_related('libraries')
+    
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # Add libraries derived from this extract
-        context['libraries'] = SequenceLibrary.objects.filter(parent=self.object)
+        # Use prefetched libraries instead of querying again
+        context['libraries'] = self.object.libraries.all()
         return context
 
 
@@ -309,7 +334,7 @@ class SequenceLibraryListView(PermissionRequiredMixin, ListView):
     paginate_by = 10
     
     def get_queryset(self):
-        return SequenceLibrary.objects.all().order_by('-date_created')
+        return SequenceLibrary.objects.select_related('parent', 'plate').order_by('-date_created')
 
 
 class SequenceLibraryCreateView(PermissionRequiredMixin, CreateView):
@@ -349,66 +374,76 @@ class SampleSearchView(PermissionRequiredMixin, ListView):
     paginate_by = 20
     
     def get_queryset(self):
-        query = self.request.GET.get('q', '')
-        if query:
-            # Search across all sample types
-            crude_samples = CrudeSample.objects.filter(
-                Q(barcode__icontains=query) | 
-                Q(subject_id__icontains=query) |
-                Q(notes__icontains=query)
-            )
-            aliquots = Aliquot.objects.filter(
-                Q(barcode__icontains=query) |
-                Q(notes__icontains=query)
-            )
-            extracts = Extract.objects.filter(
-                Q(barcode__icontains=query) |
-                Q(notes__icontains=query) |
-                Q(extract_type__icontains=query)
-            )
-            libraries = SequenceLibrary.objects.filter(
-                Q(barcode__icontains=query) |
-                Q(notes__icontains=query) |
-                Q(library_type__icontains=query)
-            )
-            
-            # Combine results with type information
-            results = []
-            for sample in crude_samples:
-                results.append({
-                    'type': 'Crude Sample',
-                    'object': sample,
-                    'barcode': sample.barcode,
-                    'date': sample.date_created,
-                    'url': reverse('crude_sample_detail', kwargs={'pk': sample.pk})
-                })
-            for sample in aliquots:
-                results.append({
-                    'type': 'Aliquot',
-                    'object': sample,
-                    'barcode': sample.barcode,
-                    'date': sample.date_created,
-                    'url': reverse('aliquot_detail', kwargs={'pk': sample.pk})
-                })
-            for sample in extracts:
-                results.append({
-                    'type': 'Extract',
-                    'object': sample,
-                    'barcode': sample.barcode,
-                    'date': sample.date_created,
-                    'url': reverse('extract_detail', kwargs={'pk': sample.pk})
-                })
-            for sample in libraries:
-                results.append({
-                    'type': 'Sequence Library',
-                    'object': sample,
-                    'barcode': sample.barcode,
-                    'date': sample.date_created,
-                    'url': reverse('library_detail', kwargs={'pk': sample.pk})
-                })
-            
-            return sorted(results, key=lambda x: x['date'], reverse=True)
-        return []
+        query = self.request.GET.get('q', '').strip()
+        
+        # Basic input validation and sanitization
+        if not query or len(query) < 2:
+            return []
+        
+        # Limit query length to prevent potential DoS
+        if len(query) > 100:
+            query = query[:100]
+        
+        # Search across all sample types with optimized queries
+        crude_samples = CrudeSample.objects.filter(
+            Q(barcode__icontains=query) | 
+            Q(subject_id__icontains=query) |
+            Q(notes__icontains=query)
+        ).select_related('created_by', 'updated_by')
+        
+        aliquots = Aliquot.objects.filter(
+            Q(barcode__icontains=query) |
+            Q(notes__icontains=query)
+        ).select_related('parent_barcode', 'created_by', 'updated_by')
+        
+        extracts = Extract.objects.filter(
+            Q(barcode__icontains=query) |
+            Q(notes__icontains=query) |
+            Q(extract_type__icontains=query)
+        ).select_related('parent', 'created_by', 'updated_by')
+        
+        libraries = SequenceLibrary.objects.filter(
+            Q(barcode__icontains=query) |
+            Q(notes__icontains=query) |
+            Q(library_type__icontains=query)
+        ).select_related('parent', 'plate', 'created_by', 'updated_by')
+        
+        # Combine results with type information
+        results = []
+        for sample in crude_samples:
+            results.append({
+                'type': 'Crude Sample',
+                'object': sample,
+                'barcode': sample.barcode,
+                'date': sample.date_created,
+                'url': reverse('crude_sample_detail', kwargs={'pk': sample.pk})
+            })
+        for sample in aliquots:
+            results.append({
+                'type': 'Aliquot',
+                'object': sample,
+                'barcode': sample.barcode,
+                'date': sample.date_created,
+                'url': reverse('aliquot_detail', kwargs={'pk': sample.pk})
+            })
+        for sample in extracts:
+            results.append({
+                'type': 'Extract',
+                'object': sample,
+                'barcode': sample.barcode,
+                'date': sample.date_created,
+                'url': reverse('extract_detail', kwargs={'pk': sample.pk})
+            })
+        for sample in libraries:
+            results.append({
+                'type': 'Sequence Library',
+                'object': sample,
+                'barcode': sample.barcode,
+                'date': sample.date_created,
+                'url': reverse('library_detail', kwargs={'pk': sample.pk})
+            })
+        
+        return sorted(results, key=lambda x: x['date'], reverse=True)
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -512,25 +547,41 @@ class ComprehensiveReportView(LoginRequiredMixin, TemplateView):
         if sample_type and sample_type != 'all':
             crude_samples = crude_samples.filter(sample_source=sample_type)
         
-        # Order by collection date
-        crude_samples = crude_samples.order_by('-collection_date', 'subject_id')
+        # Order by collection date and prefetch related objects to avoid N+1 queries
+        crude_samples = crude_samples.order_by('-collection_date', 'subject_id').prefetch_related(
+            'aliquots',
+            'aliquots__extracts', 
+            'aliquots__extracts__libraries'
+        )
         
-        # Build report data
+        # Build report data efficiently
         report_data = []
         for cs in crude_samples:
-            # Get related samples
-            aliquots = Aliquot.objects.filter(parent_barcode=cs)
-            extracts = Extract.objects.filter(parent__parent_barcode=cs)
-            libraries = SequenceLibrary.objects.filter(parent__parent__parent_barcode=cs)
+            # Get all related objects from prefetched data
+            aliquots = list(cs.aliquots.all())
+            extracts = []
+            libraries = []
+            
+            for aliquot in aliquots:
+                aliquot_extracts = list(aliquot.extracts.all())
+                extracts.extend(aliquot_extracts)
+                
+                for extract in aliquot_extracts:
+                    libraries.extend(list(extract.libraries.all()))
+            
+            # Calculate counts and latest items
+            latest_aliquot = max(aliquots, key=lambda x: x.date_created) if aliquots else None
+            latest_extract = max(extracts, key=lambda x: x.date_created) if extracts else None
+            latest_library = max(libraries, key=lambda x: x.date_created) if libraries else None
             
             report_data.append({
                 'crude_sample': cs,
-                'aliquot_count': aliquots.count(),
-                'extract_count': extracts.count(),
-                'library_count': libraries.count(),
-                'latest_aliquot': aliquots.order_by('-date_created').first() if aliquots.exists() else None,
-                'latest_extract': extracts.order_by('-date_created').first() if extracts.exists() else None,
-                'latest_library': libraries.order_by('-date_created').first() if libraries.exists() else None,
+                'aliquot_count': len(aliquots),
+                'extract_count': len(extracts),
+                'library_count': len(libraries),
+                'latest_aliquot': latest_aliquot,
+                'latest_extract': latest_extract,
+                'latest_library': latest_library,
             })
         
         # Get sample type choices for filter dropdown
