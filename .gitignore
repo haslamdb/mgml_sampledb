@@ -61,3 +61,18 @@ deploy_secure.sh
 
 # Claude AI conversation files
 .claude/
+
+# Image files
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.bmp
+*.emf
+*.svg
+*.tiff
+*.tif
+*.ico
+*.webp
+images/
+pictures/
