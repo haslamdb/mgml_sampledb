@@ -18,6 +18,8 @@ from django.contrib import admin
 from django.urls import path, include
 from django.views.generic import TemplateView
 from django.contrib.auth import views as auth_views
+from django.conf import settings
+from django.conf.urls.static import static
 from sampletracking import views
 from sampletracking import sample_dashboard
 
@@ -71,3 +73,8 @@ urlpatterns = [
     path('reports/daily_status/', views.ReportView.as_view(), name='daily_status_report'),
     path('reports/comprehensive/', views.ComprehensiveReportView.as_view(), name='comprehensive_report'),
 ]
+
+# Serve static files in development
+if settings.DEBUG:
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

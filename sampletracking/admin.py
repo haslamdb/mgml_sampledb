@@ -116,6 +116,15 @@ class SampleAdmin(admin.ModelAdmin):
         }
         js = ('admin/js/admin_enhancements.js',)
     
+    def get_form(self, request, obj=None, **kwargs):
+        """Override to add our custom CSS class to forms"""
+        form = super().get_form(request, obj, **kwargs)
+        form.base_fields['barcode'].widget.attrs.update({
+            'class': 'custom-barcode-field',
+            'placeholder': 'Enter barcode...'
+        })
+        return form
+    
     def barcode_display(self, obj):
         """Enhanced barcode display with copy functionality"""
         return format_html(

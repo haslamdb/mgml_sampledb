@@ -1,10 +1,20 @@
-/* Enhanced Django Admin Interface Styling */
+/* Enhanced Django Admin Interface Styling - MGML Sample Database */
 
 /* Header Improvements */
 #header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border-bottom: none;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    border-bottom: none !important;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1) !important;
+}
+
+#header h1 {
+    color: white !important;
+    font-weight: 300 !important;
+    letter-spacing: 1px !important;
+}
+
+#header h1 a:link, #header h1 a:visited {
+    color: white !important;
 }
 
 #header h1 {
