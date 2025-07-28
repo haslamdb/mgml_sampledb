@@ -2,6 +2,55 @@
 
 document.addEventListener('DOMContentLoaded', function() {
     
+    // Hide theme controls that might appear dynamically
+    function hideThemeControls() {
+        // Wait a bit for dynamic content to load
+        setTimeout(function() {
+            // Find and hide theme-related elements
+            const themeSelectors = [
+                '[class*="theme"]',
+                '[class*="toggle"]',
+                '[id*="theme"]',
+                'button[onclick*="theme"]',
+                'button[onclick*="color"]',
+                'button[title*="theme"]',
+                'button[title*="color"]'
+            ];
+            
+            themeSelectors.forEach(selector => {
+                try {
+                    const elements = document.querySelectorAll(selector);
+                    elements.forEach(el => {
+                        // Check if it's likely a theme control
+                        const text = el.textContent.toLowerCase();
+                        if (text.includes('toggle') || text.includes('theme') || text.includes('color')) {
+                            el.style.display = 'none';
+                            // Also hide parent if it becomes empty
+                            if (el.parentElement && el.parentElement.children.length === 1) {
+                                el.parentElement.style.display = 'none';
+                            }
+                        }
+                    });
+                } catch (e) {
+                    // Ignore selector errors
+                }
+            });
+            
+            // Hide empty modules that might contain only theme controls
+            const modules = document.querySelectorAll('.module');
+            modules.forEach(module => {
+                const visibleContent = Array.from(module.children).some(child => 
+                    child.style.display !== 'none' && 
+                    child.offsetHeight > 0 &&
+                    child.textContent.trim().length > 0
+                );
+                if (!visibleContent) {
+                    module.style.display = 'none';
+                }
+            });
+        }, 100);
+    }
+    
     // Copy to Clipboard functionality for barcodes
     function setupBarcodeClipboard() {
         const barcodes = document.querySelectorAll('code[title="Click to copy"]');
@@ -350,6 +399,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Initialize all enhancements
+    hideThemeControls(); // Hide theme controls first
     setupBarcodeClipboard();
     setupTableEnhancements();
     setupEnhancedSearch();
@@ -359,6 +409,9 @@ document.addEventListener('DOMContentLoaded', function() {
     setupLoadingStates();
     setupDarkMode();
     setupPerformanceMonitoring();
+    
+    // Run theme control hiding periodically in case they're added dynamically
+    setInterval(hideThemeControls, 2000);
     
     // Setup auto-refresh (disabled by default for performance)
     // setupAutoRefresh();

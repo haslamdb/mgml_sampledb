@@ -233,6 +233,13 @@ class CrudeSampleAdmin(SampleAdmin):
     list_filter = SampleAdmin.list_filter + ('sample_source', 'barcode_override_used')
     search_fields = SampleAdmin.search_fields + ('subject_id', 'source_details')
     
+    # Force CSS/JS loading for this specific admin
+    class Media:
+        css = {
+            'all': ('admin/css/custom_admin.css',)
+        }
+        js = ('admin/js/admin_enhancements.js',)
+    
     def get_queryset(self, request):
         queryset = super().get_queryset(request)
         queryset = queryset.annotate(
@@ -360,6 +367,13 @@ class AliquotAdmin(SampleAdmin):
     search_fields = SampleAdmin.search_fields
     autocomplete_fields = ('parent_barcode',)
     
+    # Force CSS/JS loading for this specific admin
+    class Media:
+        css = {
+            'all': ('admin/css/custom_admin.css',)
+        }
+        js = ('admin/js/admin_enhancements.js',)
+    
     def get_queryset(self, request):
         queryset = super().get_queryset(request)
         queryset = queryset.select_related('parent_barcode').annotate(
@@ -469,6 +483,13 @@ class ExtractAdmin(SampleAdmin):
     list_filter = SampleAdmin.list_filter + ('extract_type',)
     search_fields = SampleAdmin.search_fields + ('protocol_used', 'extraction_method', 'extraction_solvent')
     autocomplete_fields = ('parent',)
+    
+    # Force CSS/JS loading for this specific admin
+    class Media:
+        css = {
+            'all': ('admin/css/custom_admin.css',)
+        }
+        js = ('admin/js/admin_enhancements.js',)
     
     def get_queryset(self, request):
         queryset = super().get_queryset(request)
@@ -609,6 +630,13 @@ class SequenceLibraryAdmin(SampleAdmin):
     search_fields = SampleAdmin.search_fields + ('sequencing_run_id', 'sequencing_platform', 'well')
     autocomplete_fields = ('parent', 'plate')
     
+    # Force CSS/JS loading for this specific admin
+    class Media:
+        css = {
+            'all': ('admin/css/custom_admin.css',)
+        }
+        js = ('admin/js/admin_enhancements.js',)
+    
     def get_queryset(self, request):
         queryset = super().get_queryset(request)
         queryset = queryset.select_related('parent', 'plate')
@@ -734,6 +762,13 @@ class PlateAdmin(admin.ModelAdmin):
     readonly_fields = ('created_at', 'updated_at', 'created_by', 'updated_by')
     date_hierarchy = 'created_at'
     list_per_page = 25
+    
+    # Force CSS/JS loading for this specific admin
+    class Media:
+        css = {
+            'all': ('admin/css/custom_admin.css',)
+        }
+        js = ('admin/js/admin_enhancements.js',)
     
     def get_queryset(self, request):
         queryset = super().get_queryset(request)

@@ -1,0 +1,82 @@
+{% extends "admin/base.html" %}
+
+{% block extrahead %}
+    {{ block.super }}
+    <style>
+        /* Hide theme controls completely */
+        .theme-toggle, .theme-toggle-container, 
+        [data-theme-toggle], [id*="theme-toggle"],
+        .toggle-theme, .color-toggle,
+        button[onclick*="theme"], button[onclick*="color"],
+        .theme-switcher, #theme-switcher,
+        .admin-tools, #admin-tools,
+        .theme-controls, .color-controls,
+        select[name*="theme"], select[id*="theme"],
+        .admin-theme-selector, .theme-selector,
+        .theme, .color-scheme, .dark-mode-toggle,
+        button[title*="theme"], button[title*="color"],
+        button[aria-label*="theme"], button[aria-label*="color"],
+        .toggle, [class*="toggle"]:not(.collapse-toggle):not(.section-toggle),
+        .theme-menu, .color-menu,
+        .admin-theme-controls, .admin-color-controls {
+            display: none !important;
+        }
+
+        /* Hide any empty modules that contained theme controls */
+        .module:empty {
+            display: none !important;
+        }
+        
+        /* Force our custom admin styles */
+        #header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+            border-bottom: none !important;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1) !important;
+        }
+
+        #header h1, #header h1 a:link, #header h1 a:visited {
+            color: white !important;
+            font-weight: 300 !important;
+            letter-spacing: 1px !important;
+        }
+    </style>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Remove theme controls that might be added dynamically
+            function removeThemeControls() {
+                const selectors = [
+                    '[class*="theme"]',
+                    '[class*="toggle"]:not([class*="collapse"]):not([class*="section"])',
+                    '[id*="theme"]',
+                    'button[onclick*="theme"]',
+                    'button[onclick*="color"]'
+                ];
+                
+                selectors.forEach(selector => {
+                    try {
+                        const elements = document.querySelectorAll(selector);
+                        elements.forEach(el => {
+                            const text = el.textContent.toLowerCase();
+                            if (text.includes('toggle') || text.includes('theme') || text.includes('color')) {
+                                el.remove();
+                            }
+                        });
+                    } catch (e) {}
+                });
+                
+                // Remove empty modules
+                const modules = document.querySelectorAll('.module');
+                modules.forEach(module => {
+                    if (module.children.length === 0 || module.textContent.trim() === '') {
+                        module.remove();
+                    }
+                });
+            }
+            
+            // Run immediately and periodically
+            removeThemeControls();
+            setInterval(removeThemeControls, 1000);
+        });
+    </script>
+{% endblock %}

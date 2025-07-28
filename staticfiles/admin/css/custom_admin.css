@@ -1,5 +1,59 @@
 /* Enhanced Django Admin Interface Styling - MGML Sample Database */
 
+/* Hide/Minimize Theme Controls */
+.theme-toggle, .theme-toggle-container, 
+[data-theme-toggle], [id*="theme-toggle"],
+.toggle-theme, .color-toggle,
+button[onclick*="theme"], button[onclick*="color"],
+.theme-switcher, #theme-switcher,
+.admin-tools, #admin-tools,
+.theme-controls, .color-controls {
+    display: none !important;
+}
+
+/* Hide Django's built-in theme selector if it appears */
+select[name*="theme"], select[id*="theme"],
+.admin-theme-selector, .theme-selector {
+    display: none !important;
+}
+
+/* Clean up any remaining theme elements */
+.theme, .color-scheme, .dark-mode-toggle,
+button[title*="theme"], button[title*="color"],
+button[aria-label*="theme"], button[aria-label*="color"],
+.toggle, [class*="toggle"],
+.theme-menu, .color-menu,
+.admin-theme-controls, .admin-color-controls {
+    display: none !important;
+}
+
+/* Target common Django admin theme element patterns */
+#content-main > .theme-toggle,
+#content-main > div:first-child:has(button),
+#main > .theme-controls,
+.module:has(button[onclick*="theme"]) {
+    display: none !important;
+}
+
+/* Hide any box that only contains theme controls */
+.module:empty, .module:has(button):not(:has(table)):not(:has(form)):not(:has(.results)) {
+    display: none !important;
+}
+
+/* If theme controls can't be hidden, make them minimal */
+.theme-controls {
+    position: absolute !important;
+    top: 5px !important;
+    right: 10px !important;
+    opacity: 0.3 !important;
+    font-size: 10px !important;
+    z-index: 9999 !important;
+}
+
+.theme-controls:hover {
+    opacity: 1 !important;
+}
+
 /* Header Improvements */
 #header {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;

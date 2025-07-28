@@ -188,3 +188,7 @@ LOGGING = {
         },
     },
 }
+
+# Disable Django admin theme switching
+# This prevents the theme toggle box from appearing
+ADMIN_THEME_ENABLED = False
