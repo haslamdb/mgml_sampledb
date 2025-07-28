@@ -7,6 +7,8 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.db.models import Q
 from datetime import datetime, time
+import logging
+import re
 
 from .models import CrudeSample, Aliquot, Extract, SequenceLibrary
 from .forms import (
@@ -17,6 +19,15 @@ from .forms import (
     AccessioningForm,
     ReportForm
 )
+
+# Set up logging for security events
+logger = logging.getLogger('sampletracking')
+
+# Security constants
+MAX_LOGIN_ATTEMPTS = 5
+BARCODE_PATTERN = re.compile(r'^[A-Za-z0-9_-]+$')
+MAX_SEARCH_QUERY_LENGTH = 100
+MIN_SEARCH_QUERY_LENGTH = 2
 
 
 class HomeView(TemplateView):
@@ -59,6 +70,9 @@ class CrudeSampleCreateView(PermissionRequiredMixin, CreateView):
     success_url = reverse_lazy('sample_submitted')
     
     def form_valid(self, form):
+        # Log sample creation
+        logger.info(f"New crude sample created by user {self.request.user.username}")
+        
         # Add the current user as the creator
         form.instance.created_by = self.request.user
         form.instance.updated_by = self.request.user
@@ -119,6 +133,9 @@ class AccessioningCreateView(LoginRequiredMixin, PermissionRequiredMixin, Create
         return context
 
     def form_valid(self, form):
+        # Log sample registration
+        logger.info(f"Sample registration by user {self.request.user.username}")
+        
         form.instance.created_by = self.request.user
         form.instance.updated_by = self.request.user
         form.instance.date_created = timezone.now().date()
@@ -130,6 +147,9 @@ class AccessioningCreateView(LoginRequiredMixin, PermissionRequiredMixin, Create
             existing_notes = form.instance.notes or ''
             override_note = "[BARCODE OVERRIDE] Generic barcode used - Subject ID validation was overridden during registration."
             form.instance.notes = f"{override_note}\n{existing_notes}".strip()
+            
+            # Log barcode override as security event
+            logger.warning(f"Barcode validation override used by user {self.request.user.username} for sample {form.instance.barcode}")
         
         messages.success(self.request, f"Sample {form.instance.barcode} registered and is awaiting receipt.")
         return super().form_valid(form)
@@ -174,25 +194,43 @@ def find_sample_to_receive(request):
     if request.method == 'POST':
         barcode = request.POST.get('barcode', '').strip()
         
+        # Log barcode search attempts
+        logger.info(f"Barcode search attempt by user {request.user.username}: {barcode}")
+        
         # Input validation for barcode
         if not barcode:
             messages.error(request, "Please enter a barcode.")
             return render(request, 'sampletracking/find_sample_form.html')
         
         if len(barcode) > 255:  # Match the model field max_length
+            logger.warning(f"Oversized barcode attempted by user {request.user.username}: {len(barcode)} characters")
             messages.error(request, "Barcode is too long.")
             return render(request, 'sampletracking/find_sample_form.html')
         
         # Check for valid barcode format (alphanumeric, underscore, hyphen)
-        import re
-        if not re.match(r'^[A-Za-z0-9_-]+$', barcode):
+        if not BARCODE_PATTERN.match(barcode):
+            logger.warning(f"Invalid barcode format attempted by user {request.user.username}: {barcode}")
             messages.error(request, "Barcode contains invalid characters. Only letters, numbers, underscores, and hyphens are allowed.")
             return render(request, 'sampletracking/find_sample_form.html')
         
-        if CrudeSample.objects.filter(barcode=barcode).exists():
-            return redirect('receive_sample', barcode=barcode)
-        else:
-            messages.error(request, f"No sample found with barcode '{barcode}'. Please register it first.")
+        # Check for suspicious patterns
+        suspicious_patterns = ['<script', 'javascript:', 'DROP', 'DELETE', 'INSERT', 'UPDATE', '--', ';']
+        if any(pattern.lower() in barcode.lower() for pattern in suspicious_patterns):
+            logger.critical(f"Suspicious barcode pattern detected from user {request.user.username}: {barcode}")
+            messages.error(request, "Invalid barcode format.")
+            return render(request, 'sampletracking/find_sample_form.html')
+        
+        try:
+            if CrudeSample.objects.filter(barcode=barcode).exists():
+                logger.info(f"Barcode search successful by user {request.user.username}: {barcode}")
+                return redirect('receive_sample', barcode=barcode)
+            else:
+                logger.info(f"Barcode not found by user {request.user.username}: {barcode}")
+                messages.error(request, f"No sample found with barcode '{barcode}'. Please register it first.")
+        except Exception as e:
+            logger.error(f"Database error during barcode search by user {request.user.username}: {str(e)}")
+            messages.error(request, "An error occurred while searching. Please try again.")
+            
     return render(request, 'sampletracking/find_sample_form.html')
 
 
@@ -376,74 +414,91 @@ class SampleSearchView(PermissionRequiredMixin, ListView):
     def get_queryset(self):
         query = self.request.GET.get('q', '').strip()
         
+        # Log search attempts for security monitoring
+        logger.info(f"Search attempt by user {self.request.user.username} with query: {query[:50]}...")
+        
         # Basic input validation and sanitization
-        if not query or len(query) < 2:
+        if not query or len(query) < MIN_SEARCH_QUERY_LENGTH:
             return []
         
         # Limit query length to prevent potential DoS
-        if len(query) > 100:
-            query = query[:100]
+        if len(query) > MAX_SEARCH_QUERY_LENGTH:
+            logger.warning(f"Oversized search query attempted by user {self.request.user.username}: {len(query)} characters")
+            query = query[:MAX_SEARCH_QUERY_LENGTH]
         
-        # Search across all sample types with optimized queries
-        crude_samples = CrudeSample.objects.filter(
-            Q(barcode__icontains=query) | 
-            Q(subject_id__icontains=query) |
-            Q(notes__icontains=query)
-        ).select_related('created_by', 'updated_by')
+        # Check for suspicious patterns that might indicate injection attempts
+        suspicious_patterns = ['<script', 'javascript:', 'DROP TABLE', 'DELETE FROM', 'INSERT INTO', 'UPDATE ', '--', ';']
+        if any(pattern.lower() in query.lower() for pattern in suspicious_patterns):
+            logger.warning(f"Suspicious search query detected from user {self.request.user.username}: {query}")
+            return []
         
-        aliquots = Aliquot.objects.filter(
-            Q(barcode__icontains=query) |
-            Q(notes__icontains=query)
-        ).select_related('parent_barcode', 'created_by', 'updated_by')
-        
-        extracts = Extract.objects.filter(
-            Q(barcode__icontains=query) |
-            Q(notes__icontains=query) |
-            Q(extract_type__icontains=query)
-        ).select_related('parent', 'created_by', 'updated_by')
-        
-        libraries = SequenceLibrary.objects.filter(
-            Q(barcode__icontains=query) |
-            Q(notes__icontains=query) |
-            Q(library_type__icontains=query)
-        ).select_related('parent', 'plate', 'created_by', 'updated_by')
-        
-        # Combine results with type information
-        results = []
-        for sample in crude_samples:
-            results.append({
-                'type': 'Crude Sample',
-                'object': sample,
-                'barcode': sample.barcode,
-                'date': sample.date_created,
-                'url': reverse('crude_sample_detail', kwargs={'pk': sample.pk})
-            })
-        for sample in aliquots:
-            results.append({
-                'type': 'Aliquot',
-                'object': sample,
-                'barcode': sample.barcode,
-                'date': sample.date_created,
-                'url': reverse('aliquot_detail', kwargs={'pk': sample.pk})
-            })
-        for sample in extracts:
-            results.append({
-                'type': 'Extract',
-                'object': sample,
-                'barcode': sample.barcode,
-                'date': sample.date_created,
-                'url': reverse('extract_detail', kwargs={'pk': sample.pk})
-            })
-        for sample in libraries:
-            results.append({
-                'type': 'Sequence Library',
-                'object': sample,
-                'barcode': sample.barcode,
-                'date': sample.date_created,
-                'url': reverse('library_detail', kwargs={'pk': sample.pk})
-            })
-        
-        return sorted(results, key=lambda x: x['date'], reverse=True)
+        try:
+            # Search across all sample types with optimized queries
+            crude_samples = CrudeSample.objects.filter(
+                Q(barcode__icontains=query) | 
+                Q(subject_id__icontains=query) |
+                Q(notes__icontains=query)
+            ).select_related('created_by', 'updated_by')
+            
+            aliquots = Aliquot.objects.filter(
+                Q(barcode__icontains=query) |
+                Q(notes__icontains=query)
+            ).select_related('parent_barcode', 'created_by', 'updated_by')
+            
+            extracts = Extract.objects.filter(
+                Q(barcode__icontains=query) |
+                Q(notes__icontains=query) |
+                Q(extract_type__icontains=query)
+            ).select_related('parent', 'created_by', 'updated_by')
+            
+            libraries = SequenceLibrary.objects.filter(
+                Q(barcode__icontains=query) |
+                Q(notes__icontains=query) |
+                Q(library_type__icontains=query)
+            ).select_related('parent', 'plate', 'created_by', 'updated_by')
+            
+            # Combine results with type information
+            results = []
+            for sample in crude_samples:
+                results.append({
+                    'type': 'Crude Sample',
+                    'object': sample,
+                    'barcode': sample.barcode,
+                    'date': sample.date_created,
+                    'url': reverse('crude_sample_detail', kwargs={'pk': sample.pk})
+                })
+            for sample in aliquots:
+                results.append({
+                    'type': 'Aliquot',
+                    'object': sample,
+                    'barcode': sample.barcode,
+                    'date': sample.date_created,
+                    'url': reverse('aliquot_detail', kwargs={'pk': sample.pk})
+                })
+            for sample in extracts:
+                results.append({
+                    'type': 'Extract',
+                    'object': sample,
+                    'barcode': sample.barcode,
+                    'date': sample.date_created,
+                    'url': reverse('extract_detail', kwargs={'pk': sample.pk})
+                })
+            for sample in libraries:
+                results.append({
+                    'type': 'Sequence Library',
+                    'object': sample,
+                    'barcode': sample.barcode,
+                    'date': sample.date_created,
+                    'url': reverse('library_detail', kwargs={'pk': sample.pk})
+                })
+            
+            logger.info(f"Search completed by user {self.request.user.username}: {len(results)} results found")
+            return sorted(results, key=lambda x: x['date'], reverse=True)
+            
+        except Exception as e:
+            logger.error(f"Search error for user {self.request.user.username}: {str(e)}")
+            messages.error(self.request, "An error occurred during search. Please try again.")
+            return []
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

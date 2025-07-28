@@ -1,0 +1,90 @@
+# Django Sample Database - Requirements with Security Enhancements
+# Core Django
+Django>=5.0.0,<5.1.0
+django-environ>=0.11.0  # For environment variable management
+
+# Database
+mysqlclient>=2.2.0  # MySQL database adapter
+django-mysql>=4.12.0  # MySQL-specific Django extensions
+
+# Authentication and Security
+django-axes>=6.1.0  # Brute force protection
+django-ratelimit>=4.1.0  # Rate limiting
+django-csp>=3.8  # Content Security Policy
+django-security>=0.18.0  # Additional security middleware
+django-stronghold>=0.4.0  # Make views require login by default
+django-session-security>=2.6.7  # Enhanced session security
+
+# Password validation
+django-password-validators>=1.7.1  # Additional password validators
+argon2-cffi>=23.1.0  # Secure password hashing
+
+# Audit and History
+django-simple-history>=3.4.0  # Model history tracking
+django-audit-log>=2.1.0  # Comprehensive audit logging
+
+# Caching and Performance
+redis>=5.0.0  # Redis for caching
+django-redis>=5.4.0  # Django Redis cache backend
+django-cachalot>=2.6.1  # ORM cache layer
+
+# File handling and validation
+python-magic>=0.4.27  # File type detection
+Pillow>=10.1.0  # Image processing
+
+# Environment and Configuration
+python-decouple>=3.8  # Environment variable management
+django-extensions>=3.2.3  # Development tools
+
+# Security scanning and monitoring
+bandit>=1.7.5  # Security linting for Python
+safety>=2.3.5  # Vulnerability scanning
+django-health-check>=3.17.0  # Health monitoring
+
+# Logging and monitoring
+structlog>=23.2.0  # Structured logging
+django-structlog>=7.0.0  # Django integration for structlog
+sentry-sdk>=1.38.0  # Error tracking and monitoring
+
+# Development and Testing (include in development)
+django-debug-toolbar>=4.2.0  # Development debugging
+factory-boy>=3.3.0  # Test data factories
+pytest-django>=4.7.0  # Testing framework
+coverage>=7.3.0  # Code coverage
+
+# API Security (if implementing APIs)
+djangorestframework>=3.14.0  # REST API framework
+django-cors-headers>=4.3.0  # CORS handling
+django-oauth-toolkit>=1.7.0  # OAuth2 provider
+
+# Email security
+django-ses>=3.5.0  # Amazon SES integration (optional)
+
+# Backup and Recovery
+django-dbbackup>=4.0.2  # Database backup functionality
+
+# Additional Security Tools
+django-maintenance-mode>=0.21.1  # Maintenance mode
+django-ipware>=5.0.0  # IP address detection
+user-agents>=2.2.0  # User agent parsing
+
+# Compliance and Privacy
+django-gdpr-assist>=1.3.1  # GDPR compliance tools
+
+# Production Server
+gunicorn>=21.2.0  # WSGI HTTP Server
+whitenoise>=6.6.0  # Static file serving
+
+# SSL/TLS
+certifi>=2023.11.17  # SSL certificate validation
+
+# Development Tools (comment out for production)
+# black>=23.11.0  # Code formatting
+# flake8>=6.1.0  # Code linting
+# pre-commit>=3.6.0  # Git hooks
+
+# Note: Pin specific versions for production deployment
+# Example:
+# Django==5.0.1
+# mysqlclient==2.2.0
+# etc.
