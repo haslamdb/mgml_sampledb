@@ -9,18 +9,55 @@ local_settings.py
 db.sqlite3
 db.sqlite3-journal
 media/
+staticfiles/
+mgml_sampledb.sock
 
-# Environment variables
+# Environment variables and secrets
 .env
 .env.*
+*secret*
+*password*
+*.key
+*.pem
+*.crt
 
 # Virtual environment
 venv/
 env/
 ENV/
+bin/
+lib/
+lib64/
+include/
+pyvenv.cfg
 
 # IDE specific files
 .idea/
 .vscode/
 *.swp
 *.swo
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Logs and temporary files
+logs/
+*.log
+*.tmp
+*.temp
+
+# Backup files
+*_backup.*
+settings_backup.py
+
+# Production configuration
+nginx_config
+start_gunicorn.sh
+check_status.sh
+fix_*.sh
+update_services.sh
+deploy_secure.sh
+
+# Claude AI conversation files
+.claude/

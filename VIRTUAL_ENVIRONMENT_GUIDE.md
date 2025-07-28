@@ -18,14 +18,32 @@ Your project has the following virtual environment setup:
 │   │   └── django-admin    # Django commands
 │   ├── lib/                # Python packages
 │   └── include/            # Header files
-├── bin/                    # ❌ OLD/INCORRECT - should be removed
+├── bin/                    # ⚠️ OLD - legacy files (can be ignored)
 ├── manage.py               # Django management script
 └── run_django.sh          # 🆕 NEW: Convenience script
 ```
 
 ## 🔧 How to Use the Virtual Environment
 
-### Method 1: Using the Convenience Script (Recommended)
+### Method 1: Using the `mgml` Alias (Easiest!)
+
+We've created a convenient alias that combines navigation and environment activation:
+
+```bash
+# Simply type this anywhere to jump to your project and activate the environment:
+mgml
+
+# You'll automatically be in /var/www/mgml_sampledb with venv activated
+# Now you can run Django commands normally:
+python manage.py runserver
+python manage.py migrate
+python manage.py collectstatic
+
+# When done, deactivate
+deactivate
+```
+
+### Method 2: Using the Convenience Script (Recommended)
 
 We've created a `run_django.sh` script that automatically activates the virtual environment:
 
@@ -43,7 +61,7 @@ We've created a `run_django.sh` script that automatically activates the virtual 
 ./run_django.sh help
 ```
 
-### Method 2: Manual Activation
+### Method 3: Manual Activation
 
 ```bash
 # Activate the virtual environment
@@ -58,7 +76,7 @@ python manage.py collectstatic
 deactivate
 ```
 
-### Method 3: One-off Commands
+### Method 4: One-off Commands
 
 ```bash
 # Run a single command with the virtual environment
@@ -76,6 +94,13 @@ source venv/bin/activate && python manage.py check && deactivate
 
 ### 1. Start the Enhanced Admin Interface
 
+**Option A: Using the mgml alias (easiest)**
+```bash
+mgml
+python manage.py runserver
+```
+
+**Option B: Using the convenience script**
 ```bash
 ./run_django.sh server
 ```
@@ -106,6 +131,24 @@ Your Django admin now includes:
 
 ### Daily Development
 
+**Option A: Using the mgml alias**
+```bash
+# 1. Start your development session (from anywhere)
+mgml
+
+# 2. Start the server
+python manage.py runserver
+
+# 3. In another terminal, make database changes
+mgml  # (in the new terminal)
+python manage.py makemigrations
+python manage.py migrate
+
+# 4. If you modify static files
+python manage.py collectstatic
+```
+
+**Option B: Using the convenience script**
 ```bash
 # 1. Start your development session
 ./run_django.sh server
@@ -166,11 +209,16 @@ deactivate
 chmod +x run_django.sh
 ./run_django.sh check
 
+# OR using the mgml alias:
+mgml
+python manage.py check
+
 # If packages are missing:
-source venv/bin/activate
+mgml
 pip install -r requirements.txt
 
 # If Python path is wrong:
+mgml
 which python  # Should show: /var/www/mgml_sampledb/venv/bin/python
 ```
 
@@ -219,6 +267,7 @@ The admin interface now uses optimized queries:
 
 ## 💡 Pro Tips
 
+- Use the `mgml` alias to quickly jump to your project from anywhere
 - Use `Ctrl+K` to quickly focus the search bar
 - Double-click table rows to edit records
 - Use the batch actions for efficient sample management

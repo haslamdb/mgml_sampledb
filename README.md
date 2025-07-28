@@ -109,6 +109,8 @@ A GLP & CLIA compliant Django-based application for tracking samples in the MGML
 
 9. Access the application at http://localhost:8000
 
+> **💡 Pro Tip**: After initial setup, see `VIRTUAL_ENVIRONMENT_GUIDE.md` for convenient ways to work with the project, including the `mgml` alias that combines `cd` and virtual environment activation!
+
 ## Usage
 
 ### For Sample Collection Staff
