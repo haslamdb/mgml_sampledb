@@ -1,6 +1,6 @@
 # Django Sample Database - Requirements with Security Enhancements
 # Core Django
-Django>=5.0.0,<5.1.0
+Django>=5.1.12,<5.2.0
 django-environ>=0.11.0  # For environment variable management
 
 # Database
