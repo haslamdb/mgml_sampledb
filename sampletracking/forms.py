@@ -192,9 +192,21 @@ class AliquotForm(SampleForm):
 
     def __init__(self, *args, **kwargs):
         super(AliquotForm, self).__init__(*args, **kwargs)
-        self.fields['parent_barcode'].empty_label = "Select a crude sample barcode"
-        self.fields['parent_barcode'].widget.attrs.update({'class': 'form-select'})
-        self.fields['parent_barcode'].label_from_instance = lambda obj: f"{obj.barcode} ({obj.subject_id})"
+        self.fields['parent_barcode'].empty_label = "Type to search by barcode or subject ID"
+        self.fields['parent_barcode'].widget.attrs.update({
+            'class': 'form-select selectpicker',
+            'data-live-search': 'true',
+            'data-size': '10',
+            'data-width': '100%'
+        })
+        # Display format: "BARCODE | Subject: SUBJECT_ID | Source: SOURCE"
+        self.fields['parent_barcode'].label_from_instance = lambda obj: (
+            f"{obj.barcode} | Subject: {obj.subject_id} | "
+            f"Source: {obj.get_sample_source_display() if obj.sample_source else 'Unknown'}"
+        )
+
+        # Sort by most recent first
+        self.fields['parent_barcode'].queryset = CrudeSample.objects.all().order_by('-date_created')
 
 
 class ExtractForm(SampleForm):
@@ -229,7 +241,6 @@ class ExtractForm(SampleForm):
             'solvent_volume': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
             'extract_volume': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
             'freezer_ID': forms.TextInput(attrs={'class': 'form-control'}),
-            'rack_ID': forms.TextInput(attrs={'class': 'form-control'}),
             'container_type': forms.Select(attrs={'class': 'form-select'}),
             'box_ID': forms.TextInput(attrs={'class': 'form-control'}),
             'well_ID': forms.TextInput(attrs={'class': 'form-control'}),
@@ -237,9 +248,21 @@ class ExtractForm(SampleForm):
         
     def __init__(self, *args, **kwargs):
         super(ExtractForm, self).__init__(*args, **kwargs)
-        self.fields['parent'].empty_label = "Select an aliquot barcode"
-        self.fields['parent'].widget.attrs.update({'class': 'form-select'})
-        self.fields['parent'].label_from_instance = lambda obj: f"{obj.barcode}"
+        self.fields['parent'].empty_label = "Type to search by barcode or parent info"
+        self.fields['parent'].widget.attrs.update({
+            'class': 'form-select selectpicker',
+            'data-live-search': 'true',
+            'data-size': '10',
+            'data-width': '100%'
+        })
+        # Display format includes parent's subject ID for better searchability
+        self.fields['parent'].label_from_instance = lambda obj: (
+            f"{obj.barcode} | Parent: {obj.parent_barcode.barcode if obj.parent_barcode else 'N/A'} | "
+            f"Subject: {obj.parent_barcode.subject_id if obj.parent_barcode else 'N/A'}"
+        )
+
+        # Sort by most recent first
+        self.fields['parent'].queryset = Aliquot.objects.select_related('parent_barcode').order_by('-date_created')
 
 
 class SequenceLibraryForm(SampleForm):
@@ -275,7 +298,6 @@ class SequenceLibraryForm(SampleForm):
             'sequencing_platform': forms.TextInput(attrs={'class': 'form-control'}),
             'sequencing_run_id': forms.TextInput(attrs={'class': 'form-control'}),
             'freezer_ID': forms.TextInput(attrs={'class': 'form-control'}),
-            'rack_ID': forms.TextInput(attrs={'class': 'form-control'}),
             'container_type': forms.Select(attrs={'class': 'form-select'}),
             'box_ID': forms.TextInput(attrs={'class': 'form-control'}),
             'well_ID': forms.TextInput(attrs={'class': 'form-control'}),
@@ -283,10 +305,25 @@ class SequenceLibraryForm(SampleForm):
         
     def __init__(self, *args, **kwargs):
         super(SequenceLibraryForm, self).__init__(*args, **kwargs)
-        self.fields['parent'].empty_label = "Select an extract barcode"
-        self.fields['parent'].widget.attrs.update({'class': 'form-select'})
-        self.fields['parent'].label_from_instance = lambda obj: f"{obj.barcode} ({obj.extract_type})"
-        
+        self.fields['parent'].empty_label = "Type to search by barcode or extract info"
+        self.fields['parent'].widget.attrs.update({
+            'class': 'form-select selectpicker',
+            'data-live-search': 'true',
+            'data-size': '10',
+            'data-width': '100%'
+        })
+        # Display format includes parent aliquot info and subject ID
+        self.fields['parent'].label_from_instance = lambda obj: (
+            f"{obj.barcode} | Type: {obj.get_extract_type_display() if obj.extract_type else 'Unknown'} | "
+            f"Parent: {obj.parent.barcode if obj.parent else 'N/A'} | "
+            f"Subject: {obj.parent.parent_barcode.subject_id if obj.parent and obj.parent.parent_barcode else 'N/A'}"
+        )
+
+        # Sort by most recent first with related data pre-fetched
+        self.fields['parent'].queryset = Extract.objects.select_related(
+            'parent', 'parent__parent_barcode'
+        ).order_by('-date_created')
+
         # Update field labels
         self.fields['nindex'].label = "N-index"
         self.fields['sindex'].label = "S-index"

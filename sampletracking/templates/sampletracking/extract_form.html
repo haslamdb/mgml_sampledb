@@ -76,17 +76,6 @@
                         </div>
                         
                         <div class="form-group mb-3">
-                            <label for="{{ form.rack_ID.id_for_label }}" class="font-weight-bold">Rack</label>
-                            {{ form.rack_ID }}
-                            {% if form.rack_ID.help_text %}
-                                <small class="form-text text-muted">{{ form.rack_ID.help_text }}</small>
-                            {% endif %}
-                            {% if form.rack_ID.errors %}
-                                <div class="text-danger small">{{ form.rack_ID.errors }}</div>
-                            {% endif %}
-                        </div>
-                        
-                        <div class="form-group mb-3">
                             <label for="{{ form.container_type.id_for_label }}" class="font-weight-bold">Container Type</label>
                             {{ form.container_type }}
                             {% if form.container_type.help_text %}
@@ -152,20 +141,20 @@
                             {% endif %}
                         </div>
                     </div>
-                    
+
                     <div class="col-md-4 mb-3 dna-rna-fields" style="display: none;">
                         <div class="form-group">
-                            <label for="{{ form.protocol_used.id_for_label }}" class="font-weight-bold">{{ form.protocol_used.label }}</label>
-                            {{ form.protocol_used }}
-                            {% if form.protocol_used.help_text %}
-                                <small class="form-text text-muted">{{ form.protocol_used.help_text }}</small>
+                            <label for="{{ form.concentration.id_for_label }}" class="font-weight-bold">{{ form.concentration.label }}</label>
+                            {{ form.concentration }}
+                            {% if form.concentration.help_text %}
+                                <small class="form-text text-muted">{{ form.concentration.help_text }}</small>
                             {% endif %}
-                            {% if form.protocol_used.errors %}
-                                <div class="text-danger small">{{ form.protocol_used.errors }}</div>
+                            {% if form.concentration.errors %}
+                                <div class="text-danger small">{{ form.concentration.errors }}</div>
                             {% endif %}
                         </div>
                     </div>
-                    
+
                     <div class="col-md-4 mb-3 dna-rna-fields" style="display: none;">
                         <div class="form-group">
                             <label for="{{ form.quality_score.id_for_label }}" class="font-weight-bold">{{ form.quality_score.label }}</label>
@@ -234,7 +223,7 @@
                     
                     <!-- Additional fields that might be present -->
                     {% for field in form %}
-                        {% if field.name != 'barcode' and field.name != 'parent' and field.name != 'extract_type' and field.name != 'date_created' and field.name != 'status' and field.name != 'extraction_method' and field.name != 'protocol_used' and field.name != 'quality_score' and field.name != 'sample_weight' and field.name != 'extraction_solvent' and field.name != 'solvent_volume' and field.name != 'extract_volume' and field.name != 'freezer_ID' and field.name != 'rack_ID' and field.name != 'container_type' and field.name != 'box_ID' and field.name != 'well_ID' and field.name != 'notes' %}
+                        {% if field.name != 'barcode' and field.name != 'parent' and field.name != 'extract_type' and field.name != 'date_created' and field.name != 'status' and field.name != 'extraction_method' and field.name != 'concentration' and field.name != 'quality_score' and field.name != 'sample_weight' and field.name != 'extraction_solvent' and field.name != 'solvent_volume' and field.name != 'extract_volume' and field.name != 'freezer_ID' and field.name != 'container_type' and field.name != 'box_ID' and field.name != 'well_ID' and field.name != 'notes' %}
                             <div class="col-md-4 mb-3">
                                 <div class="form-group">
                                     <label for="{{ field.id_for_label }}" class="font-weight-bold">{{ field.label }}</label>

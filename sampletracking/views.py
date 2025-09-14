@@ -471,13 +471,13 @@ class SampleSearchView(PermissionRequiredMixin, ListView):
                 Q(barcode__icontains=query) |
                 Q(notes__icontains=query) |
                 Q(extract_type__icontains=query)
-            ).select_related('parent', 'created_by', 'updated_by')
-            
+            ).select_related('parent', 'parent__parent_barcode', 'created_by', 'updated_by')
+
             libraries = SequenceLibrary.objects.filter(
                 Q(barcode__icontains=query) |
                 Q(notes__icontains=query) |
                 Q(library_type__icontains=query)
-            ).select_related('parent', 'plate', 'created_by', 'updated_by')
+            ).select_related('parent', 'parent__parent', 'parent__parent__parent_barcode', 'plate', 'created_by', 'updated_by')
             
             # Combine results with type information
             results = []
@@ -486,6 +486,7 @@ class SampleSearchView(PermissionRequiredMixin, ListView):
                     'type': 'Crude Sample',
                     'object': sample,
                     'barcode': sample.barcode,
+                    'sample_id': sample.subject_id if sample.subject_id else 'N/A',
                     'date': sample.date_created,
                     'url': reverse('crude_sample_detail', kwargs={'pk': sample.pk})
                 })
@@ -494,22 +495,33 @@ class SampleSearchView(PermissionRequiredMixin, ListView):
                     'type': 'Aliquot',
                     'object': sample,
                     'barcode': sample.barcode,
+                    'sample_id': sample.parent_barcode.subject_id if sample.parent_barcode and sample.parent_barcode.subject_id else 'N/A',
                     'date': sample.date_created,
                     'url': reverse('aliquot_detail', kwargs={'pk': sample.pk})
                 })
             for sample in extracts:
+                # Get subject_id through parent aliquot -> crude sample chain
+                sample_id = 'N/A'
+                if sample.parent and sample.parent.parent_barcode:
+                    sample_id = sample.parent.parent_barcode.subject_id if sample.parent.parent_barcode.subject_id else 'N/A'
                 results.append({
                     'type': 'Extract',
                     'object': sample,
                     'barcode': sample.barcode,
+                    'sample_id': sample_id,
                     'date': sample.date_created,
                     'url': reverse('extract_detail', kwargs={'pk': sample.pk})
                 })
             for sample in libraries:
+                # Get subject_id through parent extract -> aliquot -> crude sample chain
+                sample_id = 'N/A'
+                if sample.parent and sample.parent.parent and sample.parent.parent.parent_barcode:
+                    sample_id = sample.parent.parent.parent_barcode.subject_id if sample.parent.parent.parent_barcode.subject_id else 'N/A'
                 results.append({
                     'type': 'Sequence Library',
                     'object': sample,
                     'barcode': sample.barcode,
+                    'sample_id': sample_id,
                     'date': sample.date_created,
                     'url': reverse('library_detail', kwargs={'pk': sample.pk})
                 })

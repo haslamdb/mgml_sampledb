@@ -91,17 +91,6 @@
                         </div>
                         
                         <div class="form-group mb-3">
-                            <label for="{{ form.rack_ID.id_for_label }}" class="font-weight-bold">Rack</label>
-                            {{ form.rack_ID }}
-                            {% if form.rack_ID.help_text %}
-                                <small class="form-text text-muted">{{ form.rack_ID.help_text }}</small>
-                            {% endif %}
-                            {% if form.rack_ID.errors %}
-                                <div class="text-danger small">{{ form.rack_ID.errors }}</div>
-                            {% endif %}
-                        </div>
-                        
-                        <div class="form-group mb-3">
                             <label for="{{ form.container_type.id_for_label }}" class="font-weight-bold">Container Type</label>
                             {{ form.container_type }}
                             {% if form.container_type.help_text %}

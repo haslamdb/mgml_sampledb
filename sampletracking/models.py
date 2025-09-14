@@ -67,10 +67,6 @@ class Sample(TimeStampedModel):
         max_length=100, blank=True, null=True,  # Allow blank for initial registration
         help_text="Identifier for the freezer where this sample is stored"
     )
-    rack_ID = models.CharField(
-        max_length=100, blank=True, null=True,  # Allow blank for initial registration
-        help_text="Identifier for the rack where this sample is stored"
-    )
     container_type = models.CharField(
         max_length=10,
         choices=[('box', 'Box'), ('plate', 'Plate')],
@@ -317,12 +313,6 @@ class Plate(TimeStampedModel):
         blank=True,
         null=True,
         help_text="Identifier for the freezer where this plate is stored"
-    )
-    rack_ID = models.CharField(
-        max_length=100,
-        blank=True,
-        null=True,
-        help_text="Identifier for the rack where this plate is stored"
     )
     container_type = models.CharField(
         max_length=10,

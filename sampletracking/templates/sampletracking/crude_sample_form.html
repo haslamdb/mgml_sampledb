@@ -14,21 +14,7 @@
                     <!-- Basic Information Column -->
                     <div class="col-md-6">
                         <h5 class="mb-3">Basic Information</h5>
-                        
-                        <div class="form-group mb-3" id="barcode-group">
-                            <label for="{{ form.barcode.id_for_label }}" class="font-weight-bold">
-                                <span id="barcode-label">{{ form.barcode.label }}</span>
-                            </label>
-                            {{ form.barcode }}
-                            <small class="form-text text-muted" id="barcode-help">
-                                <span class="box-storage-help">Scan the tube barcode</span>
-                                <span class="plate-storage-help" style="display:none;">Will be auto-generated from plate and well</span>
-                            </small>
-                            {% if form.barcode.errors %}
-                                <div class="text-danger small">{{ form.barcode.errors }}</div>
-                            {% endif %}
-                        </div>
-                        
+
                         <div class="form-group mb-3">
                             <label for="{{ form.subject_id.id_for_label }}" class="font-weight-bold">{{ form.subject_id.label }}</label>
                             {{ form.subject_id }}
@@ -97,17 +83,6 @@
                             {% endif %}
                             {% if form.freezer_ID.errors %}
                                 <div class="text-danger small">{{ form.freezer_ID.errors }}</div>
-                            {% endif %}
-                        </div>
-                        
-                        <div class="form-group mb-3">
-                            <label for="{{ form.rack_ID.id_for_label }}" class="font-weight-bold">Rack</label>
-                            {{ form.rack_ID }}
-                            {% if form.rack_ID.help_text %}
-                                <small class="form-text text-muted">{{ form.rack_ID.help_text }}</small>
-                            {% endif %}
-                            {% if form.rack_ID.errors %}
-                                <div class="text-danger small">{{ form.rack_ID.errors }}</div>
                             {% endif %}
                         </div>
                         

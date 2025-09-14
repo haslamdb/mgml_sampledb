@@ -55,7 +55,7 @@
                         {% endif %}
                         
                         {% for field in form %}
-                            {% if field.name != 'barcode' and field.name != 'parent' and field.name != 'date_created' and field.name != 'status' and field.name != 'freezer_ID' and field.name != 'rack_ID' and field.name != 'container_type' and field.name != 'box_ID' and field.name != 'well_ID' and field.name != 'notes' and field.name != 'date_sequenced' and field.name != 'sequencing_platform' and field.name != 'sequencing_run_id' %}
+                            {% if field.name != 'barcode' and field.name != 'parent' and field.name != 'date_created' and field.name != 'status' and field.name != 'freezer_ID' and field.name != 'container_type' and field.name != 'box_ID' and field.name != 'well_ID' and field.name != 'notes' and field.name != 'date_sequenced' and field.name != 'sequencing_platform' and field.name != 'sequencing_run_id' %}
                                 <div class="form-group mb-3">
                                     <label for="{{ field.id_for_label }}" class="font-weight-bold">{{ field.label }}</label>
                                     {{ field }}
@@ -82,17 +82,6 @@
                             {% endif %}
                             {% if form.freezer_ID.errors %}
                                 <div class="text-danger small">{{ form.freezer_ID.errors }}</div>
-                            {% endif %}
-                        </div>
-                        
-                        <div class="form-group mb-3">
-                            <label for="{{ form.rack_ID.id_for_label }}" class="font-weight-bold">Rack</label>
-                            {{ form.rack_ID }}
-                            {% if form.rack_ID.help_text %}
-                                <small class="form-text text-muted">{{ form.rack_ID.help_text }}</small>
-                            {% endif %}
-                            {% if form.rack_ID.errors %}
-                                <div class="text-danger small">{{ form.rack_ID.errors }}</div>
                             {% endif %}
                         </div>
                         
