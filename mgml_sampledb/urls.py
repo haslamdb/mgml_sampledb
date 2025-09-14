@@ -67,11 +67,14 @@ urlpatterns = [
     path('libraries/<int:pk>/', views.SequenceLibraryDetailView.as_view(), name='library_detail'),
     
     # Submission confirmation
-    path('sample-submitted/', TemplateView.as_view(template_name='sampletracking/sample_submitted.html'), name='sample_submitted'),
+    path('sample-submitted/', views.SampleSubmittedView.as_view(), name='sample_submitted'),
     
     # Reporting URLs
     path('reports/daily_status/', views.ReportView.as_view(), name='daily_status_report'),
     path('reports/comprehensive/', views.ComprehensiveReportView.as_view(), name='comprehensive_report'),
+
+    # Export URLs
+    path('export/labels/', views.ExportLabelsView.as_view(), name='export_labels'),
 ]
 
 # Serve static files in development

@@ -137,10 +137,7 @@ class CrudeSample(Sample):
         null=True,
         help_text="Additional details about the sample source"
     )
-    barcode_override_used = models.BooleanField(
-        default=False,
-        help_text="Indicates if barcode validation was overridden during registration"
-    )
+    
     
     history = HistoricalRecords()
     
@@ -213,16 +210,15 @@ class Extract(Sample):
         default='DNA',
         help_text="Type of extract"
     )
-    protocol_used = models.CharField(
-        max_length=255, 
-        blank=True, 
-        null=True,
-        help_text="Protocol used for extraction"
-    )
     quality_score = models.FloatField(
         null=True, 
         blank=True,
         help_text="Quality score for this extract (e.g., A260/A280)"
+    )
+    concentration = models.FloatField(
+        null=True,
+        blank=True,
+        help_text="Concentration of the extract in ng/µL"
     )
     
     # New fields for Metabolomics and Antimicrobials
@@ -255,12 +251,26 @@ class Extract(Sample):
     )
     
     # New field for DNA/RNA extracts
+    EXTRACTION_METHOD_CHOICES = [
+        ('PowerFecal Pro DNA', 'PowerFecal Pro DNA'),
+        ('ZymoBIOMICS DNA', 'ZymoBIOMICS DNA'),
+        ('RNeasy PowerMicrobiome', 'RNeasy PowerMicrobiome'),
+        ('ZymoBIOMICS RNA', 'ZymoBIOMICS RNA'),
+        ('AllPrep PowerFecal DNA/RNA', 'AllPrep PowerFecal DNA/RNA'),
+        ('ZymoBIOMICS DNA/RNA', 'ZymoBIOMICS DNA/RNA'),
+        ('Other', 'Other'),
+    ]
     extraction_method = models.CharField(
         max_length=255,
         blank=True,
         null=True,
+        choices=EXTRACTION_METHOD_CHOICES,
+        default='PowerFecal Pro DNA',
         help_text="Extraction method used (for DNA/RNA extracts)"
     )
+
+    def __str__(self):
+        return f"{self.barcode} ({self.parent.parent_barcode.subject_id})"
     
     history = HistoricalRecords()
     

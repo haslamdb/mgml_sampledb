@@ -7,6 +7,11 @@
         <p class="lead">Your sample has been successfully submitted.</p>
         <hr>
         <div class="mt-4">
+            {% if next_url %}
+                <a href="{{ next_url }}" class="btn btn-success me-3">
+                    <i class="fas fa-plus-circle"></i> {{ next_text|default:"Register Another" }}
+                </a>
+            {% endif %}
             <a href="{% url 'home' %}" class="btn btn-primary me-3">Return to Home</a>
             {% if user.is_authenticated %}
                 <a href="{% url 'search' %}" class="btn btn-secondary">Search Samples</a>

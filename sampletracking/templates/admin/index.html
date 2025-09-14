@@ -219,30 +219,16 @@
     <div class="stats-grid">
         <div class="stat-card" style="--card-color: linear-gradient(135deg, #11998e, #38ef7d); animation-delay: 0.1s;">
             <div class="stat-icon">🧪</div>
-            <div class="stat-number">4</div>
+            <div class="stat-number">{{ total_samples }}</div>
             <div class="stat-label">Total Samples</div>
             <div class="stat-description">Active crude samples in the system</div>
         </div>
         
         <div class="stat-card" style="--card-color: linear-gradient(135deg, #667eea, #764ba2); animation-delay: 0.2s;">
             <div class="stat-icon">📈</div>
-            <div class="stat-number">3</div>
+            <div class="stat-number">{{ recent_activity }}</div>
             <div class="stat-label">Recent Activity</div>
             <div class="stat-description">New samples added in last 30 days</div>
-        </div>
-        
-        <div class="stat-card" style="--card-color: linear-gradient(135deg, #f093fb, #f5576c); animation-delay: 0.3s;">
-            <div class="stat-icon">✅</div>
-            <div class="stat-number">2</div>
-            <div class="stat-label">Available</div>
-            <div class="stat-description">Samples ready for processing</div>
-        </div>
-        
-        <div class="stat-card" style="--card-color: linear-gradient(135deg, #ffecd2, #fcb69f); animation-delay: 0.4s;">
-            <div class="stat-icon">⚠️</div>
-            <div class="stat-number">2</div>
-            <div class="stat-label">Attention Needed</div>
-            <div class="stat-description">Barcode overrides requiring review</div>
         </div>
     </div>
     {% endif %}

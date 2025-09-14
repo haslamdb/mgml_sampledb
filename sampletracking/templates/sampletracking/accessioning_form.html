@@ -275,25 +275,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Real-time barcode validation
     const barcodeInput = document.getElementById('id_barcode');
     const subjectIdInput = document.getElementById('id_subject_id');
-    const overrideCheckbox = document.getElementById('id_override_barcode_check');
     
     function validateBarcode() {
         // Skip validation if override is checked
-        if (overrideCheckbox && overrideCheckbox.checked) {
-            barcodeInput.classList.remove('is-valid', 'is-invalid');
-            const existingFeedback = barcodeInput.parentElement.querySelector('.barcode-feedback');
-            if (existingFeedback) {
-                existingFeedback.remove();
-            }
-            
-            // Add override indicator
-            const overrideDiv = document.createElement('div');
-            overrideDiv.className = 'text-info small barcode-feedback mt-1';
-            overrideDiv.innerHTML = '<i class="fas fa-info-circle"></i> Barcode validation overridden';
-            barcodeInput.parentElement.appendChild(overrideDiv);
-            return;
-        }
-        
         const barcode = barcodeInput.value.toUpperCase();
         const subjectId = subjectIdInput.value.toUpperCase();
         
@@ -350,11 +334,24 @@ document.addEventListener('DOMContentLoaded', function() {
         barcodeInput.addEventListener('blur', validateBarcode);
         subjectIdInput.addEventListener('blur', validateBarcode);
     }
-    
-    // Add listener for override checkbox
-    if (overrideCheckbox) {
-        overrideCheckbox.addEventListener('change', validateBarcode);
+
+    // Logic for auto-creating aliquot
+    const autoCreateCheckbox = document.getElementById('id_auto_create_aliquot');
+    const aliquotBarcodeField = document.querySelector('#div_id_aliquot_barcode'); // Crispy forms wraps fields in a div
+
+    function toggleAliquotBarcode() {
+        if (aliquotBarcodeField) {
+            aliquotBarcodeField.style.display = autoCreateCheckbox.checked ? 'block' : 'none';
+        }
+    }
+
+    // Initial state on page load
+    if(autoCreateCheckbox) {
+        toggleAliquotBarcode();
+        // Listen for changes
+        autoCreateCheckbox.addEventListener('change', toggleAliquotBarcode);
     }
 });
 </script>
+{% endblock %}ript>
 {% endblock %}

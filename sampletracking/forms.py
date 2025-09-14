@@ -18,12 +18,18 @@ class SampleForm(forms.ModelForm):
     """
     class Meta:
         model = Sample
-        fields = ['barcode', 'date_created', 'status', 'freezer_ID', 'rack_ID', 'container_type', 'box_ID', 'well_ID', 'notes']
+        fields = ['barcode', 'date_created', 'status', 'freezer_ID', 'container_type', 'box_ID', 'well_ID', 'notes']
         widgets = {
             'date_created': DateInput(attrs={'class': 'form-control'}),
             'status': forms.Select(attrs={'class': 'form-control'}),
             'notes': forms.Textarea(attrs={'rows': 2, 'class': 'form-control'}),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if not self.instance.pk:  # Only set initial for new records
+            self.fields['date_created'].initial = timezone.now().date()
+            self.fields['status'].initial = 'AVAILABLE'
     
     def clean_barcode(self):
         """
@@ -55,6 +61,18 @@ class AccessioningForm(forms.ModelForm):
         label="Override barcode validation",
         help_text="Check this if using generic pre-printed barcodes not specific to this subject",
         widget=forms.CheckboxInput(attrs={'class': 'form-check-input'})
+    )
+    auto_create_aliquot = forms.BooleanField(
+        required=False,
+        label="Automatically create an aliquot for this sample",
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input', 'id': 'auto_create_aliquot_checkbox'})
+    )
+    aliquot_barcode = forms.CharField(
+        max_length=255,
+        required=False,
+        label="Aliquot Barcode",
+        help_text="Scan the barcode for the aliquot tube.",
+        widget=forms.TextInput(attrs={'class': 'form-control'})
     )
     
     class Meta:
@@ -97,15 +115,18 @@ class AccessioningForm(forms.ModelForm):
         cleaned_data = super().clean()
         barcode = cleaned_data.get('barcode', '')
         subject_id = cleaned_data.get('subject_id', '')
-        override = cleaned_data.get('override_barcode_check', False)
         
-        # Only validate if override is not checked
-        if barcode and subject_id and not override:
-            # Check if the barcode starts with the subject ID
-            if not barcode.upper().startswith(subject_id.upper()):
-                error_msg = "Entered Subject ID does not match the barcode Subject ID. Please check that the sample collection barcode is for the correct Subject"
-                self.add_error('barcode', error_msg)
-                self.add_error('subject_id', error_msg)
+        auto_create = cleaned_data.get('auto_create_aliquot')
+        aliquot_barcode = cleaned_data.get('aliquot_barcode')
+
+        if auto_create and not aliquot_barcode:
+            self.add_error('aliquot_barcode', 'This field is required when automatically creating an aliquot.')
+
+        if aliquot_barcode:
+            if barcode and aliquot_barcode == barcode:
+                self.add_error('aliquot_barcode', 'Aliquot barcode cannot be the same as the crude sample barcode.')
+            if Sample.objects.filter(barcode=aliquot_barcode).exists():
+                self.add_error('aliquot_barcode', f'A sample with barcode "{aliquot_barcode}" already exists.')
         
         return cleaned_data
 
@@ -192,7 +213,7 @@ class ExtractForm(SampleForm):
     class Meta(SampleForm.Meta):
         model = Extract
         fields = SampleForm.Meta.fields + [
-            'parent', 'extract_type', 'protocol_used', 'quality_score',
+            'parent', 'extract_type', 'quality_score', 'concentration',
             'extraction_method', 'sample_weight', 'extraction_solvent', 
             'solvent_volume', 'extract_volume'
         ]
@@ -200,9 +221,9 @@ class ExtractForm(SampleForm):
             **SampleForm.Meta.widgets,
             'date_created': DateInput(attrs={'type': 'date', 'class': 'form-control'}),
             'extract_type': forms.Select(attrs={'class': 'form-select'}),
-            'protocol_used': forms.TextInput(attrs={'class': 'form-control'}),
             'quality_score': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
-            'extraction_method': forms.TextInput(attrs={'class': 'form-control'}),
+            'concentration': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+            'extraction_method': forms.Select(attrs={'class': 'form-select'}),
             'sample_weight': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.001'}),
             'extraction_solvent': forms.TextInput(attrs={'class': 'form-control'}),
             'solvent_volume': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),

@@ -241,21 +241,7 @@
             </div>
           </li>
           {% if user.is_authenticated %}
-            {% for group in user.groups.all %}
-              {% if group.name == "Sample Collectors" %}
-                <li class="nav-item">
-                  <a class="nav-link" href="{% url 'collection_landing' %}">
-                    <i class="fas fa-vial"></i> Collection Portal
-                  </a>
-                </li>
-              {% endif %}
-            {% endfor %}
             {% if user.is_staff %}
-              <li class="nav-item">
-                <a class="nav-link" href="{% url 'collection_landing' %}">
-                  <i class="fas fa-vial"></i> Collection Portal
-                </a>
-              </li>
               <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle" href="#" id="reportsDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                   <i class="fas fa-chart-bar"></i> Reports

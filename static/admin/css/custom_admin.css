@@ -470,3 +470,36 @@ fieldset .description {
     color: #721c24;
     border-left: 4px solid #dc3545;
 }
+
+/* Admin index app list button styles */
+#content-main .app-list th a {
+    display: block;
+    padding: 10px 15px;
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    color: #495057;
+    text-decoration: none;
+    transition: all 0.2s ease-in-out;
+}
+
+#content-main .app-list th a:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    background-color: #667eea;
+    color: white;
+    border-color: #667eea;
+}
+
+#content-main .app-list caption {
+    font-size: 1.2em;
+    font-weight: 700;
+    padding-bottom: 10px;
+}
+
+#content-main .app-list .addlink,
+#content-main .app-list .changelink {
+    font-size: 14px;
+}

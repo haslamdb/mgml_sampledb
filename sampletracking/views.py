@@ -1,4 +1,4 @@
-from django.views.generic import ListView, CreateView, UpdateView, DetailView, TemplateView, FormView
+from django.views.generic import ListView, CreateView, UpdateView, DetailView, TemplateView, FormView, View
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.contrib.auth.decorators import login_required
 from django.urls import reverse_lazy, reverse
@@ -9,6 +9,8 @@ from django.db.models import Q
 from datetime import datetime, time
 import logging
 import re
+import csv
+from django.http import HttpResponse
 
 from .models import CrudeSample, Aliquot, Extract, SequenceLibrary
 from .forms import (
@@ -67,7 +69,9 @@ class CrudeSampleCreateView(PermissionRequiredMixin, CreateView):
     model = CrudeSample
     form_class = CrudeSampleForm
     template_name = 'sampletracking/crude_sample_form.html'
-    success_url = reverse_lazy('sample_submitted')
+
+    def get_success_url(self):
+        return f"{reverse('sample_submitted')}?next_url=create_crude_sample&next_text=Create Another Crude Sample"
     
     def form_valid(self, form):
         # Log sample creation
@@ -124,8 +128,10 @@ class AccessioningCreateView(LoginRequiredMixin, PermissionRequiredMixin, Create
     model = CrudeSample
     form_class = AccessioningForm
     template_name = 'sampletracking/accessioning_form.html'
-    success_url = reverse_lazy('sample_submitted')
     permission_required = 'sampletracking.add_crudesample'
+
+    def get_success_url(self):
+        return f"{reverse('sample_submitted')}?next_url=accessioning_create&next_text=Register Another Sample"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -141,18 +147,28 @@ class AccessioningCreateView(LoginRequiredMixin, PermissionRequiredMixin, Create
         form.instance.date_created = timezone.now().date()
         form.instance.status = 'AWAITING_RECEIPT'
         
-        # Track if barcode validation was overridden
-        if form.cleaned_data.get('override_barcode_check'):
-            form.instance.barcode_override_used = True
-            existing_notes = form.instance.notes or ''
-            override_note = "[BARCODE OVERRIDE] Generic barcode used - Subject ID validation was overridden during registration."
-            form.instance.notes = f"{override_note}\n{existing_notes}".strip()
+        # Save the crude sample first
+        response = super().form_valid(form)
+
+        # Check if we need to auto-create an aliquot
+        if form.cleaned_data.get('auto_create_aliquot'):
+            crude_sample = self.object
+            aliquot_barcode = form.cleaned_data.get('aliquot_barcode')
             
-            # Log barcode override as security event
-            logger.warning(f"Barcode validation override used by user {self.request.user.username} for sample {form.instance.barcode}")
-        
+            # Create the aliquot
+            Aliquot.objects.create(
+                parent_barcode=crude_sample,
+                barcode=aliquot_barcode,
+                date_created=crude_sample.collection_date, # Match collection date
+                status='AWAITING_RECEIPT',
+                created_by=self.request.user,
+                updated_by=self.request.user
+            )
+            logger.info(f"Automatically created aliquot {aliquot_barcode} for crude sample {crude_sample.barcode} by user {self.request.user.username}")
+            messages.success(self.request, f"Aliquot {aliquot_barcode} was also created automatically.")
+
         messages.success(self.request, f"Sample {form.instance.barcode} registered and is awaiting receipt.")
-        return super().form_valid(form)
+        return response
 
 
 class ReceiveSampleView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
@@ -283,7 +299,9 @@ class AliquotCreateView(PermissionRequiredMixin, CreateView):
     model = Aliquot
     form_class = AliquotForm
     template_name = 'sampletracking/aliquot_form.html'
-    success_url = reverse_lazy('sample_submitted')
+
+    def get_success_url(self):
+        return f"{reverse('sample_submitted')}?next_url=create_aliquot&next_text=Create Another Aliquot"
     
     def form_valid(self, form):
         form.instance.created_by = self.request.user
@@ -333,7 +351,9 @@ class ExtractCreateView(PermissionRequiredMixin, CreateView):
     model = Extract
     form_class = ExtractForm
     template_name = 'sampletracking/extract_form.html'
-    success_url = reverse_lazy('sample_submitted')
+
+    def get_success_url(self):
+        return f"{reverse('sample_submitted')}?next_url=create_extract&next_text=Create Another Extract"
     
     def form_valid(self, form):
         form.instance.created_by = self.request.user
@@ -383,7 +403,9 @@ class SequenceLibraryCreateView(PermissionRequiredMixin, CreateView):
     model = SequenceLibrary
     form_class = SequenceLibraryForm
     template_name = 'sampletracking/sequence_library_form.html'
-    success_url = reverse_lazy('sample_submitted')
+
+    def get_success_url(self):
+        return f"{reverse('sample_submitted')}?next_url=create_sequence_library&next_text=Create Another Library"
     
     def form_valid(self, form):
         form.instance.created_by = self.request.user
@@ -652,3 +674,61 @@ class ComprehensiveReportView(LoginRequiredMixin, TemplateView):
         })
         
         return context
+
+class SampleSubmittedView(TemplateView):
+    """
+    A generic success page that can link back to the creation form.
+    """
+    template_name = 'sampletracking/sample_submitted.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        next_url_name = self.request.GET.get('next_url')
+        next_text = self.request.GET.get('next_text')
+        
+        if next_url_name:
+            try:
+                context['next_url'] = reverse(next_url_name)
+                context['next_text'] = next_text or "Go Back"
+            except Exception:
+                # Fail silently if the URL name is invalid
+                pass
+        return context
+
+class ExportLabelsView(LoginRequiredMixin, View):
+    def post(self, request, *args, **kwargs):
+        sample_pks = request.POST.getlist('selected_samples')
+        model_type = request.POST.get('model_type')
+
+        if not sample_pks:
+            messages.error(request, "You didn\'t select any samples to export.")
+            # Redirect back to the referring page, or a default
+            return redirect(request.META.get('HTTP_REFERER', 'home'))
+
+        response = HttpResponse(
+            content_type='text/csv',
+            headers={'Content-Disposition': 'attachment; filename="sample_labels.csv"'},
+        )
+
+        writer = csv.writer(response)
+        writer.writerow(['SubjectID', 'Barcode'])
+
+        queryset = None
+        if model_type == 'crudesample':
+            queryset = CrudeSample.objects.filter(pk__in=sample_pks)
+            for sample in queryset:
+                writer.writerow([sample.subject_id, sample.barcode])
+        elif model_type == 'aliquot':
+            queryset = Aliquot.objects.filter(pk__in=sample_pks).select_related('parent_barcode')
+            for sample in queryset:
+                writer.writerow([sample.parent_barcode.subject_id, sample.barcode])
+        elif model_type == 'extract':
+            queryset = Extract.objects.filter(pk__in=sample_pks).select_related('parent__parent_barcode')
+            for sample in queryset:
+                writer.writerow([sample.parent.parent_barcode.subject_id, sample.barcode])
+        elif model_type == 'sequencelibrary':
+            queryset = SequenceLibrary.objects.filter(pk__in=sample_pks).select_related('parent__parent__parent_barcode')
+            for sample in queryset:
+                writer.writerow([sample.parent.parent.parent_barcode.subject_id, sample.barcode])
+
+        return response
