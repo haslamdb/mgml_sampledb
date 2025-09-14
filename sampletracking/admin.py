@@ -29,7 +29,7 @@ class MyAdminSite(AdminSite):
         total_samples = CrudeSample.objects.count()
         
         # Recent Activity (last 30 days)
-        thirty_days_ago = timezone.now() - timedelta(days=30)
+        thirty_days_ago = timezone.localtime() - timedelta(days=30)
         recent_activity = CrudeSample.objects.filter(created_at__gte=thirty_days_ago).count()
         
         # Available Samples
@@ -90,8 +90,8 @@ class RecentSamplesFilter(admin.SimpleListFilter):
     def queryset(self, request, queryset):
         from datetime import timedelta
         from django.utils import timezone
-        now = timezone.now()
-        
+        now = timezone.localtime()
+
         if self.value() == 'today':
             return queryset.filter(date_created=now.date())
         elif self.value() == 'week':
@@ -194,7 +194,7 @@ class SampleAdmin(admin.ModelAdmin):
     def date_display(self, obj):
         from datetime import timedelta
         from django.utils import timezone
-        now = timezone.now().date()
+        now = timezone.localtime().date()
         created_date = obj.date_created
         if created_date == now:
             time_str = "Today"
