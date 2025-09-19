@@ -55,16 +55,19 @@ urlpatterns = [
     path('aliquots/', views.AliquotListView.as_view(), name='aliquot_list'),
     path('aliquots/create/', views.AliquotCreateView.as_view(), name='create_aliquot'),
     path('aliquots/<int:pk>/', views.AliquotDetailView.as_view(), name='aliquot_detail'),
+    path('aliquots/<int:pk>/edit/', views.AliquotUpdateView.as_view(), name='aliquot_update'),
     
     # Extract URLs
     path('extracts/', views.ExtractListView.as_view(), name='extract_list'),
     path('extracts/create/', views.ExtractCreateView.as_view(), name='create_extract'),
     path('extracts/<int:pk>/', views.ExtractDetailView.as_view(), name='extract_detail'),
+    path('extracts/<int:pk>/edit/', views.ExtractUpdateView.as_view(), name='extract_update'),
     
     # Sequence Library URLs
     path('libraries/', views.SequenceLibraryListView.as_view(), name='library_list'),
     path('libraries/create/', views.SequenceLibraryCreateView.as_view(), name='create_sequence_library'),
     path('libraries/<int:pk>/', views.SequenceLibraryDetailView.as_view(), name='library_detail'),
+    path('libraries/<int:pk>/edit/', views.SequenceLibraryUpdateView.as_view(), name='library_update'),
     
     # Submission confirmation
     path('sample-submitted/', views.SampleSubmittedView.as_view(), name='sample_submitted'),

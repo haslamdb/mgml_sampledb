@@ -329,6 +329,24 @@ class AliquotDetailView(PermissionRequiredMixin, DetailView):
         return context
 
 
+class AliquotUpdateView(PermissionRequiredMixin, UpdateView):
+    """
+    Update an existing aliquot
+    """
+    permission_required = 'sampletracking.change_aliquot'
+    model = Aliquot
+    form_class = AliquotForm
+    template_name = 'sampletracking/aliquot_form.html'
+    
+    def get_success_url(self):
+        return reverse_lazy('aliquot_detail', kwargs={'pk': self.object.pk})
+    
+    def form_valid(self, form):
+        form.instance.updated_by = self.request.user
+        messages.success(self.request, "Aliquot updated successfully.")
+        return super().form_valid(form)
+
+
 class ExtractListView(PermissionRequiredMixin, ListView):
     """
     Display a list of all extracts
@@ -381,6 +399,24 @@ class ExtractDetailView(PermissionRequiredMixin, DetailView):
         return context
 
 
+class ExtractUpdateView(PermissionRequiredMixin, UpdateView):
+    """
+    Update an existing extract
+    """
+    permission_required = 'sampletracking.change_extract'
+    model = Extract
+    form_class = ExtractForm
+    template_name = 'sampletracking/extract_form.html'
+    
+    def get_success_url(self):
+        return reverse_lazy('extract_detail', kwargs={'pk': self.object.pk})
+    
+    def form_valid(self, form):
+        form.instance.updated_by = self.request.user
+        messages.success(self.request, "Extract updated successfully.")
+        return super().form_valid(form)
+
+
 class SequenceLibraryListView(PermissionRequiredMixin, ListView):
     """
     Display a list of all sequence libraries
@@ -422,6 +458,24 @@ class SequenceLibraryDetailView(PermissionRequiredMixin, DetailView):
     model = SequenceLibrary
     template_name = 'sampletracking/sequence_library_detail.html'
     context_object_name = 'library'
+
+
+class SequenceLibraryUpdateView(PermissionRequiredMixin, UpdateView):
+    """
+    Update an existing sequence library
+    """
+    permission_required = 'sampletracking.change_sequencelibrary'
+    model = SequenceLibrary
+    form_class = SequenceLibraryForm
+    template_name = 'sampletracking/sequence_library_form.html'
+    
+    def get_success_url(self):
+        return reverse_lazy('library_detail', kwargs={'pk': self.object.pk})
+    
+    def form_valid(self, form):
+        form.instance.updated_by = self.request.user
+        messages.success(self.request, "Sequence library updated successfully.")
+        return super().form_valid(form)
 
 
 class SampleSearchView(PermissionRequiredMixin, ListView):

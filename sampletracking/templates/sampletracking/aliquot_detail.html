@@ -109,6 +109,7 @@
             {% endif %}
             
             <div class="mt-4">
+                <a href="{% url 'aliquot_update' aliquot.pk %}" class="btn btn-warning">Edit</a>
                 <a href="{% url 'aliquot_list' %}" class="btn btn-secondary">Back to List</a>
             </div>
         </div>

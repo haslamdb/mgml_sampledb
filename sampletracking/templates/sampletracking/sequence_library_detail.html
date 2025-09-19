@@ -143,6 +143,7 @@
             {% endif %}
             
             <div class="mt-4">
+                <a href="{% url 'library_update' library.pk %}" class="btn btn-warning">Edit</a>
                 <a href="{% url 'library_list' %}" class="btn btn-secondary">Back to List</a>
             </div>
         </div>
