@@ -139,10 +139,10 @@ class SampleAdmin(admin.ModelAdmin):
     """
     Enhanced base admin configuration for all sample types with better formatting
     """
-    list_display = ('barcode_display', 'status_badge', 'date_display', 'created_by_display', 'last_updated')
+    list_display = ('sample_id_display', 'barcode_display', 'status_badge', 'date_display', 'created_by_display', 'last_updated')
     list_filter = (StatusFilter, RecentSamplesFilter, 'created_by')
-    search_fields = ('barcode', 'notes')
-    readonly_fields = ('created_at', 'updated_at', 'created_by', 'updated_by')
+    search_fields = ('barcode', 'sample_id', 'base_id', 'notes')
+    readonly_fields = ('sample_id', 'base_id', 'created_at', 'updated_at', 'created_by', 'updated_by')
     date_hierarchy = 'date_created'
     actions = [mark_archived, mark_available, mark_contaminated]
     list_per_page = 25
@@ -171,7 +171,18 @@ class SampleAdmin(admin.ModelAdmin):
         )
     barcode_display.short_description = '🏷️ Barcode'
     barcode_display.admin_order_field = 'barcode'
-    
+
+    def sample_id_display(self, obj):
+        """Display sample ID with formatting"""
+        if obj.sample_id:
+            return format_html(
+                '<span style="color: #007bff; font-weight: bold; font-family: monospace;">{}</span>',
+                obj.sample_id
+            )
+        return format_html('<span style="color: #999;">-</span>')
+    sample_id_display.short_description = '🧬 Sample ID'
+    sample_id_display.admin_order_field = 'sample_id'
+
     def status_badge(self, obj):
         status_config = {
             'AWAITING_RECEIPT': {'color': '#17a2b8', 'icon': '⏳', 'bg': '#d1ecf1'},
@@ -243,7 +254,7 @@ class SampleAdmin(admin.ModelAdmin):
 
 @admin.register(CrudeSample)
 class CrudeSampleAdmin(SampleAdmin):
-    list_display = ('barcode_display', 'status_badge', 'subject_display', 'source_display', 
+    list_display = ('sample_id_display', 'barcode_display', 'status_badge', 'subject_display', 'source_display',
                    'collection_display', 'aliquot_count_badge')
     list_filter = SampleAdmin.list_filter + ('sample_source',)
     search_fields = SampleAdmin.search_fields + ('subject_id', 'source_details')
@@ -331,7 +342,7 @@ class CrudeSampleAdmin(SampleAdmin):
 
 @admin.register(Aliquot)
 class AliquotAdmin(SampleAdmin):
-    list_display = ('barcode_display', 'status_badge', 'parent_link', 'volume_display', 
+    list_display = ('sample_id_display', 'barcode_display', 'status_badge', 'parent_link', 'volume_display',
                    'concentration_display', 'extract_count_badge')
     list_filter = SampleAdmin.list_filter
     search_fields = SampleAdmin.search_fields
@@ -411,7 +422,7 @@ class AliquotAdmin(SampleAdmin):
 
 @admin.register(Extract)
 class ExtractAdmin(SampleAdmin):
-    list_display = ('barcode_display', 'status_badge', 'parent_link', 'extract_type_display', 
+    list_display = ('sample_id_display', 'barcode_display', 'status_badge', 'parent_link', 'extract_type_display',
                    'quality_display', 'library_count_badge')
     list_filter = SampleAdmin.list_filter + ('extract_type',)
     search_fields = SampleAdmin.search_fields + ('extraction_method', 'extraction_solvent')
@@ -506,7 +517,7 @@ class ExtractAdmin(SampleAdmin):
 
 @admin.register(SequenceLibrary)
 class SequenceLibraryAdmin(SampleAdmin):
-    list_display = ('barcode_display', 'status_badge', 'parent_link', 'library_type_display', 
+    list_display = ('sample_id_display', 'barcode_display', 'status_badge', 'parent_link', 'library_type_display',
                    'plate_well_display', 'sequencing_status_badge')
     list_filter = SampleAdmin.list_filter + ('library_type', 'date_sequenced')
     search_fields = SampleAdmin.search_fields + ('sequencing_run_id', 'sequencing_platform', 'well')

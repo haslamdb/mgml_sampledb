@@ -3,6 +3,19 @@ from django.utils import timezone
 from django.core.validators import RegexValidator
 from django.contrib.auth.models import User
 from simple_history.models import HistoricalRecords
+from datetime import date
+
+# Dictionary to map the full sample type name to a 2-letter code.
+TYPE_CODES = {
+    'Stool': 'ST',
+    'Oral': 'OR',
+    'Nasal': 'NA',
+    'Skin': 'SK',
+    'Blood': 'BL',
+    'Tissue': 'TI',
+    'Isolate': 'IS',
+    'Other': 'OT',
+}
 
 class TimeStampedModel(models.Model):
     """
@@ -40,10 +53,25 @@ class Sample(TimeStampedModel):
     )
     
     barcode = models.CharField(
-        max_length=255, 
-        unique=True, 
+        max_length=255,
+        unique=True,
         validators=[barcode_validator],
         help_text="Unique identifier for this sample (auto-generated for plate storage)"
+    )
+    base_id = models.CharField(
+        max_length=20,
+        blank=True,
+        editable=False,
+        help_text="Base ID shared among related samples (e.g., ST-241219-001)",
+        null=True
+    )
+    sample_id = models.CharField(
+        max_length=30,
+        unique=True,
+        blank=True,
+        editable=False,
+        help_text="Full unique sample ID (e.g., ST-241219-001-CS)",
+        null=True
     )
     date_created = models.DateField(
         help_text="Date when the sample was created"
@@ -105,12 +133,13 @@ class CrudeSample(Sample):
     Represents the initial crude sample before any processing.
     """
     SAMPLE_SOURCE_CHOICES = [
-        ('Stool', 'Stool'),  
+        ('Stool', 'Stool'),
         ("Oral", "Oral Swab"),
         ('Nasal', 'Nasal Swab'),
         ('Skin', 'Skin Swab'),
         ('Blood', 'Blood'),
         ('Tissue', 'Tissue'),
+        ('Isolate', 'Isolate'),
         ('Other', 'Other')
     ]
     
@@ -129,12 +158,44 @@ class CrudeSample(Sample):
         help_text="Source of the sample"
     )
     source_details = models.TextField(
-        blank=True, 
+        blank=True,
         null=True,
         help_text="Additional details about the sample source"
     )
-    
-    
+
+    def save(self, *args, **kwargs):
+        if not self.pk and not self.sample_id:  # Only on creation
+            # 1. Generate base_id
+            type_code = TYPE_CODES.get(self.sample_source, 'XX')
+            date_str = self.collection_date.strftime('%y%m%d')
+            prefix = f'{type_code}-{date_str}'
+
+            # Find the last sample with this date prefix
+            last_sample = CrudeSample.objects.filter(
+                base_id__startswith=prefix
+            ).order_by('base_id').last()
+
+            if last_sample and last_sample.base_id:
+                # Extract sequence number from base_id like 'ST-241219-001'
+                parts = last_sample.base_id.split('-')
+                if len(parts) >= 3:
+                    try:
+                        last_seq = int(parts[2])
+                        next_seq = last_seq + 1
+                    except ValueError:
+                        next_seq = 1
+                else:
+                    next_seq = 1
+            else:
+                next_seq = 1
+
+            self.base_id = f'{prefix}-{str(next_seq).zfill(3)}'
+
+            # 2. Generate full sample_id
+            self.sample_id = f'{self.base_id}-CS'
+
+        super().save(*args, **kwargs)
+
     history = HistoricalRecords()
     
     class Meta:
@@ -164,11 +225,20 @@ class Aliquot(Sample):
         help_text="Volume of the aliquot in microliters"
     )
     concentration = models.FloatField(
-        null=True, 
+        null=True,
         blank=True,
         help_text="Concentration of the aliquot"
     )
-    
+
+    def save(self, *args, **kwargs):
+        if not self.pk and not self.sample_id:  # Only on creation
+            if self.parent_barcode:
+                self.base_id = self.parent_barcode.base_id
+                # Get the count of existing aliquots for the same parent
+                sibling_count = Aliquot.objects.filter(parent_barcode=self.parent_barcode).count()
+                self.sample_id = f'{self.base_id}-AL-{sibling_count + 1}'
+        super().save(*args, **kwargs)
+
     history = HistoricalRecords()
     
     class Meta:
@@ -265,8 +335,17 @@ class Extract(Sample):
         help_text="Extraction method used (for DNA/RNA extracts)"
     )
 
+    def save(self, *args, **kwargs):
+        if not self.pk and not self.sample_id:  # Only on creation
+            if self.parent:
+                self.base_id = self.parent.base_id
+                # Get the count of existing extracts for the same parent
+                sibling_count = Extract.objects.filter(parent=self.parent).count()
+                self.sample_id = f'{self.base_id}-EX-{sibling_count + 1}'
+        super().save(*args, **kwargs)
+
     def __str__(self):
-        return f"{self.barcode} ({self.parent.parent_barcode.subject_id})"
+        return self.sample_id if self.sample_id else self.barcode
     
     history = HistoricalRecords()
     
@@ -482,6 +561,18 @@ class SequenceLibrary(Sample):
         help_text="Well position, e.g., A1, H12"
     )
     
+    def save(self, *args, **kwargs):
+        if not self.pk and not self.sample_id:  # Only on creation
+            if self.parent:
+                self.base_id = self.parent.base_id
+                # Get the count of existing libraries for the same parent
+                sibling_count = SequenceLibrary.objects.filter(parent=self.parent).count()
+                self.sample_id = f'{self.base_id}-SL-{sibling_count + 1}'
+        super(Sample, self).save(*args, **kwargs)
+
+    def __str__(self):
+        return self.sample_id if self.sample_id else self.barcode
+
     history = HistoricalRecords()
     
     class Meta:

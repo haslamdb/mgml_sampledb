@@ -1,0 +1,16 @@
+Sample_ID,Base_ID,Barcode,Subject_ID,Sample_Source,Collection_Date,Date_Created,Freezer_ID,Box_ID,Well_ID,Status,Created_By,Notes
+IS-250812-001-CS,IS-250812-001,3534224395,Nissle Stock-1,Isolate,2025-08-12,2025-08-12,,,,AVAILABLE,david,[BARCODE OVERRIDE] Generic barcode used - Subject ID validation was overridden during registration.
+IS-250812-002-CS,IS-250812-002,3534224348,Nissle Stock-2,Isolate,2025-08-12,2025-08-12,,,,AVAILABLE,david,[BARCODE OVERRIDE] Generic barcode used - Subject ID validation was overridden during registration.
+IS-250812-003-CS,IS-250812-003,3534224346,Nissle Control-4,Isolate,2025-08-12,2025-08-12,,,,AVAILABLE,david,[BARCODE OVERRIDE] Generic barcode used - Subject ID validation was overridden during registration.
+IS-250812-004-CS,IS-250812-004,3534224375,Nissle Control-2,Isolate,2025-08-12,2025-08-12,,,,AVAILABLE,david,[BARCODE OVERRIDE] Generic barcode used - Subject ID validation was overridden during registration.
+IS-250812-005-CS,IS-250812-005,3534224380,Nissle Control-3,Isolate,2025-08-12,2025-08-12,,,,AVAILABLE,david,[BARCODE OVERRIDE] Generic barcode used - Subject ID validation was overridden during registration.
+IS-250812-006-CS,IS-250812-006,3534224407,Nissle Control-1,Isolate,2025-08-12,2025-08-12,,,,AVAILABLE,david,[BARCODE OVERRIDE] Generic barcode used - Subject ID validation was overridden during registration.
+IS-250913-001-CS,IS-250913-001,3534225468,Nissle Preg-1,Isolate,2025-09-13,2025-09-13,,,,AVAILABLE,david,[BARCODE OVERRIDE] Generic barcode used - Subject ID validation was overridden during registration.
+IS-250913-002-CS,IS-250913-002,3534225476,Nissle Preg-2,Isolate,2025-09-13,2025-09-13,,,,AVAILABLE,david,[BARCODE OVERRIDE] Generic barcode used - Subject ID validation was overridden during registration.
+IS-250913-003-CS,IS-250913-003,3534225492,CFT073/rpoS,Isolate,2025-09-13,2025-09-13,,,,AVAILABLE,david,[BARCODE OVERRIDE] Generic barcode used - Subject ID validation was overridden during registration.
+IS-250913-004-CS,IS-250913-004,3534225484,Nissle Mark S,Isolate,2025-09-13,2025-09-13,,,,AVAILABLE,david,[BARCODE OVERRIDE] Generic barcode used - Subject ID validation was overridden during registration.
+IS-250918-001-CS,IS-250918-001,3534225513,Nissle Preg-9,Isolate,2025-09-18,2025-09-18,,,,AVAILABLE,david,Overnight culture Preg-9
+IS-250918-002-CS,IS-250918-002,3534224381,Nissle Preg-11,Isolate,2025-09-18,2025-09-18,,,,AVAILABLE,david,
+IS-250918-003-CS,IS-250918-003,3534224342,MS8707,Isolate,2025-09-18,2025-09-18,,,,AVAILABLE,david,
+IS-250918-004-CS,IS-250918-004,3534224374,MS25509,Isolate,2025-09-18,2025-09-18,,,,AVAILABLE,david,This is CFT073/ompA from Mark S
+IS-250919-001-CS,IS-250919-001,TEST-ISO-001,TEST-SUB-001,Isolate,2025-09-19,2025-09-19,TEST-F1,TEST-B1,A1,Active,david,
