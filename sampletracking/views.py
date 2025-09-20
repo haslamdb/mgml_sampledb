@@ -14,12 +14,14 @@ from django.http import HttpResponse
 
 from .models import CrudeSample, Aliquot, Extract, SequenceLibrary
 from .forms import (
-    CrudeSampleForm, 
-    AliquotForm, 
-    ExtractForm, 
+    CrudeSampleForm,
+    AliquotForm,
+    ExtractForm,
     SequenceLibraryForm,
     AccessioningForm,
-    ReportForm
+    ReportForm,
+    QuickAliquotForm,
+    AdvancedFilterForm
 )
 
 # Set up logging for security events
@@ -337,14 +339,86 @@ class AliquotUpdateView(PermissionRequiredMixin, UpdateView):
     model = Aliquot
     form_class = AliquotForm
     template_name = 'sampletracking/aliquot_form.html'
-    
+
     def get_success_url(self):
         return reverse_lazy('aliquot_detail', kwargs={'pk': self.object.pk})
-    
+
     def form_valid(self, form):
         form.instance.updated_by = self.request.user
         messages.success(self.request, "Aliquot updated successfully.")
         return super().form_valid(form)
+
+
+class QuickAliquotCreateView(PermissionRequiredMixin, FormView):
+    """
+    Create both a crude sample and aliquot in one step
+    """
+    permission_required = ['sampletracking.add_crudesample', 'sampletracking.add_aliquot']
+    form_class = QuickAliquotForm
+    template_name = 'sampletracking/quick_aliquot_form.html'
+
+    def form_valid(self, form):
+        """
+        Create both crude sample and aliquot from the form data
+        """
+        data = form.cleaned_data
+
+        try:
+            # Create crude sample
+            crude_sample = CrudeSample(
+                barcode=data['crude_barcode'],
+                subject_id=data['subject_id'],
+                collection_date=data['collection_date'],
+                sample_source=data['sample_source'],
+                date_created=timezone.now().date(),
+                status='AVAILABLE' if data.get('store_crude_sample', True) else 'IN_USE',
+                freezer_ID=data.get('freezer_ID', ''),
+                box_ID=data.get('box_ID', ''),
+                notes=data.get('notes', ''),
+                created_by=self.request.user,
+                updated_by=self.request.user
+            )
+            crude_sample.save()
+
+            # Create aliquot
+            aliquot = Aliquot(
+                barcode=data['aliquot_barcode'],
+                parent_barcode=crude_sample,
+                volume=data.get('aliquot_volume'),
+                concentration=data.get('aliquot_concentration'),
+                date_created=timezone.now().date(),
+                status='AVAILABLE',
+                freezer_ID=data.get('freezer_ID', ''),
+                box_ID=data.get('box_ID', ''),
+                notes=data.get('notes', ''),
+                created_by=self.request.user,
+                updated_by=self.request.user
+            )
+            aliquot.save()
+
+            # Log the creation
+            logger.info(f"Quick create: crude sample {crude_sample.barcode} and aliquot {aliquot.barcode} by {self.request.user.username}")
+
+            messages.success(
+                self.request,
+                f"Successfully created crude sample ({crude_sample.barcode}) and aliquot ({aliquot.barcode})"
+            )
+
+            # Store the aliquot pk for success URL
+            self.aliquot_pk = aliquot.pk
+
+            return super().form_valid(form)
+
+        except Exception as e:
+            logger.error(f"Error in quick aliquot creation: {str(e)}")
+            messages.error(self.request, f"Error creating samples: {str(e)}")
+            return self.form_invalid(form)
+
+    def get_success_url(self):
+        """
+        Redirect to the aliquot detail page
+        """
+        return reverse('aliquot_detail', kwargs={'pk': self.aliquot_pk})
 
 
 class ExtractListView(PermissionRequiredMixin, ListView):
@@ -537,10 +611,10 @@ class SampleSearchView(PermissionRequiredMixin, ListView):
             results = []
             for sample in crude_samples:
                 results.append({
-                    'type': 'Crude Sample',
+                    'type': 'Parent Sample',
                     'object': sample,
                     'barcode': sample.barcode,
-                    'sample_id': sample.subject_id if sample.subject_id else 'N/A',
+                    'sample_id': sample.sample_id if sample.sample_id else 'N/A',
                     'date': sample.date_created,
                     'url': reverse('crude_sample_detail', kwargs={'pk': sample.pk})
                 })
@@ -549,33 +623,25 @@ class SampleSearchView(PermissionRequiredMixin, ListView):
                     'type': 'Aliquot',
                     'object': sample,
                     'barcode': sample.barcode,
-                    'sample_id': sample.parent_barcode.subject_id if sample.parent_barcode and sample.parent_barcode.subject_id else 'N/A',
+                    'sample_id': sample.sample_id if sample.sample_id else 'N/A',
                     'date': sample.date_created,
                     'url': reverse('aliquot_detail', kwargs={'pk': sample.pk})
                 })
             for sample in extracts:
-                # Get subject_id through parent aliquot -> crude sample chain
-                sample_id = 'N/A'
-                if sample.parent and sample.parent.parent_barcode:
-                    sample_id = sample.parent.parent_barcode.subject_id if sample.parent.parent_barcode.subject_id else 'N/A'
                 results.append({
                     'type': 'Extract',
                     'object': sample,
                     'barcode': sample.barcode,
-                    'sample_id': sample_id,
+                    'sample_id': sample.sample_id if sample.sample_id else 'N/A',
                     'date': sample.date_created,
                     'url': reverse('extract_detail', kwargs={'pk': sample.pk})
                 })
             for sample in libraries:
-                # Get subject_id through parent extract -> aliquot -> crude sample chain
-                sample_id = 'N/A'
-                if sample.parent and sample.parent.parent and sample.parent.parent.parent_barcode:
-                    sample_id = sample.parent.parent.parent_barcode.subject_id if sample.parent.parent.parent_barcode.subject_id else 'N/A'
                 results.append({
                     'type': 'Sequence Library',
                     'object': sample,
                     'barcode': sample.barcode,
-                    'sample_id': sample_id,
+                    'sample_id': sample.sample_id if sample.sample_id else 'N/A',
                     'date': sample.date_created,
                     'url': reverse('library_detail', kwargs={'pk': sample.pk})
                 })
@@ -777,24 +843,233 @@ class ExportLabelsView(LoginRequiredMixin, View):
         )
 
         writer = csv.writer(response)
-        writer.writerow(['SubjectID', 'Barcode'])
+        writer.writerow(['SampleID', 'SubjectID', 'Barcode'])
 
         queryset = None
         if model_type == 'crudesample':
             queryset = CrudeSample.objects.filter(pk__in=sample_pks)
             for sample in queryset:
-                writer.writerow([sample.subject_id, sample.barcode])
+                writer.writerow([sample.sample_id, sample.subject_id, sample.barcode])
         elif model_type == 'aliquot':
             queryset = Aliquot.objects.filter(pk__in=sample_pks).select_related('parent_barcode')
             for sample in queryset:
-                writer.writerow([sample.parent_barcode.subject_id, sample.barcode])
+                subject_id = sample.parent_barcode.subject_id if sample.parent_barcode else ''
+                writer.writerow([sample.sample_id, subject_id, sample.barcode])
         elif model_type == 'extract':
             queryset = Extract.objects.filter(pk__in=sample_pks).select_related('parent__parent_barcode')
             for sample in queryset:
-                writer.writerow([sample.parent.parent_barcode.subject_id, sample.barcode])
+                subject_id = sample.parent.parent_barcode.subject_id if sample.parent and sample.parent.parent_barcode else ''
+                writer.writerow([sample.sample_id, subject_id, sample.barcode])
         elif model_type == 'sequencelibrary':
             queryset = SequenceLibrary.objects.filter(pk__in=sample_pks).select_related('parent__parent__parent_barcode')
             for sample in queryset:
-                writer.writerow([sample.parent.parent.parent_barcode.subject_id, sample.barcode])
+                subject_id = sample.parent.parent.parent_barcode.subject_id if sample.parent and sample.parent.parent and sample.parent.parent.parent_barcode else ''
+                writer.writerow([sample.sample_id, subject_id, sample.barcode])
 
         return response
+
+
+class AdvancedFilterView(LoginRequiredMixin, FormView):
+    """
+    Advanced filtering view for comprehensive sample reports
+    """
+    template_name = 'sampletracking/advanced_filter.html'
+    form_class = AdvancedFilterForm
+
+    def form_valid(self, form):
+        # Get filter criteria
+        sample_type = form.cleaned_data.get('sample_type')
+        project_name = form.cleaned_data.get('project_name')
+        investigator = form.cleaned_data.get('investigator')
+        patient_type = form.cleaned_data.get('patient_type')
+        study_id = form.cleaned_data.get('study_id')
+        subject_id = form.cleaned_data.get('subject_id')
+        date_from = form.cleaned_data.get('date_from')
+        date_to = form.cleaned_data.get('date_to')
+        sample_source = form.cleaned_data.get('sample_source')
+        isolate_source = form.cleaned_data.get('isolate_source')
+        status = form.cleaned_data.get('status')
+        legacy_only = form.cleaned_data.get('legacy_only')
+        export_format = form.cleaned_data.get('export_format')
+
+        # Build results based on sample type
+        results = []
+
+        # Helper function to apply common filters
+        def apply_filters(queryset, model_class):
+            if project_name:
+                queryset = queryset.filter(project_name__icontains=project_name)
+            if investigator:
+                queryset = queryset.filter(investigator__icontains=investigator)
+            if patient_type:
+                queryset = queryset.filter(patient_type__icontains=patient_type)
+            if study_id:
+                queryset = queryset.filter(study_id__icontains=study_id)
+            if date_from:
+                queryset = queryset.filter(date_created__gte=date_from)
+            if date_to:
+                queryset = queryset.filter(date_created__lte=date_to)
+            if status:
+                queryset = queryset.filter(status=status)
+            return queryset
+
+        # Query each sample type as needed
+        if not sample_type or sample_type == 'crude':
+            crude_qs = CrudeSample.objects.all()
+            crude_qs = apply_filters(crude_qs, CrudeSample)
+            if subject_id:
+                crude_qs = crude_qs.filter(subject_id__icontains=subject_id)
+            if sample_source:
+                crude_qs = crude_qs.filter(sample_source=sample_source)
+            if isolate_source:
+                crude_qs = crude_qs.filter(isolate_source=isolate_source)
+
+            for sample in crude_qs:
+                results.append({
+                    'type': 'Parent Sample',
+                    'sample_id': sample.sample_id,
+                    'barcode': sample.barcode,
+                    'subject_id': sample.subject_id,
+                    'project': sample.project_name or '-',
+                    'investigator': sample.investigator or '-',
+                    'patient_type': sample.patient_type or '-',
+                    'study_id': sample.study_id or '-',
+                    'date': sample.date_created,
+                    'status': sample.get_status_display(),
+                    'source': sample.get_sample_source_display(),
+                    'pk': sample.pk,
+                    'url': reverse('crude_sample_detail', kwargs={'pk': sample.pk})
+                })
+
+        if not sample_type or sample_type == 'aliquot':
+            aliquot_qs = Aliquot.objects.select_related('parent_barcode').all()
+            aliquot_qs = apply_filters(aliquot_qs, Aliquot)
+            if subject_id:
+                aliquot_qs = aliquot_qs.filter(parent_barcode__subject_id__icontains=subject_id)
+
+            for sample in aliquot_qs:
+                results.append({
+                    'type': 'Aliquot',
+                    'sample_id': sample.sample_id,
+                    'barcode': sample.barcode,
+                    'subject_id': sample.parent_barcode.subject_id if sample.parent_barcode else '-',
+                    'project': sample.project_name or '-',
+                    'investigator': sample.investigator or '-',
+                    'patient_type': sample.patient_type or '-',
+                    'study_id': sample.study_id or '-',
+                    'date': sample.date_created,
+                    'status': sample.get_status_display(),
+                    'source': '-',
+                    'pk': sample.pk,
+                    'url': reverse('aliquot_detail', kwargs={'pk': sample.pk})
+                })
+
+        if not sample_type or sample_type == 'extract':
+            extract_qs = Extract.objects.select_related('parent__parent_barcode').all()
+            extract_qs = apply_filters(extract_qs, Extract)
+            if subject_id:
+                extract_qs = extract_qs.filter(parent__parent_barcode__subject_id__icontains=subject_id)
+
+            for sample in extract_qs:
+                subj_id = '-'
+                if sample.parent and sample.parent.parent_barcode:
+                    subj_id = sample.parent.parent_barcode.subject_id
+                results.append({
+                    'type': 'Extract',
+                    'sample_id': sample.sample_id,
+                    'barcode': sample.barcode,
+                    'subject_id': subj_id,
+                    'project': sample.project_name or '-',
+                    'investigator': sample.investigator or '-',
+                    'patient_type': sample.patient_type or '-',
+                    'study_id': sample.study_id or '-',
+                    'date': sample.date_created,
+                    'status': sample.get_status_display(),
+                    'source': sample.get_extract_type_display(),
+                    'pk': sample.pk,
+                    'url': reverse('extract_detail', kwargs={'pk': sample.pk})
+                })
+
+        if not sample_type or sample_type == 'library':
+            library_qs = SequenceLibrary.objects.select_related('parent__parent__parent_barcode').all()
+            library_qs = apply_filters(library_qs, SequenceLibrary)
+            if subject_id:
+                library_qs = library_qs.filter(parent__parent__parent_barcode__subject_id__icontains=subject_id)
+            if legacy_only:
+                library_qs = library_qs.filter(is_legacy_import=True)
+
+            for sample in library_qs:
+                subj_id = '-'
+                if sample.parent and sample.parent.parent and sample.parent.parent.parent_barcode:
+                    subj_id = sample.parent.parent.parent_barcode.subject_id
+
+                # Get sequence filenames
+                filenames = sample.get_sequence_filenames()
+
+                results.append({
+                    'type': 'Sequence Library',
+                    'sample_id': sample.sample_id,
+                    'barcode': sample.barcode,
+                    'subject_id': subj_id,
+                    'project': sample.project_name or '-',
+                    'investigator': sample.investigator or '-',
+                    'patient_type': sample.patient_type or '-',
+                    'study_id': sample.study_id or '-',
+                    'date': sample.date_created,
+                    'status': sample.get_status_display(),
+                    'source': sample.library_type,
+                    'pk': sample.pk,
+                    'url': reverse('library_detail', kwargs={'pk': sample.pk}),
+                    'is_legacy': sample.is_legacy_import,
+                    'sequence_files': f"{filenames.get('R1', '-')}, {filenames.get('R2', '-')}"
+                })
+
+        # Sort results by date
+        results.sort(key=lambda x: x['date'], reverse=True)
+
+        # Handle export formats
+        if export_format == 'csv':
+            response = HttpResponse(content_type='text/csv')
+            response['Content-Disposition'] = 'attachment; filename="filtered_samples.csv"'
+            writer = csv.writer(response)
+
+            # Write header
+            writer.writerow(['Type', 'Sample ID', 'Barcode', 'Subject ID', 'Project',
+                           'Investigator', 'Patient Type', 'Study ID', 'Date',
+                           'Status', 'Source/Type'])
+
+            # Write data
+            for r in results:
+                writer.writerow([
+                    r['type'], r['sample_id'], r['barcode'], r['subject_id'],
+                    r['project'], r['investigator'], r['patient_type'],
+                    r['study_id'], r['date'], r['status'], r['source']
+                ])
+
+            return response
+
+        elif export_format == 'labels':
+            response = HttpResponse(content_type='text/csv')
+            response['Content-Disposition'] = 'attachment; filename="filtered_labels.csv"'
+            writer = csv.writer(response)
+            writer.writerow(['SampleID', 'SubjectID', 'Barcode', 'Type', 'Project'])
+
+            for r in results:
+                writer.writerow([
+                    r['sample_id'], r['subject_id'], r['barcode'],
+                    r['type'], r['project']
+                ])
+
+            return response
+
+        # Default: render in browser
+        return self.render_to_response(self.get_context_data(
+            form=form,
+            results=results,
+            result_count=len(results)
+        ))
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Advanced Sample Filtering'
+        return context

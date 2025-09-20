@@ -1,0 +1,7 @@
+subject_id,collection_date,legacy_sequence_filename,project_name,investigator,patient_type,study_id,sample_source,isolate_source,barcode,n_index,s_index,library_type,sequencing_date,sequencing_platform,notes,data_file_location
+PATIENT001,2022-01-15,OLD_IBD_001,IBD_Study_2022,Dr. Smith,IBD,IBD2022,Stool,,,N701,S502,Nextera,2022-02-01,NovaSeq,First batch,/data/legacy/2022/
+PATIENT002,2022-01-16,OLD_IBD_002,IBD_Study_2022,Dr. Smith,Control,IBD2022,Stool,,,N702,S503,Nextera,2022-02-01,NovaSeq,First batch,/data/legacy/2022/
+PATIENT003,2022-01-17,,Cancer_Study_2022,Dr. Jones,Cancer,CAN2022,Blood,,,N703,S505,TruSeq,2022-02-15,MiSeq,Missing legacy filename,
+PATIENT004,2022-02-01,LEGACY_SAMPLE_123,Mixed_Study,Dr. Brown,Other,,Tissue,,CUSTOM_BC_001,N704,S506,Other,2022-03-01,NovaSeq,Custom barcode example,/data/legacy/2022/
+PATIENT005,2022-03-01,ISO_BLOOD_001,Isolate_Study,Dr. White,Infection,ISO2022,Isolate,Blood,,N705,S507,Nextera,2022-03-15,NovaSeq,Blood isolate example,/data/legacy/2022/
+PATIENT006,2022-03-02,ISO_URINE_001,Isolate_Study,Dr. White,UTI,ISO2022,Isolate,Urine,,N706,S508,Nextera,2022-03-15,NovaSeq,Urine isolate example,/data/legacy/2022/

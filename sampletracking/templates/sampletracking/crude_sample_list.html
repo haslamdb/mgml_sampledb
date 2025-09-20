@@ -1,6 +1,6 @@
 {% extends "base_generic.html" %}
 
-{% block title %}Crude Samples List{% endblock %}
+{% block title %}Parent Samples List{% endblock %}
 
 {% block content %}
 <div class="container mt-4">
@@ -10,7 +10,7 @@
         <div class="card">
             <div class="card-header bg-primary text-white">
                 <div class="d-flex justify-content-between align-items-center">
-                    <h3>Crude Samples</h3>
+                    <h3>Parent Samples</h3>
                     <div>
                         <button type="submit" class="btn btn-success btn-sm">
                             <i class="fas fa-print"></i> Export for Label Printing
@@ -99,7 +99,7 @@
                 </nav>
                 {% endif %}
                 {% else %}
-                <p class="text-center">No crude samples found. <a href="{% url 'create_crude_sample' %}">Create the first one</a>.</p>
+                <p class="text-center">No parent samples found. <a href="{% url 'create_crude_sample' %}">Create the first one</a>.</p>
                 {% endif %}
             </div>
         </div>

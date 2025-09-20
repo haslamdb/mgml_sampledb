@@ -1,0 +1,5 @@
+subject_id,collection_date,legacy_sequence_filename,project_name,investigator,patient_type,study_id,sample_source,isolate_source,barcode,n_index,s_index,library_type,sequencing_date,sequencing_platform,notes,data_file_location
+TEST_ISO001,2024-01-15,ISO_TEST_001,Isolate_Test,Dr. Test,Infection,TEST2024,Isolate,Blood,,N801,S601,Nextera,2024-02-01,NovaSeq,Blood isolate test,
+TEST_ISO002,2024-01-16,ISO_TEST_002,Isolate_Test,Dr. Test,UTI,TEST2024,Isolate,Urine,,N802,S602,Nextera,2024-02-01,NovaSeq,Urine isolate test,
+TEST_ISO003,2024-01-17,ISO_TEST_003,Isolate_Test,Dr. Test,Wound,TEST2024,Isolate,Wound,,N803,S603,Nextera,2024-02-01,NovaSeq,Wound isolate test,
+TEST_NISO001,2024-01-18,NISO_TEST_001,Regular_Test,Dr. Test,Control,TEST2024,Blood,,,N804,S604,Nextera,2024-02-01,NovaSeq,Non-isolate blood test,

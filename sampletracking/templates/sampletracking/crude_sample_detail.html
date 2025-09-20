@@ -1,12 +1,12 @@
 {% extends "base_generic.html" %}
 
-{% block title %}Crude Sample Details - {{ sample.barcode }}{% endblock %}
+{% block title %}Parent Sample Details - {{ sample.barcode }}{% endblock %}
 
 {% block content %}
 <div class="container mt-4">
     <div class="card">
         <div class="card-header bg-primary text-white">
-            <h3>Crude Sample Details</h3>
+            <h3>Parent Sample Details</h3>
         </div>
         <div class="card-body">
             <div class="row">
@@ -34,6 +34,12 @@
                             <th>Sample Source:</th>
                             <td>{{ sample.get_sample_source_display }}</td>
                         </tr>
+                        {% if sample.sample_source == 'Isolate' and sample.isolate_source %}
+                        <tr>
+                            <th>Isolate Source:</th>
+                            <td>{{ sample.get_isolate_source_display }}</td>
+                        </tr>
+                        {% endif %}
                         <tr>
                             <th>Collection Date:</th>
                             <td>{{ sample.collection_date|date:"m/d/Y" }}</td>

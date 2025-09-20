@@ -30,7 +30,7 @@
                             <th>Barcode</th>
                             <th>Parent Aliquot</th>
                             <th>Extract Type</th>
-                            <th>Quality Score</th>
+                            <th>Concentration (ng/µL)</th>
                             <th>Date Created</th>
                             <th>Status</th>
                             <th>Actions</th>
@@ -47,7 +47,7 @@
                                 </a>
                             </td>
                             <td>{{ extract.get_extract_type_display }}</td>
-                            <td>{{ extract.quality_score|default:"-" }}</td>
+                            <td>{{ extract.concentration|default:"-" }}</td>
                             <td>{{ extract.date_created|date:"m/d/Y" }}</td>
                             <td>
                                 <span class="badge badge-{% if extract.status == 'AVAILABLE' %}success{% elif extract.status == 'IN_USE' %}warning{% else %}secondary{% endif %}">

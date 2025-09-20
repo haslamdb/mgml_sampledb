@@ -111,7 +111,33 @@ class Sample(TimeStampedModel):
         max_length=50, blank=True, null=True,  # Allow blank for initial registration
         help_text="Well position in the container (e.g., A1, B2, etc.)"
     )
-    
+
+    # Project and study information
+    project_name = models.CharField(
+        max_length=200,
+        blank=True,
+        null=True,
+        help_text="Name of the project or study this sample belongs to"
+    )
+    investigator = models.CharField(
+        max_length=200,
+        blank=True,
+        null=True,
+        help_text="Principal investigator or responsible party"
+    )
+    patient_type = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        help_text="Patient classification (e.g., IBD, Control, Cancer)"
+    )
+    study_id = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        help_text="External study identifier or protocol number"
+    )
+
     def save(self, *args, **kwargs):
         # Auto-generate barcode for plate-based storage
         if self.container_type == 'plate' and self.box_ID and self.well_ID:
@@ -130,7 +156,8 @@ class Sample(TimeStampedModel):
 
 class CrudeSample(Sample):
     """
-    Represents the initial crude sample before any processing.
+    Represents the initial parent sample before any processing.
+    Note: Class name remains CrudeSample for database compatibility.
     """
     SAMPLE_SOURCE_CHOICES = [
         ('Stool', 'Stool'),
@@ -152,11 +179,30 @@ class CrudeSample(Sample):
         help_text="Date when the sample was collected"
     )
     sample_source = models.CharField(
-        max_length=100, 
-        choices=SAMPLE_SOURCE_CHOICES, 
+        max_length=100,
+        choices=SAMPLE_SOURCE_CHOICES,
         default='',
         help_text="Source of the sample"
     )
+
+    ISOLATE_SOURCE_CHOICES = [
+        ('', '---------'),
+        ('Blood', 'Blood'),
+        ('Urine', 'Urine'),
+        ('Wound', 'Wound'),
+        ('Stool', 'Stool'),
+        ('Laboratory', 'Laboratory'),
+        ('Other', 'Other')
+    ]
+
+    isolate_source = models.CharField(
+        max_length=50,
+        choices=ISOLATE_SOURCE_CHOICES,
+        blank=True,
+        null=True,
+        help_text="Source of the isolate (only applicable when sample source is 'Isolate')"
+    )
+
     source_details = models.TextField(
         blank=True,
         null=True,
@@ -197,10 +243,10 @@ class CrudeSample(Sample):
         super().save(*args, **kwargs)
 
     history = HistoricalRecords()
-    
+
     class Meta:
-        verbose_name = "Crude Sample"
-        verbose_name_plural = "Crude Samples"
+        verbose_name = "Parent Sample"
+        verbose_name_plural = "Parent Samples"
         indexes = [
             models.Index(fields=['barcode']),
             models.Index(fields=['subject_id']),
@@ -210,14 +256,14 @@ class CrudeSample(Sample):
 
 class Aliquot(Sample):
     """
-    Represents an aliquot derived from a crude sample.
+    Represents an aliquot derived from a parent sample.
     """
     parent_barcode = models.ForeignKey(
-        CrudeSample, 
-        on_delete=models.PROTECT, 
-        to_field='barcode', 
-        related_name='aliquots', 
-        help_text="The crude sample this aliquot was derived from"
+        CrudeSample,
+        on_delete=models.PROTECT,
+        to_field='barcode',
+        related_name='aliquots',
+        help_text="The parent sample this aliquot was derived from"
     )
     volume = models.FloatField(
         null=True, 
@@ -555,12 +601,50 @@ class SequenceLibrary(Sample):
         help_text="The plate this library is in"
     )
     well = models.CharField(
-        max_length=4, 
-        blank=True, 
-        null=True, 
+        max_length=4,
+        blank=True,
+        null=True,
         help_text="Well position, e.g., A1, H12"
     )
-    
+
+    # Legacy data fields
+    legacy_sequence_filename = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        help_text="Original filename for historical/legacy sequence data (without _R1/_R2 suffix)"
+    )
+    data_file_location = models.CharField(
+        max_length=500,
+        blank=True,
+        null=True,
+        help_text="Path to the actual sequence data files"
+    )
+    is_legacy_import = models.BooleanField(
+        default=False,
+        help_text="Indicates if this record was imported from historical data"
+    )
+
+    def get_sequence_filenames(self):
+        """
+        Returns the sequence filenames (R1 and R2).
+        For legacy data, uses legacy_sequence_filename.
+        For new data, derives from sample_id.
+        """
+        if self.legacy_sequence_filename:
+            return {
+                'R1': f"{self.legacy_sequence_filename}_R1.fastq.gz",
+                'R2': f"{self.legacy_sequence_filename}_R2.fastq.gz"
+            }
+        elif self.sample_id:
+            # Remove -SL suffix for the filename
+            base_name = self.sample_id.replace('-SL', '')
+            return {
+                'R1': f"{base_name}_R1.fastq.gz",
+                'R2': f"{base_name}_R2.fastq.gz"
+            }
+        return {'R1': None, 'R2': None}
+
     def save(self, *args, **kwargs):
         if not self.pk and not self.sample_id:  # Only on creation
             if self.parent:

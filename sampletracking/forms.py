@@ -137,12 +137,18 @@ class CrudeSampleForm(SampleForm):
     """
     class Meta(SampleForm.Meta):
         model = CrudeSample
-        fields = SampleForm.Meta.fields + ['sample_source', 'collection_date', 'subject_id', 'source_details']
+        fields = SampleForm.Meta.fields + ['sample_source', 'isolate_source', 'collection_date', 'subject_id', 'source_details', 'project_name', 'investigator', 'patient_type', 'study_id']
         widgets = {
             **SampleForm.Meta.widgets,
             'date_created': DateInput(attrs={'type': 'date', 'class': 'form-control'}),
             'collection_date': DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'sample_source': forms.Select(attrs={'class': 'form-control', 'id': 'id_sample_source'}),
+            'isolate_source': forms.Select(attrs={'class': 'form-control', 'id': 'id_isolate_source'}),
             'source_details': forms.Textarea(attrs={'rows': 2, 'class': 'form-control'}),
+            'project_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'investigator': forms.TextInput(attrs={'class': 'form-control'}),
+            'patient_type': forms.TextInput(attrs={'class': 'form-control'}),
+            'study_id': forms.TextInput(attrs={'class': 'form-control'}),
         }
     
     def clean_collection_date(self):
@@ -153,18 +159,25 @@ class CrudeSampleForm(SampleForm):
         if collection_date and collection_date > timezone.now().date():
             raise ValidationError("Collection date cannot be in the future.")
         return collection_date
-    
+
     def clean(self):
         """
-        Cross field validation
+        Cross field validation and isolate_source handling
         """
         cleaned_data = super().clean()
+
+        # Clear isolate_source if sample_source is not 'Isolate'
+        sample_source = cleaned_data.get('sample_source')
+        isolate_source = cleaned_data.get('isolate_source')
+        if sample_source != 'Isolate' and isolate_source:
+            cleaned_data['isolate_source'] = ''
+
+        # Validate dates
         collection_date = cleaned_data.get('collection_date')
         date_created = cleaned_data.get('date_created')
-        
         if collection_date and date_created and collection_date > date_created:
             self.add_error('collection_date', "Collection date cannot be after creation date.")
-        
+
         return cleaned_data
 
 
@@ -350,3 +363,225 @@ class ReportForm(forms.Form):
         initial=timezone.now().date(),
         label="Select Report Date"
     )
+
+
+class AdvancedFilterForm(forms.Form):
+    """
+    Advanced filtering form for comprehensive sample reports
+    """
+    # Sample type filter
+    sample_type = forms.ChoiceField(
+        choices=[
+            ('', 'All Sample Types'),
+            ('crude', 'Parent Samples'),
+            ('aliquot', 'Aliquots'),
+            ('extract', 'Extracts'),
+            ('library', 'Sequence Libraries'),
+        ],
+        required=False,
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        label="Sample Type"
+    )
+
+    # Project and study filters
+    project_name = forms.CharField(
+        max_length=200,
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter project name...'}),
+        label="Project Name"
+    )
+
+    investigator = forms.CharField(
+        max_length=200,
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter investigator name...'}),
+        label="Investigator"
+    )
+
+    patient_type = forms.CharField(
+        max_length=100,
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g., IBD, Control, Cancer...'}),
+        label="Patient Type"
+    )
+
+    study_id = forms.CharField(
+        max_length=100,
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter study ID...'}),
+        label="Study ID"
+    )
+
+    # Subject ID filter
+    subject_id = forms.CharField(
+        max_length=100,
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter subject ID...'}),
+        label="Subject ID"
+    )
+
+    # Date range filters
+    date_from = forms.DateField(
+        required=False,
+        widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+        label="Date From"
+    )
+
+    date_to = forms.DateField(
+        required=False,
+        widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+        label="Date To"
+    )
+
+    # Sample source filter (for crude samples)
+    sample_source = forms.ChoiceField(
+        choices=[('', 'All Sources')] + CrudeSample.SAMPLE_SOURCE_CHOICES,
+        required=False,
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        label="Sample Source"
+    )
+
+    # Isolate source filter (for isolates)
+    isolate_source = forms.ChoiceField(
+        choices=[('', 'All Isolate Sources')] + [c for c in CrudeSample.ISOLATE_SOURCE_CHOICES if c[0] != ''],
+        required=False,
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        label="Isolate Source (when Sample Source = Isolate)"
+    )
+
+    # Status filter
+    status = forms.ChoiceField(
+        choices=[('', 'All Statuses')] + Sample.STATUS_CHOICES,
+        required=False,
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        label="Sample Status"
+    )
+
+    # Legacy data filter
+    legacy_only = forms.BooleanField(
+        required=False,
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        label="Show only legacy imports"
+    )
+
+    # Export format
+    export_format = forms.ChoiceField(
+        choices=[
+            ('view', 'View in Browser'),
+            ('csv', 'Export to CSV'),
+            ('labels', 'Export for Labels'),
+        ],
+        initial='view',
+        widget=forms.RadioSelect(attrs={'class': 'form-check-input'}),
+        label="Output Format"
+    )
+
+
+class QuickAliquotForm(forms.Form):
+    """
+    Form for quickly creating both a crude sample and aliquot in one step
+    """
+    # Parent Sample fields (minimal required)
+    crude_barcode = forms.CharField(
+        max_length=50,
+        label="Parent Sample Barcode",
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        help_text="Barcode for the crude sample"
+    )
+
+    subject_id = forms.CharField(
+        max_length=50,
+        label="Subject ID",
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        help_text="Identifier provided by the submitter"
+    )
+
+    collection_date = forms.DateField(
+        initial=timezone.now().date(),
+        widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+        label="Collection Date",
+        help_text="Date when the sample was collected"
+    )
+
+    sample_source = forms.ChoiceField(
+        choices=CrudeSample.SAMPLE_SOURCE_CHOICES,
+        initial='Blood',
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        label="Sample Source"
+    )
+
+    # Aliquot fields
+    aliquot_barcode = forms.CharField(
+        max_length=50,
+        label="Aliquot Barcode",
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        help_text="Barcode for the aliquot"
+    )
+
+    use_same_barcode = forms.BooleanField(
+        required=False,
+        initial=False,
+        label="Use same barcode for both samples",
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        help_text="Check to use the crude sample barcode for the aliquot as well"
+    )
+
+    aliquot_volume = forms.FloatField(
+        required=False,
+        label="Aliquot Volume (µL)",
+        widget=forms.NumberInput(attrs={'class': 'form-control', 'step': '0.1'}),
+        help_text="Volume of the aliquot in microliters"
+    )
+
+    aliquot_concentration = forms.FloatField(
+        required=False,
+        label="Concentration",
+        widget=forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+        help_text="Concentration of the aliquot"
+    )
+
+    store_crude_sample = forms.BooleanField(
+        required=False,
+        initial=True,
+        label="Store crude sample",
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        help_text="Uncheck if crude sample is consumed/processed immediately"
+    )
+
+    # Storage fields (optional)
+    freezer_ID = forms.CharField(
+        max_length=50,
+        required=False,
+        label="Freezer ID",
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        help_text="Storage freezer ID (optional)"
+    )
+
+    box_ID = forms.CharField(
+        max_length=50,
+        required=False,
+        label="Box ID",
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        help_text="Storage box ID (optional)"
+    )
+
+    notes = forms.CharField(
+        required=False,
+        label="Notes",
+        widget=forms.Textarea(attrs={'rows': 2, 'class': 'form-control'}),
+        help_text="Any additional notes (optional)"
+    )
+
+    def clean(self):
+        cleaned_data = super().clean()
+        use_same_barcode = cleaned_data.get('use_same_barcode')
+
+        if use_same_barcode:
+            cleaned_data['aliquot_barcode'] = cleaned_data.get('crude_barcode')
+
+        # Validate collection date is not in the future
+        collection_date = cleaned_data.get('collection_date')
+        if collection_date and collection_date > timezone.now().date():
+            raise ValidationError({'collection_date': 'Collection date cannot be in the future.'})
+
+        return cleaned_data

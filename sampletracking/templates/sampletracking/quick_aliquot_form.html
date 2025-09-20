@@ -1,0 +1,229 @@
+{% extends 'base_generic.html' %}
+
+{% block title %}Quick Create Aliquot{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h3><i class="fas fa-vial"></i> Quick Create: Parent Sample + Aliquot</h3>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i> <strong>Note:</strong> This form will create both a parent sample and an aliquot in one step. This is useful when you're immediately processing a sample and want to track both.
+                    </div>
+
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+
+                        <!-- Parent Sample Section -->
+                        <div class="card mb-3">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0"><i class="fas fa-vial"></i> Parent Sample Information</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            {{ form.crude_barcode.label_tag }}
+                                            {{ form.crude_barcode }}
+                                            <small class="form-text text-muted">{{ form.crude_barcode.help_text }}</small>
+                                            {% if form.crude_barcode.errors %}
+                                                <div class="invalid-feedback d-block">
+                                                    {{ form.crude_barcode.errors }}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            {{ form.subject_id.label_tag }}
+                                            {{ form.subject_id }}
+                                            <small class="form-text text-muted">{{ form.subject_id.help_text }}</small>
+                                            {% if form.subject_id.errors %}
+                                                <div class="invalid-feedback d-block">
+                                                    {{ form.subject_id.errors }}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            {{ form.collection_date.label_tag }}
+                                            {{ form.collection_date }}
+                                            <small class="form-text text-muted">{{ form.collection_date.help_text }}</small>
+                                            {% if form.collection_date.errors %}
+                                                <div class="invalid-feedback d-block">
+                                                    {{ form.collection_date.errors }}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            {{ form.sample_source.label_tag }}
+                                            {{ form.sample_source }}
+                                            <small class="form-text text-muted">{{ form.sample_source.help_text }}</small>
+                                            {% if form.sample_source.errors %}
+                                                <div class="invalid-feedback d-block">
+                                                    {{ form.sample_source.errors }}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-check mb-2">
+                                    {{ form.store_crude_sample }}
+                                    <label class="form-check-label" for="{{ form.store_crude_sample.id_for_label }}">
+                                        {{ form.store_crude_sample.label }}
+                                    </label>
+                                    <small class="form-text text-muted d-block">{{ form.store_crude_sample.help_text }}</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Aliquot Section -->
+                        <div class="card mb-3">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0"><i class="fas fa-test-tube"></i> Aliquot Information</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="form-check mb-3">
+                                    {{ form.use_same_barcode }}
+                                    <label class="form-check-label" for="{{ form.use_same_barcode.id_for_label }}">
+                                        {{ form.use_same_barcode.label }}
+                                    </label>
+                                    <small class="form-text text-muted d-block">{{ form.use_same_barcode.help_text }}</small>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="form-group" id="aliquot-barcode-group">
+                                            {{ form.aliquot_barcode.label_tag }}
+                                            {{ form.aliquot_barcode }}
+                                            <small class="form-text text-muted">{{ form.aliquot_barcode.help_text }}</small>
+                                            {% if form.aliquot_barcode.errors %}
+                                                <div class="invalid-feedback d-block">
+                                                    {{ form.aliquot_barcode.errors }}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            {{ form.aliquot_volume.label_tag }}
+                                            {{ form.aliquot_volume }}
+                                            <small class="form-text text-muted">{{ form.aliquot_volume.help_text }}</small>
+                                            {% if form.aliquot_volume.errors %}
+                                                <div class="invalid-feedback d-block">
+                                                    {{ form.aliquot_volume.errors }}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            {{ form.aliquot_concentration.label_tag }}
+                                            {{ form.aliquot_concentration }}
+                                            <small class="form-text text-muted">{{ form.aliquot_concentration.help_text }}</small>
+                                            {% if form.aliquot_concentration.errors %}
+                                                <div class="invalid-feedback d-block">
+                                                    {{ form.aliquot_concentration.errors }}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Storage Section -->
+                        <div class="card mb-3">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0"><i class="fas fa-snowflake"></i> Storage Information (Optional)</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            {{ form.freezer_ID.label_tag }}
+                                            {{ form.freezer_ID }}
+                                            <small class="form-text text-muted">{{ form.freezer_ID.help_text }}</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            {{ form.box_ID.label_tag }}
+                                            {{ form.box_ID }}
+                                            <small class="form-text text-muted">{{ form.box_ID.help_text }}</small>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    {{ form.notes.label_tag }}
+                                    {{ form.notes }}
+                                    <small class="form-text text-muted">{{ form.notes.help_text }}</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger">
+                                {{ form.non_field_errors }}
+                            </div>
+                        {% endif %}
+
+                        <div class="form-group text-center">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Create Both Samples
+                            </button>
+                            <a href="{% url 'home' %}" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // JavaScript to handle the "use same barcode" checkbox
+    document.addEventListener('DOMContentLoaded', function() {
+        const useSameCheckbox = document.getElementById('id_use_same_barcode');
+        const aliquotBarcodeGroup = document.getElementById('aliquot-barcode-group');
+        const aliquotBarcodeInput = document.getElementById('id_aliquot_barcode');
+        const crudeBarcodeInput = document.getElementById('id_crude_barcode');
+
+        function toggleAliquotBarcode() {
+            if (useSameCheckbox.checked) {
+                aliquotBarcodeGroup.style.display = 'none';
+                aliquotBarcodeInput.value = crudeBarcodeInput.value;
+            } else {
+                aliquotBarcodeGroup.style.display = 'block';
+            }
+        }
+
+        // Initial check
+        toggleAliquotBarcode();
+
+        // Listen for changes
+        useSameCheckbox.addEventListener('change', toggleAliquotBarcode);
+
+        // Update aliquot barcode when crude barcode changes (if using same)
+        crudeBarcodeInput.addEventListener('input', function() {
+            if (useSameCheckbox.checked) {
+                aliquotBarcodeInput.value = crudeBarcodeInput.value;
+            }
+        });
+    });
+</script>
+{% endblock %}

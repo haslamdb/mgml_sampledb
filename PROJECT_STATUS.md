@@ -1,10 +1,87 @@
 # MGML Sample Database - Project Status
 
-## Last Updated: September 19, 2025
+## Last Updated: September 19, 2025 - 8:45 PM
 
-## ✅ Recent Accomplishments
+## ✅ Recent Accomplishments (Latest Session - Evening)
 
-### Sample ID System Implementation (September 19, 2025)
+### UI/UX Improvements (September 19, 2025 - Evening)
+- **Renamed "Crude Sample" to "Parent Sample"** throughout the application
+  - Updated all models' verbose names
+  - Modified all templates and forms
+  - Changed navigation menus and headers
+  - Note: Database model class remains `CrudeSample` for backward compatibility
+
+- **Enhanced Extract List View**
+  - Removed "Quality Score" column
+  - Added "Concentration (ng/µL)" column for better lab workflow visibility
+
+- **Added Reports Section to Home Page**
+  - Quick access buttons to view all samples by type
+  - Direct links to comprehensive reports and advanced filtering
+  - Improved navigation for lab staff
+
+- **Fixed Search Results Display**
+  - Corrected Sample ID column to show actual sample_id instead of subject_id
+  - Format now properly shows: ST-250924-CR style IDs
+
+### Legacy Sample Import System (September 19, 2025 - Evening)
+- **Created comprehensive import system for thousands of legacy samples**
+  - Built management command: `python manage.py import_legacy_samples`
+  - Supports CSV import with extensive metadata fields
+  - Handles missing data gracefully
+  - Creates full sample hierarchy (CrudeSample → Aliquot → Extract → SequenceLibrary)
+
+- **Added project tracking fields to all sample models**:
+  - `project_name` - Text field for project identification
+  - `investigator` - Principal investigator name
+  - `patient_type` - Patient category/type
+  - `study_id` - Study identifier
+
+- **Added legacy support to SequenceLibrary**:
+  - `legacy_sequence_filename` - Original filename from legacy system
+  - `data_file_location` - Path to data files
+  - `is_legacy_import` - Boolean flag for imported samples
+  - Smart `get_sequence_filenames()` method that returns legacy name or generates new format
+
+- **Import template includes**:
+  - subject_id, collection_date (required)
+  - legacy_sequence_filename, project_name, investigator, patient_type, study_id
+  - sample_source, isolate_source, barcode
+  - n_index, s_index, library_type, sequencing_date, sequencing_platform
+  - notes, data_file_location
+  - See `import_template.csv` for example format
+
+### Advanced Filtering System (September 19, 2025 - Evening)
+- **Created comprehensive filtering interface** (`/advanced-filter/`)
+  - Filter by sample type (Parent Samples, Aliquots, Extracts, Libraries)
+  - Filter by project metadata (project name, investigator, patient type, study ID)
+  - Filter by sample source and isolate source
+  - Date range filtering
+  - Legacy sample filtering option
+  - Three export formats: View, CSV, Label Printing
+
+- **Quick Create Workflow for Aliquots**
+  - New streamlined form to create Parent Sample + Aliquot in one step
+  - Auto-generates barcodes for plate storage
+  - Accessible via "Quick Create" button on home page
+  - Useful for immediate sample processing
+
+### Isolate Source Tracking (September 19, 2025 - Evening)
+- **Added isolate_source field to CrudeSample model**
+  - Options: Blood, Urine, Wound, Stool, Laboratory, Other
+  - Only applies when sample_source is "Isolate"
+  - Conditional field display in forms
+  - Searchable and filterable in advanced filter
+  - Included in CSV imports
+
+### Export Improvements (September 19, 2025 - Evening)
+- **Updated CSV export for label printing**
+  - First column: sample_id (e.g., ST-250924-CR)
+  - Second column: subject_id
+  - Third column: barcode
+  - Better format for lab label generation
+
+### Sample ID System Implementation (September 19, 2025 - Morning)
 - **Implemented hierarchical sample ID system** with format: `[SourceType]-[Date]-[Seq]-[SampleType]`
   - SourceType: Two-letter code (e.g., IS for Isolate, ST for Stool)
   - Date: YYMMDD format
@@ -69,24 +146,45 @@ CrudeSample: IS-250812-001-CS
 ## 📝 TODO List
 
 ### Completed ✅
-- [x] **Generate Sample Reports** (September 19, 2025)
+- [x] **Generate Sample Reports** (September 19, 2025 - Morning)
   - [x] Created `generate_sample_report.py` script
-  - [x] Report lists all samples by type with full metadata:
-    - Barcode, Sample ID, Base ID
-    - Creation date, Subject ID
-    - Collection date (for CrudeSamples)
-    - Parent relationships
-    - Storage location (freezer, box, well)
-    - Status
   - [x] Export reports to CSV format (separate file for each sample type)
   - [x] Summary statistics and distribution analysis
 
+- [x] **Legacy Sample Import System** (September 19, 2025 - Evening)
+  - [x] Bulk import from CSV
+  - [x] Template generation for imports (`import_template.csv`)
+  - [x] Validation before import
+  - [x] Creates full sample hierarchy
+  - [x] Handles missing metadata gracefully
+  - [x] Support for isolate_source field
+
+- [x] **Advanced Filtering & Reports** (September 19, 2025 - Evening)
+  - [x] Web interface for report generation (`/advanced-filter/`)
+  - [x] Filtering by date range, sample type, status
+  - [x] Filter by project metadata
+  - [x] Export as CSV and label format
+  - [x] Quick access from home page
+
+- [x] **UI Enhancements** (September 19, 2025 - Evening)
+  - [x] Display sample_id in search results
+  - [x] Add sample ID to list views
+  - [x] Renamed "Crude Sample" to "Parent Sample"
+  - [x] Quick Create workflow for aliquots
+  - [x] Enhanced home page with reports section
+
 ### High Priority
+- [ ] **Import Enhancements**
+  - [ ] Progress bar for large imports
+  - [ ] Import validation report
+  - [ ] Ability to update existing samples
+  - [ ] Rollback failed imports
+
 - [ ] **Report Enhancements**
-  - [ ] Add filtering by date range, sample type, status
   - [ ] Add Excel export option (in addition to CSV)
-  - [ ] Create web interface for report generation
   - [ ] Schedule automated daily/weekly reports
+  - [ ] Email report delivery
+  - [ ] Custom report builder
 
 ### Medium Priority
 - [ ] **Data Validation**
@@ -95,24 +193,24 @@ CrudeSample: IS-250812-001-CS
   - [ ] Validate all barcodes are unique
   - [ ] Ensure all required fields are populated
 
-- [ ] **UI Enhancements**
-  - [ ] Display sample_id prominently in admin interface
-  - [ ] Add sample ID to list views and search
-  - [ ] Create sample hierarchy visualization
-  - [ ] Add bulk sample creation interface
-
 - [ ] **Reporting Dashboard**
   - [ ] Sample count by type and date
   - [ ] Storage location utilization
   - [ ] Sample processing pipeline status
-  - [ ] Quality metrics (if applicable)
+  - [ ] Quality metrics visualization
+
+- [ ] **Sample Tracking**
+  - [ ] Chain of custody tracking
+  - [ ] Temperature log integration
+  - [ ] Sample movement history
+  - [ ] Expiration date tracking
 
 ### Low Priority
-- [ ] **Data Import/Export**
-  - [ ] Bulk import from CSV/Excel
-  - [ ] Template generation for imports
-  - [ ] Validation before import
-  - [ ] Export with full hierarchy
+- [ ] **Advanced Features**
+  - [ ] Sample hierarchy visualization
+  - [ ] Bulk sample creation interface
+  - [ ] Barcode label printing integration
+  - [ ] Mobile app for sample scanning
 
 - [ ] **API Development**
   - [ ] RESTful API for sample queries
@@ -158,12 +256,32 @@ CrudeSample: IS-250812-001-CS
 - `README.md` - Project overview
 - `DEPLOYMENT.md` - Deployment instructions
 - `SECURITY_CHECKLIST.md` - Security guidelines
-- `PROJECT_STATUS.md` - This file
+- `PROJECT_STATUS.md` - This file (current status and TODO)
+
+### Import/Export
+- `import_template.csv` - Template for bulk sample import with all fields
+- `test_isolate_import.csv` - Test file for isolate import validation
 
 ### Scripts
 - `populate_sample_ids.py` - Script to populate sample IDs for existing data
 - `generate_sample_report.py` - Generate comprehensive sample reports with CSV export
+- `restart_gunicorn.sh` - Restart the Gunicorn web server
 - `manage.py` - Django management commands
+
+### Management Commands
+- `python manage.py import_legacy_samples <csv_file>` - Import legacy samples from CSV
+  - Options: `--dry-run`, `--skip-intermediates`, `--username`
+  - Example: `python manage.py import_legacy_samples legacy_data.csv --dry-run`
+  - Creates full hierarchy: CrudeSample → Aliquot → Extract → SequenceLibrary
+  - Auto-generates barcodes with suffixes (_CR, _AL, _EX, _SL)
+  - Marks imported samples with status='ARCHIVED'
+
+### Key URLs
+- `/` - Home page with quick access to all features
+- `/advanced-filter/` - Advanced filtering and reporting interface
+- `/quick-aliquot/` - Quick Create form for Parent Sample + Aliquot
+- `/search/` - Quick search functionality
+- `/admin/` - Django admin interface
 
 ## 🛠 Maintenance Notes
 

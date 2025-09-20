@@ -54,6 +54,7 @@ urlpatterns = [
     # Aliquot URLs
     path('aliquots/', views.AliquotListView.as_view(), name='aliquot_list'),
     path('aliquots/create/', views.AliquotCreateView.as_view(), name='create_aliquot'),
+    path('aliquots/quick-create/', views.QuickAliquotCreateView.as_view(), name='quick_create_aliquot'),
     path('aliquots/<int:pk>/', views.AliquotDetailView.as_view(), name='aliquot_detail'),
     path('aliquots/<int:pk>/edit/', views.AliquotUpdateView.as_view(), name='aliquot_update'),
     
@@ -75,6 +76,7 @@ urlpatterns = [
     # Reporting URLs
     path('reports/daily_status/', views.ReportView.as_view(), name='daily_status_report'),
     path('reports/comprehensive/', views.ComprehensiveReportView.as_view(), name='comprehensive_report'),
+    path('reports/advanced-filter/', views.AdvancedFilterView.as_view(), name='advanced_filter'),
 
     # Export URLs
     path('export/labels/', views.ExportLabelsView.as_view(), name='export_labels'),

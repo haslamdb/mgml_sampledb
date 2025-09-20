@@ -4,7 +4,7 @@
 <div class="container mt-3">
     <div class="card shadow">
         <div class="card-header bg-primary text-white py-2">
-            <h4 class="mb-0">Submit a Crude Sample</h4>
+            <h4 class="mb-0">Submit a Parent Sample</h4>
         </div>
         <div class="card-body py-2">
             <form method="post" class="mt-2">
@@ -36,7 +36,18 @@
                                 <div class="text-danger small">{{ form.sample_source.errors }}</div>
                             {% endif %}
                         </div>
-                        
+
+                        <div class="form-group mb-3" id="isolate-source-group" style="display: none;">
+                            <label for="{{ form.isolate_source.id_for_label }}" class="font-weight-bold">{{ form.isolate_source.label }}</label>
+                            {{ form.isolate_source }}
+                            {% if form.isolate_source.help_text %}
+                                <small class="form-text text-muted">{{ form.isolate_source.help_text }}</small>
+                            {% endif %}
+                            {% if form.isolate_source.errors %}
+                                <div class="text-danger small">{{ form.isolate_source.errors }}</div>
+                            {% endif %}
+                        </div>
+
                         <div class="form-group mb-3">
                             <label for="{{ form.collection_date.id_for_label }}" class="font-weight-bold">{{ form.collection_date.label }}</label>
                             {{ form.collection_date }}
@@ -168,7 +179,7 @@
                 <div class="mt-3 text-center">
                     <a href="{% url 'home' %}" class="btn btn-sm btn-secondary mr-2">Cancel</a>
                     <button type="submit" class="btn btn-sm btn-primary">
-                        <i class="fas fa-save"></i> Submit Crude Sample
+                        <i class="fas fa-save"></i> Submit Parent Sample
                     </button>
                 </div>
             </form>
@@ -188,6 +199,31 @@ document.addEventListener('DOMContentLoaded', function() {
     const plateHelp = document.querySelector('.plate-storage-help');
     const containerIdField = document.getElementById('id_box_ID');
     const wellField = document.getElementById('id_well_ID');
+
+    // Handle isolate source field visibility
+    const sampleSourceField = document.getElementById('id_sample_source');
+    const isolateSourceGroup = document.getElementById('isolate-source-group');
+    const isolateSourceField = document.getElementById('id_isolate_source');
+
+    function toggleIsolateSource() {
+        if (sampleSourceField && isolateSourceGroup) {
+            if (sampleSourceField.value === 'Isolate') {
+                isolateSourceGroup.style.display = 'block';
+            } else {
+                isolateSourceGroup.style.display = 'none';
+                if (isolateSourceField) {
+                    isolateSourceField.value = '';  // Clear the field when hidden
+                }
+            }
+        }
+    }
+
+    // Listen for sample source changes
+    if (sampleSourceField) {
+        sampleSourceField.addEventListener('change', toggleIsolateSource);
+        // Initialize on page load
+        toggleIsolateSource();
+    }
     
     function updateBarcodeField() {
         if (!containerTypeField || !barcodeField) return;
