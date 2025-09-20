@@ -129,7 +129,8 @@ class Sample(TimeStampedModel):
         max_length=100,
         blank=True,
         null=True,
-        help_text="Patient classification (e.g., IBD, Control, Cancer)"
+        verbose_name="Patient Group",
+        help_text="Patient group or classification (e.g., IBD, Control, Cancer)"
     )
     study_id = models.CharField(
         max_length=100,
@@ -482,12 +483,114 @@ class SequenceLibrary(Sample):
     Represents a sequencing library derived from an extract.
     """
     LIBRARY_CHOICES = [
-        ('Nextera', 'Nextera'),  
-        ('SMARTer', 'SMARTer'),
-        ('QIA_COVID', 'QIA_COVID'),
-        ('TruSeq', 'TruSeq'),
-        ('Other', 'Other')
+        # Metagenomics
+        ('Nextera_XT', 'Illumina Nextera XT DNA Library Prep'),  # NX - Default
+        ('Nextera_Flex', 'Illumina Nextera DNA Flex / DNA Prep'),  # NF
+        ('TruSeq_Nano', 'Illumina TruSeq Nano DNA'),  # TN
+        ('NEBNext_Ultra_DNA', 'NEBNext Ultra II DNA Library Prep'),  # ND
+        ('QIAseq_FX', 'QIAseq FX DNA Library Kit'),  # QF
+        ('Swift_Accel', 'Swift Biosciences Accel-NGS 2S DNA Library Kit'),  # SA
+        ('PacBio_SMRTbell', 'PacBio SMRTbell Express Template Prep Kit'),  # PB
+        ('ONT_Ligation', 'Oxford Nanopore Ligation Sequencing Kit'),  # OL
+        ('ONT_Rapid', 'Oxford Nanopore Rapid Sequencing Kit'),  # OR
+        ('Twist_Hybrid', 'Twist Target Enrichment (Hybrid Capture)'),  # TH
+        ('Agilent_SureSelect', 'Agilent SureSelect Target Enrichment'),  # AS
+        ('16S_Metagenomic', '16S Metagenomic Sequencing Library Prep'),  # 16
+        ('ITS_Amplicon', 'ITS Amplicon Library Prep (fungal)'),  # IT
+
+        # Metatranscriptomics
+        ('TruSeq_Total_RNA', 'Illumina TruSeq Stranded Total RNA (Ribo-Zero)'),  # TR
+        ('NEBNext_RNA_Ribo', 'NEBNext rRNA Depletion + Ultra II RNA Prep'),  # NR
+        ('RiboZero_Plus', 'Ribo-Zero Plus rRNA Depletion Kit'),  # RZ
+        ('SMARTer_Total_Microbes', 'SMARTer Stranded Total RNA-Seq (microbes)'),  # SM
+        ('SMARTer_Pico', 'SMARTer Stranded Total RNA-Seq v2 - Pico Input'),  # SP
+        ('QIAseq_FastSelect', 'QIAseq FastSelect rRNA Removal + RNA Library'),  # QR
+        ('Lexogen_RiboCop', 'Lexogen RiboCop rRNA Depletion + CORALL RNA-Seq'),  # LR
+        ('ONT_Direct_RNA', 'Oxford Nanopore Direct RNA Sequencing Kit'),  # OD
+        ('PacBio_IsoSeq', 'PacBio Iso-Seq Express Template Prep'),  # PI
+
+        # Bulk RNA-seq
+        ('TruSeq_mRNA', 'Illumina TruSeq Stranded mRNA Library Prep'),  # TM
+        ('TruSeq_SmallRNA', 'Illumina TruSeq Small RNA Library Prep'),  # TS
+        ('NEBNext_Ultra_RNA', 'NEBNext Ultra II Directional RNA Library Prep'),  # NU
+        ('SMART_Seq_v4', 'SMART-Seq v4 Ultra Low Input RNA Kit'),  # S4
+        ('QuantSeq_3prime', 'QuantSeq 3′ mRNA-Seq Library Prep (Lexogen)'),  # Q3
+
+        # Single-cell RNA-seq
+        ('10x_3prime', '10x Genomics Chromium Single Cell 3′ Gene Expression'),  # X3
+        ('10x_5prime', '10x Genomics Chromium Single Cell 5′ Gene Expression'),  # X5
+        ('10x_Multiome', '10x Genomics Multiome (ATAC + RNA)'),  # XM
+        ('SMART_Seq2', 'SMART-Seq2'),  # S2
+        ('SMART_Seq3', 'SMART-Seq3'),  # S3
+        ('CEL_Seq2', 'CEL-Seq2'),  # C2
+        ('Drop_seq', 'Drop-seq (academic protocol)'),  # DS
+        ('inDrops', 'inDrops (academic protocol)'),  # ID
+        ('Seq_Well', 'Seq-Well (academic protocol)'),  # SW
+
+        # Specialized RNA-seq
+        ('10x_Visium', '10x Genomics Visium Spatial Gene Expression'),  # XV
+        ('NanoString_GeoMx', 'NanoString GeoMx DSP RNA Library Prep'),  # NG
+        ('Slide_seq', 'Slide-seq / Slide-seqV2'),  # SS
+        ('SMART_Seq_HT', 'SMART-Seq HT Kit (high-throughput)'),  # SH
+        ('SMART_Seq_Nucleus', 'SMARTer Stranded Total RNA-Seq (Single Nucleus)'),  # SN
+
+        # Legacy/Other
+        ('Nextera', 'Nextera (legacy)'),  # NL
+        ('SMARTer', 'SMARTer (legacy)'),  # SL
+        ('QIA_COVID', 'QIA_COVID'),  # QC
+        ('TruSeq', 'TruSeq (legacy)'),  # TL
+        ('Other', 'Other/Custom'),  # OT
     ]
+
+    # Dictionary for quick suffix lookup
+    LIBRARY_SUFFIX_MAP = {
+        'Nextera_XT': 'NX',
+        'Nextera_Flex': 'NF',
+        'TruSeq_Nano': 'TN',
+        'NEBNext_Ultra_DNA': 'ND',
+        'QIAseq_FX': 'QF',
+        'Swift_Accel': 'SA',
+        'PacBio_SMRTbell': 'PB',
+        'ONT_Ligation': 'OL',
+        'ONT_Rapid': 'OR',
+        'Twist_Hybrid': 'TH',
+        'Agilent_SureSelect': 'AS',
+        '16S_Metagenomic': '16',
+        'ITS_Amplicon': 'IT',
+        'TruSeq_Total_RNA': 'TR',
+        'NEBNext_RNA_Ribo': 'NR',
+        'RiboZero_Plus': 'RZ',
+        'SMARTer_Total_Microbes': 'SM',
+        'SMARTer_Pico': 'SP',
+        'QIAseq_FastSelect': 'QR',
+        'Lexogen_RiboCop': 'LR',
+        'ONT_Direct_RNA': 'OD',
+        'PacBio_IsoSeq': 'PI',
+        'TruSeq_mRNA': 'TM',
+        'TruSeq_SmallRNA': 'TS',
+        'NEBNext_Ultra_RNA': 'NU',
+        'SMART_Seq_v4': 'S4',
+        'QuantSeq_3prime': 'Q3',
+        '10x_3prime': 'X3',
+        '10x_5prime': 'X5',
+        '10x_Multiome': 'XM',
+        'SMART_Seq2': 'S2',
+        'SMART_Seq3': 'S3',
+        'CEL_Seq2': 'C2',
+        'Drop_seq': 'DS',
+        'inDrops': 'ID',
+        'Seq_Well': 'SW',
+        '10x_Visium': 'XV',
+        'NanoString_GeoMx': 'NG',
+        'Slide_seq': 'SS',
+        'SMART_Seq_HT': 'SH',
+        'SMART_Seq_Nucleus': 'SN',
+        'Nextera': 'NL',
+        'SMARTer': 'SL',
+        'QIA_COVID': 'QC',
+        'TruSeq': 'TL',
+        'Other': 'OT',
+    }
     
     NINDEX_CHOICES = [("N701" , "N701"),
         ("N702" , "N702"),
@@ -541,10 +644,10 @@ class SequenceLibrary(Sample):
         help_text="The extract this library was derived from"
     )
     library_type = models.CharField(
-        max_length=100, 
-        choices=LIBRARY_CHOICES, 
-        default='DNA',
-        help_text="Type of sequencing library"
+        max_length=100,
+        choices=LIBRARY_CHOICES,
+        default='Nextera_XT',
+        help_text="Type of sequencing library preparation method"
     )
     nindex = models.CharField(
         max_length=100, 
@@ -629,16 +732,17 @@ class SequenceLibrary(Sample):
         """
         Returns the sequence filenames (R1 and R2).
         For legacy data, uses legacy_sequence_filename.
-        For new data, derives from sample_id.
+        For new data, derives from base_id (without -SL suffix) and adds library type suffix.
         """
         if self.legacy_sequence_filename:
             return {
                 'R1': f"{self.legacy_sequence_filename}_R1.fastq.gz",
                 'R2': f"{self.legacy_sequence_filename}_R2.fastq.gz"
             }
-        elif self.sample_id:
-            # Remove -SL suffix for the filename
-            base_name = self.sample_id.replace('-SL', '')
+        elif self.base_id:
+            # Use base_id (which doesn't have -SL suffix) and add library type suffix
+            suffix = self.LIBRARY_SUFFIX_MAP.get(self.library_type, 'OT')
+            base_name = f"{self.base_id}_{suffix}"
             return {
                 'R1': f"{base_name}_R1.fastq.gz",
                 'R2': f"{base_name}_R2.fastq.gz"

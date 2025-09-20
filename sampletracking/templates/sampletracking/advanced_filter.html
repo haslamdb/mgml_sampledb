@@ -66,6 +66,12 @@
                         </div>
 
                         <div class="form-group">
+                            {{ form.library_type.label_tag }}
+                            {{ form.library_type }}
+                            <small class="form-text text-muted">Only applies when filtering Sequence Libraries</small>
+                        </div>
+
+                        <div class="form-group">
                             {{ form.status.label_tag }}
                             {{ form.status }}
                         </div>
@@ -142,7 +148,7 @@
                                     <th>Subject ID</th>
                                     <th>Project</th>
                                     <th>Investigator</th>
-                                    <th>Patient Type</th>
+                                    <th>Patient Group</th>
                                     <th>Date</th>
                                     <th>Status</th>
                                     <th>Actions</th>
@@ -167,6 +173,11 @@
                                         <span class="badge badge-secondary">{{ result.status }}</span>
                                     </td>
                                     <td>
+                                        {% if result.type == 'Sequence Library' and result.sequence_r1 != '-' %}
+                                            <span class="text-muted" style="font-size: 0.8em;" title="R1: {{ result.sequence_r1 }}, R2: {{ result.sequence_r2 }}">
+                                                <i class="fas fa-dna"></i> Files
+                                            </span>
+                                        {% endif %}
                                         <a href="{{ result.url }}" class="btn btn-sm btn-outline-info">
                                             <i class="fas fa-eye"></i>
                                         </a>

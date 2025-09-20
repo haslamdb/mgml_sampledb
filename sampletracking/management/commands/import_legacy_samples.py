@@ -7,7 +7,7 @@ CSV should have these columns (all optional except subject_id and collection_dat
 - legacy_sequence_filename: Legacy filename (without _R1/_R2)
 - project_name: Project or study name
 - investigator: PI name
-- patient_type: Patient classification (IBD, Control, etc.)
+- patient_type: Patient group or classification (IBD, Control, etc.)
 - study_id: External study ID
 - sample_source: Sample type (Stool, Blood, etc.) - default: 'Unknown'
 - barcode: Sample barcode (will auto-generate if not provided)

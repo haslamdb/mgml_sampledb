@@ -402,7 +402,7 @@ class AdvancedFilterForm(forms.Form):
         max_length=100,
         required=False,
         widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g., IBD, Control, Cancer...'}),
-        label="Patient Type"
+        label="Patient Group"
     )
 
     study_id = forms.CharField(
@@ -447,6 +447,14 @@ class AdvancedFilterForm(forms.Form):
         required=False,
         widget=forms.Select(attrs={'class': 'form-control'}),
         label="Isolate Source (when Sample Source = Isolate)"
+    )
+
+    # Library type filter (for sequence libraries)
+    library_type = forms.ChoiceField(
+        choices=[('', 'All Library Types')] + SequenceLibrary.LIBRARY_CHOICES,
+        required=False,
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        label="Library Type (Sequence Libraries only)"
     )
 
     # Status filter

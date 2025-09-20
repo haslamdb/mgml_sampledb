@@ -76,6 +76,64 @@
         </div>
     </div>
 
+    <!-- Reports Section -->
+    <div class="row mt-5 mb-4">
+        <div class="col-12">
+            <h3 class="text-center mb-4" style="color: #2c5f7c;">
+                <i class="fas fa-chart-bar"></i> Reports & Sample Lists
+            </h3>
+        </div>
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-list"></i> View All Samples
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text mb-3">Quick access to view all samples by type. Click on any category to see the complete list.</p>
+                    <div class="row">
+                        <div class="col-md-3 mb-2">
+                            <a href="{% url 'crude_sample_list' %}" class="btn btn-outline-primary btn-block">
+                                <i class="fas fa-vial"></i> View All Parent Samples
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <a href="{% url 'aliquot_list' %}" class="btn btn-outline-success btn-block">
+                                <i class="fas fa-test-tube"></i> View All Aliquots
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <a href="{% url 'extract_list' %}" class="btn btn-outline-warning btn-block">
+                                <i class="fas fa-dna"></i> View All Extracts
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <a href="{% url 'library_list' %}" class="btn btn-outline-info btn-block">
+                                <i class="fas fa-book"></i> View All Libraries
+                            </a>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="row mt-3">
+                        <div class="col-md-12">
+                            <p class="text-muted mb-2"><i class="fas fa-info-circle"></i> <strong>Additional Reports:</strong></p>
+                            <a href="{% url 'advanced_filter' %}" class="btn btn-primary btn-sm mr-2">
+                                <i class="fas fa-filter"></i> Advanced Filter & Export
+                            </a>
+                            <a href="{% url 'comprehensive_report' %}" class="btn btn-secondary btn-sm mr-2">
+                                <i class="fas fa-file-csv"></i> Comprehensive Report
+                            </a>
+                            <a href="{% url 'search' %}" class="btn btn-secondary btn-sm">
+                                <i class="fas fa-search"></i> Quick Search
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Sample Search and Admin Actions Section -->
     <div class="row mt-5 mb-4">
         <div class="col-12">
@@ -164,64 +222,6 @@
                     <a href="{% url 'find_sample_to_receive' %}" class="btn btn-success">
                         <i class="fas fa-barcode"></i> Scan & Receive Sample
                     </a>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Reports Section -->
-    <div class="row mt-5 mb-4">
-        <div class="col-12">
-            <h3 class="text-center mb-4" style="color: #2c5f7c;">
-                <i class="fas fa-chart-bar"></i> Reports & Sample Lists
-            </h3>
-        </div>
-        <div class="col-md-12">
-            <div class="card">
-                <div class="card-header bg-info text-white">
-                    <h5 class="card-title mb-0">
-                        <i class="fas fa-list"></i> View All Samples
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <p class="card-text mb-3">Quick access to view all samples by type. Click on any category to see the complete list.</p>
-                    <div class="row">
-                        <div class="col-md-3 mb-2">
-                            <a href="{% url 'crude_sample_list' %}" class="btn btn-outline-primary btn-block">
-                                <i class="fas fa-vial"></i> View All Parent Samples
-                            </a>
-                        </div>
-                        <div class="col-md-3 mb-2">
-                            <a href="{% url 'aliquot_list' %}" class="btn btn-outline-success btn-block">
-                                <i class="fas fa-test-tube"></i> View All Aliquots
-                            </a>
-                        </div>
-                        <div class="col-md-3 mb-2">
-                            <a href="{% url 'extract_list' %}" class="btn btn-outline-warning btn-block">
-                                <i class="fas fa-dna"></i> View All Extracts
-                            </a>
-                        </div>
-                        <div class="col-md-3 mb-2">
-                            <a href="{% url 'library_list' %}" class="btn btn-outline-info btn-block">
-                                <i class="fas fa-book"></i> View All Libraries
-                            </a>
-                        </div>
-                    </div>
-                    <hr>
-                    <div class="row mt-3">
-                        <div class="col-md-12">
-                            <p class="text-muted mb-2"><i class="fas fa-info-circle"></i> <strong>Additional Reports:</strong></p>
-                            <a href="{% url 'advanced_filter' %}" class="btn btn-primary btn-sm mr-2">
-                                <i class="fas fa-filter"></i> Advanced Filter & Export
-                            </a>
-                            <a href="{% url 'comprehensive_report' %}" class="btn btn-secondary btn-sm mr-2">
-                                <i class="fas fa-file-csv"></i> Comprehensive Report
-                            </a>
-                            <a href="{% url 'search' %}" class="btn btn-secondary btn-sm">
-                                <i class="fas fa-search"></i> Quick Search
-                            </a>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>

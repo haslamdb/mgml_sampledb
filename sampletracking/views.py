@@ -888,6 +888,7 @@ class AdvancedFilterView(LoginRequiredMixin, FormView):
         date_to = form.cleaned_data.get('date_to')
         sample_source = form.cleaned_data.get('sample_source')
         isolate_source = form.cleaned_data.get('isolate_source')
+        library_type = form.cleaned_data.get('library_type')
         status = form.cleaned_data.get('status')
         legacy_only = form.cleaned_data.get('legacy_only')
         export_format = form.cleaned_data.get('export_format')
@@ -995,6 +996,8 @@ class AdvancedFilterView(LoginRequiredMixin, FormView):
             library_qs = apply_filters(library_qs, SequenceLibrary)
             if subject_id:
                 library_qs = library_qs.filter(parent__parent__parent_barcode__subject_id__icontains=subject_id)
+            if library_type:
+                library_qs = library_qs.filter(library_type=library_type)
             if legacy_only:
                 library_qs = library_qs.filter(is_legacy_import=True)
 
@@ -1017,11 +1020,13 @@ class AdvancedFilterView(LoginRequiredMixin, FormView):
                     'study_id': sample.study_id or '-',
                     'date': sample.date_created,
                     'status': sample.get_status_display(),
-                    'source': sample.library_type,
+                    'source': sample.get_library_type_display(),
                     'pk': sample.pk,
                     'url': reverse('library_detail', kwargs={'pk': sample.pk}),
                     'is_legacy': sample.is_legacy_import,
-                    'sequence_files': f"{filenames.get('R1', '-')}, {filenames.get('R2', '-')}"
+                    'sequence_r1': filenames.get('R1', '-'),
+                    'sequence_r2': filenames.get('R2', '-'),
+                    'legacy_filename': sample.legacy_sequence_filename or '-'
                 })
 
         # Sort results by date
@@ -1033,18 +1038,35 @@ class AdvancedFilterView(LoginRequiredMixin, FormView):
             response['Content-Disposition'] = 'attachment; filename="filtered_samples.csv"'
             writer = csv.writer(response)
 
-            # Write header
-            writer.writerow(['Type', 'Sample ID', 'Barcode', 'Subject ID', 'Project',
-                           'Investigator', 'Patient Type', 'Study ID', 'Date',
-                           'Status', 'Source/Type'])
+            # Write header - include sequence filenames for libraries
+            header = ['Type', 'Sample ID', 'Barcode', 'Subject ID', 'Project',
+                     'Investigator', 'Patient Group', 'Study ID', 'Date',
+                     'Status', 'Source/Type']
+
+            # Check if we have any sequence libraries in results
+            has_libraries = any(r['type'] == 'Sequence Library' for r in results)
+            if has_libraries:
+                header.extend(['Sequence R1', 'Sequence R2', 'Legacy Filename'])
+
+            writer.writerow(header)
 
             # Write data
             for r in results:
-                writer.writerow([
+                row = [
                     r['type'], r['sample_id'], r['barcode'], r['subject_id'],
                     r['project'], r['investigator'], r['patient_type'],
                     r['study_id'], r['date'], r['status'], r['source']
-                ])
+                ]
+
+                # Add sequence filenames if this is a library or if we're including them for all
+                if has_libraries:
+                    if r['type'] == 'Sequence Library':
+                        row.extend([r.get('sequence_r1', '-'), r.get('sequence_r2', '-'),
+                                   r.get('legacy_filename', '-')])
+                    else:
+                        row.extend(['-', '-', '-'])  # Empty columns for non-libraries
+
+                writer.writerow(row)
 
             return response
 

@@ -1,8 +1,50 @@
 # MGML Sample Database - Project Status
 
-## Last Updated: September 19, 2025 - 8:45 PM
+## Last Updated: September 19, 2025 - 9:35 PM
 
-## ✅ Recent Accomplishments (Latest Session - Evening)
+## ✅ Recent Accomplishments (Latest Session - Evening Part 2)
+
+### Sequence Library Improvements (September 19, 2025 - 9:00 PM)
+- **Comprehensive Library Type System with 45+ Methods**
+  - Added detailed library preparation methods across 5 categories:
+    - Metagenomics (13 methods)
+    - Metatranscriptomics (9 methods)
+    - Bulk RNA-seq (5 methods)
+    - Single-cell RNA-seq (9 methods)
+    - Specialized RNA-seq (5 methods)
+  - Each method has a unique 2-letter suffix for file naming (e.g., NX for Nextera XT)
+  - Default library type: Nextera XT
+
+- **Sequence Filename Generation System**
+  - Format: `{base_id}_{library_suffix}_R1/R2.fastq.gz`
+  - Example: `IS-250919-001_NX_R1.fastq.gz` for Nextera XT library
+  - **Legacy filename priority**: Imported samples with legacy_sequence_filename use original names
+  - Critical for cross-referencing with existing data and metadata
+
+- **Enhanced Sequence File Display**
+  - SequenceLibrary detail page now shows:
+    - R1 and R2 filenames
+    - Legacy filename (if imported)
+    - Data file location
+  - Advanced filter exports include sequence filenames in CSV
+  - Visual indicator for libraries with generated files
+
+- **Library Type Filtering**
+  - Added library_type filter to Advanced Filter interface
+  - Can filter sequence libraries by preparation method
+  - All 45+ library types available in dropdown
+
+### UI/UX Refinements (September 19, 2025 - 9:20 PM)
+- **Home Page Reorganization**
+  - Moved "Reports & Sample Lists" section above "Sample Search & Admin Actions"
+  - Better prioritization of frequently used features
+
+- **Terminology Update**
+  - Changed "Patient Type" to "Patient Group" throughout
+  - Better reflects study cohorts/groups rather than individual types
+  - Updated in models, forms, templates, and CSV exports
+
+## ✅ Recent Accomplishments (Latest Session - Evening Part 1)
 
 ### UI/UX Improvements (September 19, 2025 - Evening)
 - **Renamed "Crude Sample" to "Parent Sample"** throughout the application
@@ -46,10 +88,11 @@
 - **Import template includes**:
   - subject_id, collection_date (required)
   - legacy_sequence_filename, project_name, investigator, patient_type, study_id
-  - sample_source, isolate_source, barcode
+  - sample_source, isolate_source (for bacterial isolates), barcode
   - n_index, s_index, library_type, sequencing_date, sequencing_platform
   - notes, data_file_location
-  - See `import_template.csv` for example format
+  - Isolate source tracking added for imports (Blood, Urine, Wound, etc.)
+  - See `import_template.csv` for example format with isolate samples
 
 ### Advanced Filtering System (September 19, 2025 - Evening)
 - **Created comprehensive filtering interface** (`/advanced-filter/`)
@@ -275,6 +318,17 @@ CrudeSample: IS-250812-001-CS
   - Creates full hierarchy: CrudeSample → Aliquot → Extract → SequenceLibrary
   - Auto-generates barcodes with suffixes (_CR, _AL, _EX, _SL)
   - Marks imported samples with status='ARCHIVED'
+  - **Legacy filenames preserved**: Original sequence filenames maintained for metadata crosswalk
+
+### Library Type Suffixes (45+ methods)
+Examples of 2-letter codes used in sequence filenames:
+- **NX** - Nextera XT (default)
+- **X3** - 10x Genomics 3' Gene Expression
+- **TM** - TruSeq mRNA
+- **OD** - Oxford Nanopore Direct RNA
+- **16** - 16S Metagenomic
+- **PI** - PacBio Iso-Seq
+- See models.py `LIBRARY_SUFFIX_MAP` for complete list
 
 ### Key URLs
 - `/` - Home page with quick access to all features

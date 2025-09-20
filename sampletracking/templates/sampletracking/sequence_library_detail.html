@@ -92,6 +92,48 @@
                             <td>{{ library.sequencing_run_id|default:"Not specified" }}</td>
                         </tr>
                     </table>
+
+                    <!-- Sequence Filenames Section -->
+                    <h5 class="mt-3">Sequence Filenames</h5>
+                    <table class="table table-bordered">
+                        {% with filenames=library.get_sequence_filenames %}
+                        <tr>
+                            <th>R1 Filename:</th>
+                            <td>
+                                {% if filenames.R1 %}
+                                    <code>{{ filenames.R1 }}</code>
+                                {% else %}
+                                    <span class="text-muted">Not generated</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>R2 Filename:</th>
+                            <td>
+                                {% if filenames.R2 %}
+                                    <code>{{ filenames.R2 }}</code>
+                                {% else %}
+                                    <span class="text-muted">Not generated</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% if library.legacy_sequence_filename %}
+                        <tr>
+                            <th>Legacy Filename:</th>
+                            <td>
+                                <code>{{ library.legacy_sequence_filename }}</code>
+                                <span class="badge badge-info ml-2">Imported</span>
+                            </td>
+                        </tr>
+                        {% endif %}
+                        {% if library.data_file_location %}
+                        <tr>
+                            <th>Data Location:</th>
+                            <td><code>{{ library.data_file_location }}</code></td>
+                        </tr>
+                        {% endif %}
+                        {% endwith %}
+                    </table>
                 </div>
                 <div class="col-md-6">
                     <h5>Plate Information</h5>
