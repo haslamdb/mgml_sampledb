@@ -12,8 +12,11 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <h3>Parent Samples</h3>
                     <div>
+                        <span id="selection-count" class="badge badge-info mr-2" style="display: none;">
+                            <span id="selection-number">0</span> selected
+                        </span>
                         <button type="submit" class="btn btn-success btn-sm">
-                            <i class="fas fa-print"></i> Export for Label Printing
+                            <i class="fas fa-print"></i> Export for Printing
                         </button>
                         <a href="{% url 'create_crude_sample' %}" class="btn btn-light btn-sm">
                             <i class="fas fa-plus"></i> Add New Sample
@@ -21,12 +24,13 @@
                     </div>
                 </div>
             </div>
-            <div class="card-body">
+            <div class="card-body" style="font-size: 0.8rem;">
                 {% if samples %}
                 <table class="table table-striped table-hover">
                     <thead>
                         <tr>
                             <th style="width: 5%;"><input type="checkbox" id="select-all-checkbox"></th>
+                            <th>Sample ID</th>
                             <th>Barcode</th>
                             <th>Subject ID</th>
                             <th>Sample Source</th>
@@ -39,6 +43,7 @@
                         {% for sample in samples %}
                         <tr>
                             <td><input type="checkbox" name="selected_samples" value="{{ sample.pk }}" class="sample-checkbox"></td>
+                            <td>{{ sample.sample_id }}</td>
                             <td>{{ sample.barcode }}</td>
                             <td>{{ sample.subject_id }}</td>
                             <td>{{ sample.get_sample_source_display }}</td>
@@ -109,10 +114,132 @@
 
 {% block extra_js %}
 <script>
-    document.getElementById('select-all-checkbox').addEventListener('click', function(event) {
-        document.querySelectorAll('.sample-checkbox').forEach(function(checkbox) {
-            checkbox.checked = event.target.checked;
+$(document).ready(function() {
+    const storageKey = 'selectedCrudeSamples';
+    let allIds = [];
+
+    // Fetch all selectable IDs from the server
+    fetch("{% url 'get_all_crude_sample_ids' %}")
+        .then(response => response.json())
+        .then(data => {
+            allIds = data.ids.map(String); // Ensure all IDs are strings
+            updateUI(); // Initial UI update after fetching all IDs
+        })
+        .catch(error => console.error('Error fetching all crude sample IDs:', error));
+
+    // Function to get selected items from sessionStorage
+    function getSelected() {
+        const raw = sessionStorage.getItem(storageKey);
+        try {
+            const selected = raw ? JSON.parse(raw) : [];
+            return selected.map(String); // Ensure all IDs are strings
+        } catch (e) {
+            return [];
+        }
+    }
+
+    // Function to save selected items to sessionStorage
+    function saveSelected(selected) {
+        sessionStorage.setItem(storageKey, JSON.stringify(selected));
+        updateUI();
+    }
+
+    // Function to update the UI (counter, hidden fields, and checkboxes)
+    function updateUI() {
+        let selected = getSelected();
+        
+        // Update counter
+        const selectionCountEl = $('#selection-count');
+        const selectionNumberEl = $('#selection-number');
+        if (selected.length > 0) {
+            selectionNumberEl.text(selected.length);
+            selectionCountEl.show();
+        } else {
+            selectionCountEl.hide();
+        }
+
+        // Sync hidden inputs for form submission
+        $('.persistent-selection').remove(); // Clear old hidden inputs
+        selected.forEach(function(id) {
+            if ($('.sample-checkbox[value="' + id + '"]').length === 0) {
+                $('<input>')
+                    .attr('type', 'hidden')
+                    .attr('name', 'selected_samples')
+                    .attr('value', id)
+                    .addClass('persistent-selection')
+                    .appendTo('form');
+            }
         });
+
+        // Sync checkboxes on the current page
+        $('.sample-checkbox').each(function() {
+            $(this).prop('checked', selected.includes($(this).val()));
+        });
+
+        // Update the state of the main select-all checkbox
+        updateSelectAllCheckboxState();
+    }
+
+    // Function to update the 'select-all' checkbox state
+    function updateSelectAllCheckboxState() {
+        const selected = getSelected();
+        const selectAll = $('#select-all-checkbox');
+        
+        if (allIds.length > 0 && allIds.every(id => selected.includes(id))) {
+            selectAll.prop('checked', true);
+            selectAll.prop('indeterminate', false);
+        } else if (selected.length > 0) {
+            selectAll.prop('indeterminate', true);
+            selectAll.prop('checked', false);
+        } else {
+            selectAll.prop('checked', false);
+            selectAll.prop('indeterminate', false);
+        }
+    }
+
+    // EVENT: When 'select-all' checkbox is clicked
+    $('#select-all-checkbox').on('click', function() {
+        let selected = getSelected();
+        if (this.checked) {
+            // Add all IDs to selection, avoiding duplicates
+            allIds.forEach(id => {
+                if (!selected.includes(id)) {
+                    selected.push(id);
+                }
+            });
+        } else {
+            // Clear all selections
+            selected = [];
+        }
+        saveSelected(selected);
     });
+
+    // EVENT: When an individual sample checkbox is clicked
+    $('.sample-checkbox').on('change', function() {
+        const id = $(this).val();
+        let selected = getSelected();
+        const index = selected.indexOf(id);
+
+        if (this.checked) {
+            if (index === -1) {
+                selected.push(id);
+            }
+        } else {
+            if (index > -1) {
+                selected.splice(index, 1);
+            }
+        }
+        saveSelected(selected);
+    });
+
+    // ON FORM SUBMIT: Ensure all selections are included and clear storage
+    $('form').on('submit', function() {
+        updateUI(); // Final sync before submitting
+        setTimeout(() => sessionStorage.removeItem(storageKey), 500);
+    });
+
+    // Initial UI setup on page load
+    updateUI();
+});
 </script>
 {% endblock %}

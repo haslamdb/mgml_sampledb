@@ -10,7 +10,7 @@ from datetime import datetime, time
 import logging
 import re
 import csv
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 
 from .models import CrudeSample, Aliquot, Extract, SequenceLibrary
 from .forms import (
@@ -843,28 +843,85 @@ class ExportLabelsView(LoginRequiredMixin, View):
         )
 
         writer = csv.writer(response)
-        writer.writerow(['SampleID', 'SubjectID', 'Barcode'])
 
-        queryset = None
+        # Write comprehensive headers based on sample type
         if model_type == 'crudesample':
+            writer.writerow([
+                'SampleID', 'SubjectID', 'Barcode', 'Sample Source', 'Collection Date',
+                'Date Created', 'Status', 'Project', 'Investigator', 'Patient Type',
+                'Study ID', 'Isolate Source', 'Source Details',
+                'Freezer ID', 'Box ID', 'Well ID', 'Notes'
+            ])
             queryset = CrudeSample.objects.filter(pk__in=sample_pks)
             for sample in queryset:
-                writer.writerow([sample.sample_id, sample.subject_id, sample.barcode])
+                writer.writerow([
+                    sample.sample_id, sample.subject_id, sample.barcode,
+                    sample.get_sample_source_display() if hasattr(sample, 'get_sample_source_display') else sample.sample_source or '',
+                    sample.collection_date or '',
+                    sample.date_created, sample.get_status_display(), sample.project_name or '',
+                    sample.investigator or '', sample.patient_type or '', sample.study_id or '',
+                    sample.isolate_source or '', sample.source_details or '',
+                    sample.freezer_ID or '', sample.box_ID or '',
+                    sample.well_ID or '', sample.notes or ''
+                ])
         elif model_type == 'aliquot':
+            writer.writerow([
+                'SampleID', 'SubjectID', 'Barcode', 'Parent Barcode', 'Volume (µL)',
+                'Concentration (ng/µL)', 'Date Created', 'Status', 'Project',
+                'Investigator', 'Patient Type', 'Study ID', 'Freezer ID',
+                'Box ID', 'Well ID', 'Notes'
+            ])
             queryset = Aliquot.objects.filter(pk__in=sample_pks).select_related('parent_barcode')
             for sample in queryset:
                 subject_id = sample.parent_barcode.subject_id if sample.parent_barcode else ''
-                writer.writerow([sample.sample_id, subject_id, sample.barcode])
+                parent_barcode = sample.parent_barcode.barcode if sample.parent_barcode else ''
+                writer.writerow([
+                    sample.sample_id, subject_id, sample.barcode, parent_barcode,
+                    sample.volume or '', sample.concentration or '', sample.date_created,
+                    sample.get_status_display(), sample.project_name or '',
+                    sample.investigator or '', sample.patient_type or '', sample.study_id or '',
+                    sample.freezer_ID or '', sample.box_ID or '',
+                    sample.well_ID or '', sample.notes or ''
+                ])
         elif model_type == 'extract':
+            writer.writerow([
+                'SampleID', 'SubjectID', 'Barcode', 'Parent Aliquot', 'Extract Type',
+                'Extract Volume (µL)', 'Concentration (ng/µL)', 'Date Created', 'Status',
+                'Project', 'Investigator', 'Patient Type', 'Study ID', 'Freezer ID',
+                'Box ID', 'Well ID', 'Quality Score', 'Notes'
+            ])
             queryset = Extract.objects.filter(pk__in=sample_pks).select_related('parent__parent_barcode')
             for sample in queryset:
                 subject_id = sample.parent.parent_barcode.subject_id if sample.parent and sample.parent.parent_barcode else ''
-                writer.writerow([sample.sample_id, subject_id, sample.barcode])
+                parent_barcode = sample.parent.barcode if sample.parent else ''
+                writer.writerow([
+                    sample.sample_id, subject_id, sample.barcode, parent_barcode,
+                    sample.get_extract_type_display(), sample.extract_volume or '',
+                    sample.concentration or '', sample.date_created, sample.get_status_display(),
+                    sample.project_name or '', sample.investigator or '', sample.patient_type or '',
+                    sample.study_id or '', sample.freezer_ID or '',
+                    sample.box_ID or '', sample.well_ID or '', sample.quality_score or '', sample.notes or ''
+                ])
         elif model_type == 'sequencelibrary':
+            writer.writerow([
+                'SampleID', 'SubjectID', 'Barcode', 'Parent Extract', 'Library Type',
+                'N-Index', 'S-Index', 'Plate', 'Well', 'Date Created', 'Date Sequenced',
+                'Status', 'Project', 'Investigator', 'Patient Type', 'Study ID',
+                'Freezer ID', 'Box ID', 'Well ID', 'Notes'
+            ])
             queryset = SequenceLibrary.objects.filter(pk__in=sample_pks).select_related('parent__parent__parent_barcode')
             for sample in queryset:
                 subject_id = sample.parent.parent.parent_barcode.subject_id if sample.parent and sample.parent.parent and sample.parent.parent.parent_barcode else ''
-                writer.writerow([sample.sample_id, subject_id, sample.barcode])
+                parent_barcode = sample.parent.barcode if sample.parent else ''
+                writer.writerow([
+                    sample.sample_id, subject_id, sample.barcode, parent_barcode,
+                    sample.get_library_type_display(), sample.nindex or '',
+                    sample.sindex or '', sample.plate or '', sample.well or '',
+                    sample.date_created, sample.date_sequenced or '', sample.get_status_display(),
+                    sample.project_name or '', sample.investigator or '', sample.patient_type or '',
+                    sample.study_id or '', sample.freezer_ID or '',
+                    sample.box_ID or '', sample.well_ID or '', sample.notes or ''
+                ])
 
         return response
 
@@ -1095,3 +1152,27 @@ class AdvancedFilterView(LoginRequiredMixin, FormView):
         context = super().get_context_data(**kwargs)
         context['title'] = 'Advanced Sample Filtering'
         return context
+
+
+@login_required
+def get_all_crude_sample_ids(request):
+    ids = list(CrudeSample.objects.values_list('pk', flat=True))
+    return JsonResponse({'ids': ids})
+
+
+@login_required
+def get_all_aliquot_ids(request):
+    ids = list(Aliquot.objects.values_list('pk', flat=True))
+    return JsonResponse({'ids': ids})
+
+
+@login_required
+def get_all_extract_ids(request):
+    ids = list(Extract.objects.values_list('pk', flat=True))
+    return JsonResponse({'ids': ids})
+
+
+@login_required
+def get_all_library_ids(request):
+    ids = list(SequenceLibrary.objects.values_list('pk', flat=True))
+    return JsonResponse({'ids': ids})

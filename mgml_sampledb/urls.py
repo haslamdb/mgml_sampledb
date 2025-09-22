@@ -80,6 +80,12 @@ urlpatterns = [
 
     # Export URLs
     path('export/labels/', views.ExportLabelsView.as_view(), name='export_labels'),
+
+    # API endpoints for fetching all IDs (for select-all functionality)
+    path('api/crude-samples/ids/', views.get_all_crude_sample_ids, name='get_all_crude_sample_ids'),
+    path('api/aliquots/ids/', views.get_all_aliquot_ids, name='get_all_aliquot_ids'),
+    path('api/extracts/ids/', views.get_all_extract_ids, name='get_all_extract_ids'),
+    path('api/libraries/ids/', views.get_all_library_ids, name='get_all_library_ids'),
 ]
 
 # Serve static files in development

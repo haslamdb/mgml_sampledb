@@ -477,7 +477,7 @@ class AdvancedFilterForm(forms.Form):
         choices=[
             ('view', 'View in Browser'),
             ('csv', 'Export to CSV'),
-            ('labels', 'Export for Labels'),
+            ('labels', 'Export for Printing'),
         ],
         initial='view',
         widget=forms.RadioSelect(attrs={'class': 'form-check-input'}),
