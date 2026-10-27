@@ -246,3 +246,22 @@ sudo apt install wireguard
 - WireGuard VPN: https://www.wireguard.com/quickstart/
 - DuckDNS (Dynamic DNS): https://www.duckdns.org/
 - UFW Firewall guide: https://www.digitalocean.com/community/tutorials/how-to-set-up-a-firewall-with-ufw-on-ubuntu-20-04
+
+## Removing the unused Pillow dependency
+
+Pillow is no longer required by this application. Removing it from the requirements
+files prevents new installations from including it, but `pip install -r` does not
+uninstall packages already present in an existing environment.
+
+When updating an existing deployment, activate its dedicated virtual environment
+and run:
+
+```bash
+python -m pip uninstall -y Pillow
+python -m pip check
+python manage.py check
+```
+
+Restart the application's Gunicorn service using your normal deployment process.
+This removes the dependency affected by
+[CVE-2026-112397](https://github.com/advisories/GHSA-58r4-6rv3-gfh8).
