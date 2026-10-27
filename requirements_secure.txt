@@ -30,7 +30,6 @@ django-cachalot>=2.6.1  # ORM cache layer
 
 # File handling and validation
 python-magic>=0.4.27  # File type detection
-Pillow>=10.1.0  # Image processing
 
 # Environment and Configuration
 python-decouple>=3.8  # Environment variable management

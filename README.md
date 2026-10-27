@@ -250,7 +250,6 @@ Each method has a unique 2-letter suffix for filename generation (e.g., NX for N
 - **Compliance**: Audit logging, user tracking, data integrity controls, historical record tracking
 - **Additional Features**:
   - Django Filter 23.5 for advanced filtering
-  - Pillow 10.4.0 for image handling
   - Python Decouple 3.8 for environment configuration
 
 ## Management Commands
